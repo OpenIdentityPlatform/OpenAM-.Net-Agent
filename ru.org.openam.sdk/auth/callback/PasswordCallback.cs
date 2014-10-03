@@ -6,7 +6,7 @@ using System.Xml;
 
 namespace ru.org.openam.sdk.auth.callback
 {
-    class PasswordCallback: Callback
+    public class PasswordCallback: Callback
     {
         public String Prompt = "";
         public String Value = "";

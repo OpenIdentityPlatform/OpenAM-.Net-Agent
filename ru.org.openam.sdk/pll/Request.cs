@@ -5,14 +5,14 @@ using System.Text;
 
 namespace ru.org.openam.sdk.pll
 {
-    enum type
+    public enum type
     {
         unknown,
         auth,
         session
     };
 
-    abstract class  Request
+    public abstract class  Request
     {
         public type svcid=type.unknown;
         abstract override public String ToString();

@@ -6,7 +6,7 @@ using System.Xml;
 
 namespace ru.org.openam.sdk.auth
 {
-    class AuthException:Exception
+    public class AuthException:Exception
     {
         public String message;
         public String errorCode;

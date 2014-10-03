@@ -7,7 +7,7 @@ using ru.org.openam.sdk.auth.callback;
 
 namespace ru.org.openam.sdk
 {
-    class Auth
+    public class Auth
     {
         public static Session login(String realm, indexType indexType, String IndexName,Callback[] callbacks)
         {

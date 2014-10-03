@@ -6,13 +6,13 @@ using System.Xml;
 
 namespace ru.org.openam.sdk.auth
 {
-    enum status
+    public enum status
     {
         success,
         failed,
         in_progress
     }
-    class Response:pll.Response
+    public class Response:pll.Response
     {
         public String authIdentifier=null;
         public List<callback.Callback> callbacks = new List<callback.Callback>();

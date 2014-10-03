@@ -7,7 +7,7 @@ using System.Net;
 
 namespace ru.org.openam.sdk
 {
-    class Config
+    public class Config
     {
         public static Uri getUrl()
         {
