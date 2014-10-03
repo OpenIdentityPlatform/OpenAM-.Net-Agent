@@ -51,5 +51,28 @@ namespace ru.org.openam.sdk
         {
             return sessionId;
         }
+
+        naming.Response naming;
+        public naming.Response GetNaming() //for personal session naming (need agent only)
+        {
+            if (naming==null)
+                lock (this)
+                {
+                    if (naming == null)
+                        naming = Naming.Get(new naming.Request(sessionId));
+                }
+            return naming;
+        }
+
+        public String GetProperty(String key, String value)
+        {
+            String res = GetProperty(key);
+            return res == null ? value : res;
+        }
+        public String GetProperty(String key)
+        {
+            Validate();
+            return token.property[key];
+        }
     }
 }

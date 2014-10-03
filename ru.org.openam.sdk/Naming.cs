@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ru.org.openam.sdk
 {
-    class Naming
+    public class Naming
     {
         public String sessionId;
         

@@ -12,7 +12,7 @@ namespace ru.org.openam.sdk.naming
 //</GetNamingProfile>
 //</NamingRequest>]]></Request>
 //</RequestSet>
-    class Request: pll.Request
+    public class Request: pll.Request
     {
         static int reqid = 1;
 
@@ -41,6 +41,8 @@ namespace ru.org.openam.sdk.naming
             writer.WriteStartElement("NamingRequest");
             writer.WriteAttributeString("vers", "3.0");
             writer.WriteAttributeString("reqid", (reqid++).ToString());
+            if (SessionID!=null)
+                writer.WriteAttributeString("sessid", SessionID);
             writer.WriteStartElement("GetNamingProfile");
             writer.WriteValue("");
             writer.WriteEndElement();

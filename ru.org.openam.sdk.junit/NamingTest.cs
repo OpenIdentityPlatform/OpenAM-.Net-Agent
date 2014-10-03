@@ -74,6 +74,9 @@ namespace ru.org.openam.sdk.junit
         {
             naming.Response global = Naming.Get();
             Assert.AreNotEqual(null, global);
+
+            naming.Response personal = Auth.login("/", auth.indexType.moduleInstance, "Application", new Callback[] { new NameCallback(Config.getAppUser()), new PasswordCallback(Config.getAppPassword()) }).GetNaming();
+            Assert.AreNotEqual(null, personal);
         }
 
     }
