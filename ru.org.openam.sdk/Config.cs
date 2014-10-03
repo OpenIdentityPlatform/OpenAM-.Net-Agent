@@ -7,7 +7,7 @@ using System.Net;
 
 namespace ru.org.openam.sdk
 {
-    class Config
+    public class Config
     {
         public static Uri getUrl()
         {
@@ -45,6 +45,8 @@ namespace ru.org.openam.sdk
                   return new Uri(getUrl()+"/authservice");
                case pll.type.session:
                   return new Uri(getUrl() + "/sessionservice");
+               case pll.type.naming:
+                  return new Uri(getUrl() + "/namingservice");
                default:
                   throw new Exception("unknown type="+type);
             }

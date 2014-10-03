@@ -58,6 +58,10 @@
     <Compile Include="auth\Request.cs" />
     <Compile Include="auth\Response.cs" />
     <Compile Include="Config.cs" />
+    <Compile Include="Naming.cs" />
+    <Compile Include="naming\Request.cs" />
+    <Compile Include="naming\Response.cs" />
+    <Compile Include="naming\NamingException.cs" />
     <Compile Include="pll\Request.cs" />
     <Compile Include="pll\RequestSet.cs" />
     <Compile Include="pll\Response.cs" />
@@ -80,6 +84,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="policy\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

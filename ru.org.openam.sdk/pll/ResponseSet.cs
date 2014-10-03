@@ -27,6 +27,8 @@ namespace ru.org.openam.sdk.pll
                     Add(new auth.Response(response.DocumentElement.FirstChild));
                 else if (response.DocumentElement.Name.Equals("SessionResponse"))
                     Add(new session.Response(response.DocumentElement.FirstChild));
+                else if (response.DocumentElement.Name.Equals("NamingResponse"))
+                    Add(new naming.Response(response.DocumentElement.FirstChild));
                 else
                     throw new Exception("unknown svcid=" + svcid);
             }

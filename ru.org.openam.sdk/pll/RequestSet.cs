@@ -32,6 +32,12 @@ namespace ru.org.openam.sdk.pll
             }
         }
 
+        String getSvc()
+        {
+            if (svcid.Equals(type.naming))
+                return "com.iplanet.am.naming";
+            return svcid.ToString();
+        }
         override public String ToString()
         {
             StringBuilder sb = new StringBuilder();
@@ -42,7 +48,7 @@ namespace ru.org.openam.sdk.pll
             writer.WriteProcessingInstruction("xml", "version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"");
             writer.WriteStartElement("RequestSet");
             writer.WriteAttributeString("vers", "1.0");
-            writer.WriteAttributeString("svcid", svcid.ToString());
+            writer.WriteAttributeString("svcid", getSvc());
             writer.WriteAttributeString("reqid", id.ToString());
             foreach (Request req in this)
             {
