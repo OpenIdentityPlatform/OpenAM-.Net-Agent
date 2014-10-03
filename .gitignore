@@ -3,3 +3,9 @@
 /Visual Studio 2010Projects
 /Visual Studio 2010Templates
 /ru.org.openam.dotnet.suo
+/*.suo
+/ru.org.openam.iis7Agent/bin/Debug
+/ru.org.openam.iis7Agent/obj/Debug
+/ru.org.openam.iis7AgentTestSite/bin
+/ru.org.openam.iis7AgentTestSite/obj/Debug
+/ru.org.openam.iis7AgentTestSite/*.user

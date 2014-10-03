@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ru.org.openam.sdk.pll
 {
-    class Response
+    public class Response
     {
     }
 }

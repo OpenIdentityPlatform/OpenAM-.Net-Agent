@@ -6,7 +6,7 @@ using System.Xml;
 
 namespace ru.org.openam.sdk.auth.callback
 {
-    abstract class Callback
+    public abstract class Callback
     {
         public Callback()
         {

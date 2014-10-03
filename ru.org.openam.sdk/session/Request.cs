@@ -15,7 +15,7 @@ namespace ru.org.openam.sdk.session
 //</GetSession>
 //</SessionRequest>]]></Request>
 //</RequestSet>
-    class Request: pll.Request
+    public class Request: pll.Request
     {
         static int reqid = 1;
 

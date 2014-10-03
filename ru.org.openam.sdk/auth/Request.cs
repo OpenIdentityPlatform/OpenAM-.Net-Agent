@@ -7,14 +7,14 @@ using ru.org.openam.sdk.auth.callback;
 
 namespace ru.org.openam.sdk.auth
 {
-    enum indexType 
+    public enum indexType 
     {
         Unknown,
         moduleInstance,
         service
     };
 
-    class Request: pll.Request
+    public class Request: pll.Request
     {
         public String realm = "/";
         public indexType indexType = indexType.Unknown;

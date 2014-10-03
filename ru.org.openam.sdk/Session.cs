@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ru.org.openam.sdk
 {
-    class Session
+	public class Session
     {
         public String sessionId;
         public session.Response token;

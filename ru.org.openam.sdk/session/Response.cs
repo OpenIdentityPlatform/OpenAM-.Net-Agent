@@ -6,12 +6,12 @@ using System.Xml;
 
 namespace ru.org.openam.sdk.session
 {
-    enum state
+    public enum state
     {
         valid,
         destroyed
     }
-    class Response:pll.Response
+	public class Response:pll.Response
     {
         public Response()
             : base()
