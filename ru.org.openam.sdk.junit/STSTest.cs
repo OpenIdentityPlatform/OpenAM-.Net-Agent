@@ -74,12 +74,12 @@ namespace ru.org.openam.sdk.junit
         [DeploymentItem("ru.org.openam.sdk.dll")]
         public void getTokenTest()
         {
-            SecurityToken actual= STS.getToken(
-                new sts.Token(
-                    Auth.login("/", auth.indexType.moduleInstance, "Application", new Callback[] { new NameCallback(Config.getAppUser()), new PasswordCallback(Config.getAppPassword())}),
-                    Auth.login("/clients", auth.indexType.service, "ldap", new Callback[] { new NameCallback("11111111111"), new PasswordCallback("1111111111") })
-                    )
-                );
+            //SecurityToken actual= STS.getToken(
+            //    new sts.Token(
+            //        Auth.login("/", auth.indexType.moduleInstance, "Application", new Callback[] { new NameCallback(Config.getAppUser()), new PasswordCallback(Config.getAppPassword())}),
+            //        Auth.login("/clients", auth.indexType.service, "ldap", new Callback[] { new NameCallback("11111111111"), new PasswordCallback("1111111111") })
+            //        )
+            //    );
             //service=ldap&IDToken1=11111111111&IDToken2=1111111111
         }
     }

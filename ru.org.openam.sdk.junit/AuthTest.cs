@@ -71,6 +71,7 @@ namespace ru.org.openam.sdk.junit
         {
             Session actual = Auth.login("/", auth.indexType.moduleInstance, "Application", new Callback[] { new NameCallback(Config.getAppUser()), new PasswordCallback(Config.getAppPassword())});
             Assert.AreNotEqual(null, actual);
+            Auth.login("/clients", auth.indexType.service, "ldap", new Callback[] { new NameCallback("11111111111"), new PasswordCallback("1111111111") });
         }
 
         [TestMethod()]

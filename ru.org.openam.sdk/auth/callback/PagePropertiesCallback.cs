@@ -33,6 +33,12 @@ namespace ru.org.openam.sdk.auth.callback
 					TemplateName = node.InnerText;
 				else if (node.LocalName.Equals("PageState"))
 					PageState = int.Parse(node.InnerText);
+                else if (node.LocalName.Equals("AttributeList"))
+                    ;
+                else if (node.LocalName.Equals("RequiredList"))
+                    ;
+                else if (node.LocalName.Equals("InfoTextList"))
+                    ;
 				else
 					throw new Exception("unknown element=" + node.LocalName);
 		}
