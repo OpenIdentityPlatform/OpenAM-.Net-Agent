@@ -72,7 +72,7 @@ namespace ru.org.openam.sdk.junit
         [TestMethod()]
         public void session_GetTest()
         {
-            Session session= Auth.login("/", auth.indexType.moduleInstance, "Application", new Callback[] { new NameCallback(Config.getAppUser()), new PasswordCallback(Config.getAppPassword()) });
+            Session session= Auth.login("/", auth.indexType.moduleInstance, "Application", new Callback[] { new NameCallback(Bootstrap.getAppUser()), new PasswordCallback(Bootstrap.getAppPassword()) });
             Assert.AreNotEqual(null, session);
             Assert.IsTrue(session.isValid());
         }

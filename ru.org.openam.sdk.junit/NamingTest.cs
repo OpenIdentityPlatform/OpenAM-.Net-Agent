@@ -72,11 +72,10 @@ namespace ru.org.openam.sdk.junit
         [TestMethod()]
         public void naming_GetTest()
         {
-            naming.Response global = Naming.Get();
+            naming.Response global = Bootstrap.GetNaming();
             Assert.AreNotEqual(null, global);
 
-            naming.Response personal = Auth.login("/", auth.indexType.moduleInstance, "Application", new Callback[] { new NameCallback(Config.getAppUser()), new PasswordCallback(Config.getAppPassword()) }).GetNaming();
-            Assert.AreNotEqual(null, personal);
+            naming.Response personal = new Agent().GetNaming();
         }
 
     }

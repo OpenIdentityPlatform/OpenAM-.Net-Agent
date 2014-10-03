@@ -16,13 +16,14 @@ namespace ru.org.openam.sdk
             Validate();
         }
 
-        public Session(System.Web.HttpRequest request)
-            :this((request.Cookies[Config.getCookieName()]!=null)?request.Cookies[Config.getCookieName()].Value:null)
+        public Session(Agent agent, System.Web.HttpRequest request)
+            : this((request.Cookies[agent.GetCookieName()] != null) ? request.Cookies[agent.GetCookieName()].Value : null)
         {
         }
 
         public void Validate() 
         {
+            //TODO max cache time 
             token = Get(new session.Request(sessionId));
         }
 
@@ -31,12 +32,12 @@ namespace ru.org.openam.sdk
             try
             {
                 Validate();
+                return true;
             }
             catch (session.SessionException)
             {
                 return false;
             }
-            return true;
         }
 
         public static session.Response Get(session.Request request)
@@ -50,18 +51,6 @@ namespace ru.org.openam.sdk
         override public String ToString()
         {
             return sessionId;
-        }
-
-        naming.Response naming;
-        public naming.Response GetNaming() //for personal session naming (need agent only)
-        {
-            if (naming==null)
-                lock (this)
-                {
-                    if (naming == null)
-                        naming = Naming.Get(new naming.Request(sessionId));
-                }
-            return naming;
         }
 
         public String GetProperty(String key, String value)

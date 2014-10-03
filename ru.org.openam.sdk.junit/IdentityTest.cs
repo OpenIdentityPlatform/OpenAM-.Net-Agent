@@ -1,7 +1,7 @@
 ﻿using ru.org.openam.sdk;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using ru.org.openam.sdk.auth;
+using ru.org.openam.sdk.naming;
 using ru.org.openam.sdk.auth.callback;
 
 namespace ru.org.openam.sdk.junit
@@ -9,12 +9,14 @@ namespace ru.org.openam.sdk.junit
     
     
     /// <summary>
-    ///This is a test class for AuthTest and is intended
-    ///to contain all AuthTest Unit Tests
+    ///This is a test class for SessionTest and is intended
+    ///to contain all SessionTest Unit Tests
     ///</summary>
     [TestClass()]
-    public class AuthTest
+    public class IdentityTest
     {
+
+
         private TestContext testContextInstance;
 
         /// <summary>
@@ -63,27 +65,15 @@ namespace ru.org.openam.sdk.junit
         //
         #endregion
 
+
         /// <summary>
-        ///A test for login
+        ///A test for Get
         ///</summary>
         [TestMethod()]
-        public void login_good_Test()
+        public void identity_GetTest()
         {
-            Session actual = Auth.login("/", auth.indexType.moduleInstance, "Application", new Callback[] { new NameCallback(Bootstrap.getAppUser()), new PasswordCallback(Bootstrap.getAppPassword())});
-            Assert.AreNotEqual(null, actual);
-            Auth.login("/clients", auth.indexType.service, "ldap", new Callback[] { new NameCallback("11111111111"), new PasswordCallback("1111111111") });
+            RPC.Get(new pll.RequestSet(new identity.Request[] { new identity.Request() }));
         }
 
-        [TestMethod()]
-        public void login_bad_Test()
-        {
-            try
-            {
-                Session actual = Auth.login("/", auth.indexType.moduleInstance, "Application", new Callback[] { new NameCallback(Bootstrap.getAppUser()), new PasswordCallback("xxxxxxxxxxxxx") });
-            }
-            catch (AuthException)
-            { 
-            }
-        }
     }
 }

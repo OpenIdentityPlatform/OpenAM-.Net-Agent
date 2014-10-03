@@ -12,7 +12,7 @@ namespace ru.org.openam.sdk
     {
         public static pll.ResponseSet Get(pll.RequestSet requests)
         {
-            var httpRequest = Config.getHttpWebRequest(requests.svcid);
+            var httpRequest = Bootstrap.getHttpWebRequest(requests.svcid);
             System.Diagnostics.Trace.TraceInformation("{0}",httpRequest.RequestUri);
 
             String req = requests.ToString();

@@ -57,7 +57,9 @@
     <Compile Include="auth\callback\PasswordCallback.cs" />
     <Compile Include="auth\Request.cs" />
     <Compile Include="auth\Response.cs" />
-    <Compile Include="Config.cs" />
+    <Compile Include="Bootstrap.cs" />
+    <Compile Include="Agent.cs" />
+    <Compile Include="identity\Request.cs" />
     <Compile Include="Naming.cs" />
     <Compile Include="naming\Request.cs" />
     <Compile Include="naming\Response.cs" />
@@ -81,9 +83,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="lib\x86\Microsoft.IdentityModel.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="policy\" />

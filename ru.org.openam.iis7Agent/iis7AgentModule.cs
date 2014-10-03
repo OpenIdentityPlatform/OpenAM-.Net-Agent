@@ -53,15 +53,16 @@ namespace ru.org.openam.iis7Agent
 			return session.token.property["UserId"];
 		}
 
+        Agent agent = new Agent();
 		private Session GetUserSession()
 		{
-			var cookie = _app.Context.Request.Cookies[Config.getCookieName()];
+            var cookie = _app.Context.Request.Cookies[agent.GetCookieName()];
 			if(cookie == null || string.IsNullOrWhiteSpace(cookie.Value))
 			{
 				return null;
 			}
 
-			var userSession = new Session(_app.Context.Request);
+            var userSession = new Session(agent,_app.Context.Request);
 			return userSession;
 		}
 
