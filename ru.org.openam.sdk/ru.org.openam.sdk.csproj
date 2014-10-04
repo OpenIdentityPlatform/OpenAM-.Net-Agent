@@ -59,6 +59,7 @@
     <Compile Include="auth\Response.cs" />
     <Compile Include="Bootstrap.cs" />
     <Compile Include="Agent.cs" />
+    <Compile Include="Policy.cs" />
     <Compile Include="identity\Request.cs" />
     <Compile Include="identity\Response.cs" />
     <Compile Include="identity\IdentityException.cs" />
@@ -70,6 +71,9 @@
     <Compile Include="pll\RequestSet.cs" />
     <Compile Include="pll\Response.cs" />
     <Compile Include="pll\ResponseSet.cs" />
+    <Compile Include="policy\Request.cs" />
+    <Compile Include="policy\Response.cs" />
+    <Compile Include="policy\PolicyException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RPC.cs" />
     <Compile Include="Session.cs" />
@@ -86,9 +90,7 @@
   <ItemGroup>
     <Content Include="lib\x86\Microsoft.IdentityModel.dll" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="policy\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -49,7 +49,7 @@ namespace ru.org.openam.sdk
         //   <name value="test.domain.com" />
         //   <type value="agent" />
         //   <realm value="/" />
-        //   <attribute name="com.sun.identity.agents.config.cdsso.enable">
+        //   <attribute name="com.sun.identity.agents.config.cdsso.enable"> 
         //      <value>false</value>
         //   </attribute>
         //   <attribute name="com.sun.identity.agents.config.cdsso.cookie.domain">

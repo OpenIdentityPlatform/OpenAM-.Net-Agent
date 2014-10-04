@@ -11,7 +11,8 @@ namespace ru.org.openam.sdk.pll
         auth,
         session,
         naming,
-        identity
+        identity,
+        policy
     };
 
     public abstract class  Request

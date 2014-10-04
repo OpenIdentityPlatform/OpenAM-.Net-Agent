@@ -62,7 +62,7 @@ namespace ru.org.openam.iis7Agent
 				return null;
 			}
 
-            var userSession = new Session(agent,_app.Context.Request);
+            var userSession = Session.getSession(agent,_app.Context.Request);
 			return userSession;
 		}
 

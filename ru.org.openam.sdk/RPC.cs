@@ -28,6 +28,8 @@ namespace ru.org.openam.sdk
                     return new Uri(naming.property["iplanet-am-naming-session-url"].Replace("%protocol://%host:%port%uri", Bootstrap.getUrl().ToString().Replace("/namingservice", "")));
                 case pll.type.identity:
                     return new Uri(naming.property["sun-naming-idsvcs-rest-url"].Replace("%protocol://%host:%port%uri", Bootstrap.getUrl().ToString().Replace("/namingservice", "")));
+                case pll.type.policy:
+                    return new Uri(naming.property["iplanet-am-naming-policy-url"].Replace("%protocol://%host:%port%uri", Bootstrap.getUrl().ToString().Replace("/namingservice", "")));
                 case pll.type.naming:
                     return Bootstrap.getUrl();
                 default:

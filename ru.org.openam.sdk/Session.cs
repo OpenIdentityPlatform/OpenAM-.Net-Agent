@@ -10,9 +10,6 @@ namespace ru.org.openam.sdk
         public String sessionId;
         public session.Response token;
 
-        //TODO LRU session cache by maxidle !!!!!!!!!!!!!!!!!!
-        //static Dictionary<String, Session> sessions;
-
         public Session(String sessionId)
         {
             token = Get(new session.Request(sessionId));
@@ -20,10 +17,17 @@ namespace ru.org.openam.sdk
         }
 
         Agent agent;
-        public Session(Agent agent, System.Web.HttpRequest request)
+        Session(Agent agent, System.Web.HttpRequest request)
             : this((request.Cookies[agent.GetCookieName()] != null) ? request.Cookies[agent.GetCookieName()].Value : null)
         {
             this.agent = agent;
+        }
+
+        //TODO LRU session cache by maxidle !!!!!!!!!!!!!!!!!!
+        //static Dictionary<String, Session> sessions;
+        public static Session getSession(Agent agent, System.Web.HttpRequest request)
+        {
+            return new Session(agent,request);
         }
 
         public void Validate() 
