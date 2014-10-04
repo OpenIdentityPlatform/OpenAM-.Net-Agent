@@ -10,21 +10,26 @@ namespace ru.org.openam.sdk
         public String sessionId;
         public session.Response token;
 
+        //TODO LRU session cache by maxidle !!!!!!!!!!!!!!!!!!
+        //static Dictionary<String, Session> sessions;
+
         public Session(String sessionId)
         {
+            token = Get(new session.Request(sessionId));
             this.sessionId = sessionId;
-            Validate();
         }
 
+        Agent agent;
         public Session(Agent agent, System.Web.HttpRequest request)
             : this((request.Cookies[agent.GetCookieName()] != null) ? request.Cookies[agent.GetCookieName()].Value : null)
         {
+            this.agent = agent;
         }
 
         public void Validate() 
         {
             //TODO max cache time 
-            token = Get(new session.Request(sessionId));
+            token = Get(new session.Request(this));
         }
 
         public bool isValid()
@@ -40,9 +45,14 @@ namespace ru.org.openam.sdk
             }
         }
 
-        public static session.Response Get(session.Request request)
+        public naming.Response GetNaming() //for personal session naming (need agent only)
         {
-            pll.ResponseSet responses = RPC.Get(new pll.RequestSet(new session.Request[] { request }));
+            return agent==null?Bootstrap.GetNaming():agent.GetNaming();
+        }
+
+        public session.Response Get(session.Request request)
+        {
+            pll.ResponseSet responses = RPC.GetXML(GetNaming(), new pll.RequestSet(new session.Request[] { request }));
             if (responses.Count > 0)
                 return (session.Response)responses[0];
             return new session.Response();

@@ -23,7 +23,7 @@ namespace ru.org.openam.sdk
 
         public static auth.Response Get(auth.Request request)
         {
-            pll.ResponseSet responses=RPC.Get(new pll.RequestSet(new auth.Request[]{request}));
+            pll.ResponseSet responses=RPC.GetXML(Bootstrap.GetNaming(), new pll.RequestSet(new auth.Request[]{request}));
             if (responses.Count > 0)
                 return (auth.Response)responses[0];
             return new auth.Response();

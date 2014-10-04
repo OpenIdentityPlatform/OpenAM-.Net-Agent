@@ -60,6 +60,8 @@
     <Compile Include="Bootstrap.cs" />
     <Compile Include="Agent.cs" />
     <Compile Include="identity\Request.cs" />
+    <Compile Include="identity\Response.cs" />
+    <Compile Include="identity\IdentityException.cs" />
     <Compile Include="Naming.cs" />
     <Compile Include="naming\Request.cs" />
     <Compile Include="naming\Response.cs" />

@@ -34,6 +34,12 @@ namespace ru.org.openam.sdk.session
             this.SessionID = SessionID;
         }
 
+        public Request(Session session)
+            : this(session.sessionId)
+        {
+            //need cookie
+        }
+
         override public String ToString()
         {
             StringBuilder sb = new StringBuilder();

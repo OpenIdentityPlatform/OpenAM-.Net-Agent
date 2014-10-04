@@ -16,7 +16,7 @@ namespace ru.org.openam.sdk.naming
     {
         static int reqid = 1;
 
-        public String SessionID;
+        public Session session;
 
         public Request()
             : base()
@@ -24,10 +24,10 @@ namespace ru.org.openam.sdk.naming
             svcid = pll.type.naming;
         }
 
-        public Request(String SessionID)
+        public Request(Session session)
             : this()
         {
-            this.SessionID = SessionID;
+            this.session = session;
         }
 
         override public String ToString()
@@ -41,8 +41,8 @@ namespace ru.org.openam.sdk.naming
             writer.WriteStartElement("NamingRequest");
             writer.WriteAttributeString("vers", "3.0");
             writer.WriteAttributeString("reqid", (reqid++).ToString());
-            if (SessionID!=null)
-                writer.WriteAttributeString("sessid", SessionID);
+            if (session != null)
+                writer.WriteAttributeString("sessid", session.sessionId);
             writer.WriteStartElement("GetNamingProfile");
             writer.WriteValue("");
             writer.WriteEndElement();

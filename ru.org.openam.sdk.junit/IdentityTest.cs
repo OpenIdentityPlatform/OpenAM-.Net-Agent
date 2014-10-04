@@ -72,7 +72,7 @@ namespace ru.org.openam.sdk.junit
         [TestMethod()]
         public void identity_GetTest()
         {
-            RPC.Get(new pll.RequestSet(new identity.Request[] { new identity.Request() }));
+            Assert.AreNotEqual(0,new Agent().GetConfig().Count);
         }
 
     }

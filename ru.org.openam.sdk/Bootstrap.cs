@@ -28,31 +28,6 @@ namespace ru.org.openam.sdk
             return ConfigurationManager.AppSettings["com.iplanet.am.service.password"];
         }
 
-        public static HttpWebRequest getHttpWebRequest(pll.type type)
-        {
-            var request = (HttpWebRequest)WebRequest.Create(getUrl(type));
-            request.KeepAlive = true;
-            request.UserAgent = "openam.org.ru .Net SDK (v 0.1)";
-            request.Method = "POST";
-            request.ContentType = "text/xml; encoding='utf-8'";
-            return request;
-        }
-
-        public static Uri getUrl(pll.type type)
-        {
-            switch (type)
-            {
-               case pll.type.auth:
-                    return new Uri(GetNaming().property["iplanet-am-naming-auth-url"].Replace("%protocol://%host:%port%uri", getUrl().ToString().Replace("/namingservice", "")));
-               case pll.type.session:
-                    return new Uri(GetNaming().property["iplanet-am-naming-session-url"].Replace("%protocol://%host:%port%uri", getUrl().ToString().Replace("/namingservice", "")));
-               case pll.type.naming:
-                    return getUrl();
-               default:
-                  throw new Exception("unknown type="+type);
-            }
-        }
-
         //<Attribute name="iplanet-am-naming-session-class" value="com.iplanet.dpro.session.service.SessionRequestHandler"></Attribute>
         //<Attribute name="iplanet-am-naming-samlsoapreceiver-url" value="%protocol://%host:%port%uri/SAMLSOAPReceiver"></Attribute>
         //<Attribute name="02" value="http://login.staging.rapidsoft.ru:80/auth"></Attribute>

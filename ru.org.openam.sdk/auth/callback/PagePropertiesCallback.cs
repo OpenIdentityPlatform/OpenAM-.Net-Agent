@@ -15,6 +15,9 @@ namespace ru.org.openam.sdk.auth.callback
 		public int PageTimeOutValue;
 		public String TemplateName;
 		public int PageState;
+        public String AttributeList;
+        public String RequiredList;
+        public String InfoTextList;
 		//<PagePropertiesCallback isErrorState="false"><ModuleName>LDAP</ModuleName><HeaderValue>This server uses LDAP Authentication</HeaderValue><ImageName></ImageName><PageTimeOutValue>1200</PageTimeOutValue><TemplateName>Login.jsp</TemplateName><PageState>1</PageState></PagePropertiesCallback>
 		public PagePropertiesCallback(XmlNode element)
 			: base(element)
@@ -34,11 +37,11 @@ namespace ru.org.openam.sdk.auth.callback
 				else if (node.LocalName.Equals("PageState"))
 					PageState = int.Parse(node.InnerText);
                 else if (node.LocalName.Equals("AttributeList"))
-                    ;
+                    AttributeList = node.InnerText;
                 else if (node.LocalName.Equals("RequiredList"))
-                    ;
+                    RequiredList = node.InnerText;
                 else if (node.LocalName.Equals("InfoTextList"))
-                    ;
+                    InfoTextList = node.InnerText;
 				else
 					throw new Exception("unknown element=" + node.LocalName);
 		}

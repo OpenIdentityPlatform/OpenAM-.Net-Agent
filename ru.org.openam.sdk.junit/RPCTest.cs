@@ -71,7 +71,7 @@ namespace ru.org.openam.sdk.junit
         [TestMethod()]
         public void pll_GetTest()
         {
-            ResponseSet actual = RPC.Get(new RequestSet(new Request[]{new auth.Request("/",auth.indexType.moduleInstance,"Application")}));
+            ResponseSet actual = RPC.GetXML(Bootstrap.GetNaming(), new RequestSet(new Request[]{new auth.Request("/",auth.indexType.moduleInstance,"Application")}));
         }
     }
 }

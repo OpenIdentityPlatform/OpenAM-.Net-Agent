@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuthTest.cs" />
+    <Compile Include="AgentTest.cs" />
     <Compile Include="IdentityTest.cs" />
     <Compile Include="NamingTest.cs" />
     <Compile Include="RPCTest.cs" />

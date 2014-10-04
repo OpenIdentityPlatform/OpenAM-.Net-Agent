@@ -3,39 +3,38 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.Web;
 
 namespace ru.org.openam.sdk.identity
 {
-//String attributeServiceURL = url + ATTRIBUTE_SERVICE 
-//                + "?name=" + URLEncoder.encode(profileName, "UTF-8") 
-//                + "&attributes_names=realm"
-//                + "&attributes_values_realm=" 
-//                + URLEncoder.encode(realm, "UTF-8")
-//                + "&attributes_names=objecttype"
-//                + "&attributes_values_objecttype=Agent"
-//                + "&admin=" + URLEncoder.encode(tokenId, "UTF-8"); 
- //GET /auth/identity/xml/read?name=mbank2&attributes_names=realm&attributes_values_realm=%2F&attributes_names=objecttype&attributes_values_objecttype=Agent&admin=AQIC5wM2LY4SfczFMrAkVFsERiXXXq2vD8rj6iMRBvr7QHM.*AAJTSQACMDIAAlNLAAotMjQwMjY3NjA2AAJTMQACMDQ.* HTTP/1.0
-    public class Request: pll.Request
+   public class Request: pll.Request
     {
-        static int reqid = 1;
-
-        public String SessionID;
-
-        public Request()
-            : base()
+        public Request() : base()
         {
-            svcid = pll.type.session;
+            svcid = pll.type.identity;
         }
 
-        public Request(String SessionID)
+        //name - Name of identity
+        //attributes_names - LDAP attributes to be searched against
+        //attributes_values_<value_from_attribute_names> - Values for LDAP attributes
+        //admin - tokenid for a user with permissions to perform search
+        String query = "";
+        public Request(String name, String[] attributes_names, KeyValuePair<String,String>[] values_from_attribute_names, Session admin)
             : this()
         {
-            this.SessionID = SessionID;
+            query = query+String.Format("admin={0}&",  HttpUtility.UrlEncode(admin.sessionId));
+            if (!String.IsNullOrEmpty(name))
+                query = query + String.Format("name={0}&", HttpUtility.UrlEncode(name));
+            if (attributes_names!=null)
+                foreach (String attributes_name in attributes_names)
+                    query = query + String.Format("attributes_names={0}&", HttpUtility.UrlEncode(attributes_name));
+            foreach (KeyValuePair<String, String> value_from_attribute_names in values_from_attribute_names)
+                query = query + String.Format("attributes_values_{0}={1}&", HttpUtility.UrlEncode(value_from_attribute_names.Key),HttpUtility.UrlEncode(value_from_attribute_names.Value));
         }
 
         override public String ToString()
         {
-            return "";
+            return query;
         }
     }
 }
