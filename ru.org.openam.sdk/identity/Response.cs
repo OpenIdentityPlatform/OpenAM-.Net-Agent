@@ -21,7 +21,7 @@ namespace ru.org.openam.sdk.identity
         public String name;
         public String type;
         public String realm;
-        public Dictionary<String, Object> property = new Dictionary<String, Object>();
+        public Dictionary<string, object> property = new Dictionary<string, object>();
 
         public Response(XmlElement element)
             : base(element)
@@ -59,23 +59,26 @@ namespace ru.org.openam.sdk.identity
                         {
                             type = attr.Value;
                             foreach (XmlNode node2 in node.ChildNodes)
-                                if (node2.LocalName.Equals("value"))
-                                {
-                                    try
-                                    {
-                                        Object value = property[attr.Value];
-                                        if (value is HashSet<String>)
-                                            ((HashSet<String>)value).Add(node2.Value);
-                                        else //String to HashSet
+                                if (node2.LocalName.Equals("value") && !string.IsNullOrWhiteSpace(node2.InnerXml))
+                                {	 
+									if(property.ContainsKey(attr.Value))
+									{
+										var value = property[attr.Value];
+										var set = value as HashSet<string>;
+										if (set != null)
+										{
+                                            set.Add(node2.InnerXml);
+										}
+										else //String to HashSet
                                         {
                                             property.Remove(attr.Value);
-                                            property.Add(attr.Value, new HashSet<String>(new String[] { (String)value, node2.Value }));
-                                        }
-                                    }
-                                    catch (KeyNotFoundException e)
-                                    {
-                                        property.Add(attr.Value, node2.Value);
-                                    }
+											property.Add(attr.Value, new HashSet<String>(new []{(string)value, node2.InnerXml}));
+                                        }	
+									}
+									else
+									{
+                                        property.Add(attr.Value, node2.InnerXml);
+									}
                                 }
                                 else
                                     throw new Exception("unknown node type=" + node2.LocalName);

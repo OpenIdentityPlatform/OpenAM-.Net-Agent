@@ -9,3 +9,7 @@
 /ru.org.openam.iis7AgentTestSite/bin
 /ru.org.openam.iis7AgentTestSite/obj/Debug
 /ru.org.openam.iis7AgentTestSite/*.user
+/ru.org.openam.loginSite/bin
+/ru.org.openam.loginSite/obj/Debug
+/ru.org.openam.loginSite/*.user
+/ru.org.openam.iis7AgentTestSite/App_Data/Logs

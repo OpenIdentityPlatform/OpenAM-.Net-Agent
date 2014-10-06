@@ -365,9 +365,20 @@ namespace ru.org.openam.sdk
             return config;
         }
 
-        public String GetCookieName()
+        public string GetCookieName()
         {
-            return (String)GetConfig()["com.iplanet.am.cookie.name"];
+            return (string)GetConfig()["com.sun.identity.agents.config.cookie.name"];
+        }
+		
+		public string GetLoginUrl()
+        {
+            var url = (string)GetConfig()["com.sun.identity.agents.config.login.url"];
+			if(url != null)
+			{
+				return url.Replace("[0]=", "");
+			}
+
+			return null;
         }
     }
 }

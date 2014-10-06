@@ -6,7 +6,7 @@ using System.Xml;
 
 namespace ru.org.openam.sdk.session
 {
-    class SessionException:Exception
+    public class SessionException:Exception
     {
         public SessionException(String message)
             : base(message)

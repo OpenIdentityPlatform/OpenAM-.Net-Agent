@@ -49,7 +49,7 @@ namespace ru.org.openam.sdk.session
         public String cdomain;
         public long maxtime;
         public long maxidle;
-        public long maxcaching;
+        public byte maxcaching;
         public long timeidle;
         public long timeleft;
         public state state;
@@ -77,7 +77,7 @@ namespace ru.org.openam.sdk.session
                         else if (attr.LocalName.Equals("maxidle"))
                             maxidle = long.Parse(attr.Value);
                         else if (attr.LocalName.Equals("maxcaching"))
-                            maxcaching = long.Parse(attr.Value);
+                            maxcaching = byte.Parse(attr.Value);
                         else if (attr.LocalName.Equals("timeidle"))
                             timeidle = long.Parse(attr.Value);
                         else if (attr.LocalName.Equals("timeleft"))

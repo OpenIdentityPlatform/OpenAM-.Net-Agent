@@ -23,7 +23,6 @@ namespace ru.org.openam.sdk
             this.agent = agent;
         }
 
-        //TODO LRU session cache by maxidle !!!!!!!!!!!!!!!!!!
         //static Dictionary<String, Session> sessions;
         public static Session getSession(Agent agent, System.Web.HttpRequest request)
         {
@@ -32,7 +31,6 @@ namespace ru.org.openam.sdk
 
         public void Validate() 
         {
-            //TODO max cache time 
             token = Get(new session.Request(this));
         }
 
