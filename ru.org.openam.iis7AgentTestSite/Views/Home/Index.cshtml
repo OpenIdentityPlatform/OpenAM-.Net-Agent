@@ -1,2 +1,12 @@
-﻿<h1>Hello @Context.User.Identity.Name</h1>  
+﻿@using System.Collections
+<h1>Hello @Context.User.Identity.Name</h1>  
 <a href="@Url.Action("Logoff")">Logoff</a>
+<br>
+<br>
+@foreach (DictionaryEntry item in HttpContext.Current.Items)
+{
+	if (item.Key is string && item.Value is string)
+	{
+		@item.Key @(" = ") @item.Value <br>
+	}
+}

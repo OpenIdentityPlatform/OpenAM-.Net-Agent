@@ -66,9 +66,20 @@ namespace ru.org.openam.sdk
             var http = getHttpWebRequest(uri);
             http.Method = "POST";
             http.ContentType = ContentType;
-            System.Diagnostics.Trace.TraceInformation("{0} {1}\r\nUser-Agent: {2}\r\nContent-Type: {3}\r\n{4}\r\n", http.Method,http.RequestUri, http.UserAgent, http.ContentType, body);
+			var uuid = Guid.NewGuid();
+            Log.Info(string.Format
+			(
+				"Message sent (uuid: {1}) {2} {3}{0}User-Agent: {4}{0}Content-Type: {5}{0}{6}{0}",
+ 				Environment.NewLine,
+				uuid,
+				http.Method,
+				http.RequestUri, 
+				http.UserAgent, 
+				http.ContentType, 
+				body
+			));
             
-            UTF8Encoding encoding = new UTF8Encoding();
+            //UTF8Encoding encoding = new UTF8Encoding();
             byte[] postBytes = (new UTF8Encoding()).GetBytes(body);
             http.ContentLength = postBytes.Length;
 
@@ -84,7 +95,9 @@ namespace ru.org.openam.sdk
                 myXMLReader.Close();
                 response.Close();
             }
-            System.Diagnostics.Trace.TraceInformation("{0}\r\n", XMLDocument.InnerXml);
+
+            Log.Info(string.Format("Message received (uuid: {1}) {2}{0}", Environment.NewLine, uuid, XMLDocument.InnerXml));
+
             return XMLDocument;
         }
     }

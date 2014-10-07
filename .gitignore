@@ -13,3 +13,4 @@
 /ru.org.openam.loginSite/obj/Debug
 /ru.org.openam.loginSite/*.user
 /ru.org.openam.iis7AgentTestSite/App_Data/Logs
+/ru.org.openam.loginSite/App_Data/Logs/PolicyAgentDebug

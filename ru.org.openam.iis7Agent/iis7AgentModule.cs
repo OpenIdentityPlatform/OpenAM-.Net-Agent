@@ -1,14 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Principal;
 using System.Web;
 using ru.org.openam.sdk;
-
-// todo аудит и анхендлед в логи
-// todo проверить поступ к статику
-// todo доимплиментировать настройки
 using ru.org.openam.sdk.session;
+
+// todo доимплиментировать настройки
+// todo проверить все кейсы авторизации
+// todo авторизация
+
+// todo 
+//   <attribute name="com.sun.identity.agents.config.redirect.param">
+        //      <value>goto</value>
+        //   </attribute>
+// в каком параметре передается возвратный урл
 
 namespace ru.org.openam.iis7Agent
 {
@@ -21,80 +26,220 @@ namespace ru.org.openam.iis7Agent
 		public void Init(HttpApplication context)
 		{
 			this._app = context;
+			this._app.BeginRequest += OnBeginRequest;
 			this._app.AuthenticateRequest += OnAuthentication;
+			this._app.EndRequest += OnEndRequest;
+		}
+
+		private void OnEndRequest(object sender, EventArgs e)
+		{
+			Log.Trace("End request");
+		}
+
+		private void OnBeginRequest(object sender, EventArgs e)
+		{	
+			Log.Trace(string.Format("Begin request url: {0} ip: {1}",  _app.Context.Request.Url.AbsoluteUri, _app.Context.Request.UserHostAddress));
 		}
 
 		void OnAuthentication(object sender, EventArgs a)
 		{
-			var nUrl = CheckUrl();
-			if(nUrl != null)
+			try
 			{
-				_app.Response.Redirect(nUrl);
-				return;
-			}
+				var nUrl = CheckUrl();
+				if(nUrl != null)
+				{
+					Log.Trace(string.Format("Request {0} was redirected to {1}",  _app.Context.Request.Url.AbsoluteUri, nUrl));
+					_app.Response.Redirect(nUrl);
+					return;
+				}
 
+				if (IsFree())
+				{
+					if((string)agent.GetConfig()["com.sun.identity.agents.config.notenforced.url.attributes.enable"] == "true")
+					{
+						_app.Context.User = GetUser();
+					}
+					else
+					{
+						_app.Context.User = GetAnonymous();
+					}
+
+					Log.AuditTrace(string.Format("Free access allowed to {0}", _app.Context.Request.Url.AbsoluteUri));
+					return;
+				}
+
+				
+				var user = GetUser();
+				if (user != null)
+				{	
+					_app.Context.User = user;
+					MapArrtsProps();
+					Log.Audit(string.Format("User {0} was allowed access to {1}", user.Identity.Name, _app.Context.Request.Url.AbsoluteUri));
+				}
+				else if((string)agent.GetConfig()["com.sun.identity.agents.config.anonymous.user.enable"] == "true")
+				{
+					_app.Context.User = GetAnonymous();
+					Log.AuditTrace(string.Format("Anonymous access allowed to {0}", _app.Context.Request.Url.AbsoluteUri));
+				}
+				else
+				{
+					// todo юзер ид
+					Log.Audit(string.Format("User {0} was denied access to {1}", null, _app.Context.Request.Url.AbsoluteUri));
+					_app.Response.Redirect(GetLoginUrl());
+				}
+			}
+			catch (Exception ex)
+			{
+				Log.Fatal(ex);
+				throw;
+			}
+		}
+
+		
+		private string GetLoginUrl()
+		{
+			var url = (string)agent.GetConfig()["com.sun.identity.agents.config.login.url"];
+			if (url != null)
+			{
+				url = url.Replace("[0]=", "");
+				 
+				var gotoName = (string)agent.GetConfig()["com.sun.identity.agents.config.redirect.param"];
+				if(!string.IsNullOrWhiteSpace(gotoName))
+				{
+					if(url.Contains("?"))
+					{
+						url += "&";
+					}
+					else
+					{
+						url += "?";
+					}
+					url += gotoName + "=" + HttpUtility.UrlPathEncode(_app.Request.Url.AbsoluteUri);
+				}
+
+				return url;
+			}
+			return null;
+		}
+
+		private GenericPrincipal GetUser()
+		{
 			Session session;
 			try
 			{
 				session = GetUserSession();
 			}
-			catch(SessionException)
+			catch(SessionException ex)
 			{
-				_app.Response.Redirect(agent.GetLoginUrl());	
-				return;
+				Log.Warning(string.Format("SessionException was thrown {0}{1}", Environment.NewLine, ex));
+				return null;
 			}
 
 			var userId = GetUserId(session);
-			var freeUrls = agent.GetConfig()["com.sun.identity.agents.config.notenforced.url"] as HashSet<string>;
-			if (session != null && userId != null)
+			if(session == null || userId == null)
 			{
-				var identity = new GenericIdentity(userId);
-				var principal = new GenericPrincipal(identity, new string[0]);
-				_app.Context.User = principal;
+				return null;
+			}
 
-				// todo замапить из маппинга
-				foreach (var prop in session.token.property)
-				{
-					_app.Context.Items["am_" + prop.Key] = prop.Value;
-				}
-				_app.Context.Items["am_auth_cookie"] = GetAuthCookie();
-			}
-			else if (freeUrls == null || freeUrls.All(u => !_app.Context.Request.Url.LocalPath.StartsWith(u, StringComparison.InvariantCultureIgnoreCase)))
+			var identity = new GenericIdentity(userId);
+			var principal = new GenericPrincipal(identity, new string[0]);
+			return principal;
+		}
+
+		private GenericPrincipal GetAnonymous()
+		{
+			var identity = new GenericIdentity("");
+			var principal = new GenericPrincipal(identity, new string[0]);
+			return principal;
+		}
+
+		private bool IsFree()
+		{
+			var freeUrls = agent.GetConfig()["com.sun.identity.agents.config.notenforced.url"] as HashSet<string>;
+			if (freeUrls != null)
 			{
-				_app.Response.Redirect(agent.GetLoginUrl());
+				foreach (var u in freeUrls)
+				{
+					var url = u.Substring(u.IndexOf("=")+1);
+					if(url.EndsWith("*") && _app.Context.Request.Url.AbsoluteUri.StartsWith(url, StringComparison.InvariantCultureIgnoreCase))
+					{
+						return true;
+					}
+					else if(_app.Context.Request.Url.AbsoluteUri.Equals(url, StringComparison.InvariantCultureIgnoreCase))
+					{
+						return true;
+					}
+				}
 			}
-//			else if((string)agent.GetConfig()["com.sun.identity.agents.config.notenforced.url.attributes.enable"] == "true")
-//			{
-//
-//			}
+
+			return false;
+		}
+
+		private void MapArrtsProps()
+		{
+			var props = GetUserSession().token.property;
+			var mapStrs = agent.GetConfig()["com.sun.identity.agents.config.session.attribute.mapping"] as HashSet<string>;
+			// todo var mapStrs = agent.GetConfig()["com.sun.identity.agents.config.profile.attribute.mapping"] as HashSet<string>;
+			if(mapStrs == null)
+			{
+				return;
+			}
+
+			foreach (var mapStr in mapStrs)
+			{
+				var vals = mapStr.Split('=');
+				if(vals.Length != 2)
+				{
+					continue;
+				}
+
+				var key = vals[0].Substring(1);
+				key = key.Substring(0, key.Length-1);
+				if(props.ContainsKey(key))
+				{
+					_app.Context.Items[vals[1]] = props[key];
+				}
+			}
+
+			_app.Context.Items["am_auth_cookie"] = GetAuthCookie();
 		}
 
 		private string CheckUrl()
 		{
-			var enabled = (string)agent.GetConfig()["com.sun.identity.agents.config.notenforced.url.attributes.enable"] == "true";
+			var enabled = (string)agent.GetConfig()["com.sun.identity.agents.config.override.host"] == "true";
 			var url = (string)agent.GetConfig()["com.sun.identity.agents.config.fqdn.default"];
 			if(enabled && !string.IsNullOrWhiteSpace(url) 
 				&& !_app.Context.Request.Url.Host.Equals(url, StringComparison.InvariantCultureIgnoreCase))
 			{
-				var protocol = (string)agent.GetConfig()["com.sun.identity.agents.config.override.protocol"];
-				var port = (string)agent.GetConfig()["com.sun.identity.agents.config.override.port"];
+				var agentUrlStr = (string)agent.GetConfig()["com.sun.identity.agents.config.agenturi.prefix"]; 
+				var rewriteProtocol = (string)agent.GetConfig()["com.sun.identity.agents.config.override.protocol"] == "true";
+				var rewritePort = (string)agent.GetConfig()["com.sun.identity.agents.config.override.port"] == "true";
 				var res = "";
 
-//			todo	if(!string.IsNullOrWhiteSpace(protocol))
-//				{
-//					res += protocol +"://";
-//				}
-//				else
+				int? port = null;
+				string protocol = null;
+				if((rewriteProtocol || rewritePort) && !string.IsNullOrWhiteSpace(agentUrlStr))
 				{
-					res += "//";
+					var uri = new Uri(agentUrlStr);
+					port = uri.Port;
+					protocol = uri.Scheme;
+				}
+
+				if(!string.IsNullOrWhiteSpace(protocol))
+				{
+					res += protocol +"://";
+				}
+				else
+				{
+					res += _app.Context.Request.Url.Scheme + "://";
 				}
 
 				res += url;
 
-//	todo			if(!string.IsNullOrWhiteSpace(port))
-//				{
-//					res += ":" + port;
-//				}
+				if(port.HasValue)
+				{
+					res += ":" + port;
+				}
 
 				res += _app.Context.Request.Url.PathAndQuery;
 

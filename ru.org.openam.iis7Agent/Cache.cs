@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Web;
 using System.Web.Caching;
+using ru.org.openam.sdk;
 
 namespace ru.org.openam.iis7Agent
 {

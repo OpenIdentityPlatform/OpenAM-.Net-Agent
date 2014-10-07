@@ -4,7 +4,7 @@
          //   <attribute name="com.sun.identity.agents.config.fqdn.default">
         //      <value>ibank.staging.rapidsoft.ru</value>
         //   </attribute>
- отвечают за контроль имени сайта
+ отвечают за контроль имени сайта - поддержал
 
 
          //   <attribute name="com.sun.identity.agents.config.notenforced.url">
@@ -23,7 +23,7 @@
          //   <attribute name="com.sun.identity.agents.config.notenforced.url.attributes.enable">
         //      <value>true</value>
         //   </attribute>
- заполнять ли имя пользователя если задан пропуск без аутентификации - не поддержал
+ заполнять ли имя пользователя если задан пропуск без аутентификации - поддержал
 
 
          //   <attribute name="com.sun.identity.agents.config.session.attribute.mapping">
@@ -31,19 +31,13 @@
         //      <value>[password.expired]=profile-password-expire-notify</value>
         //      <value>[ignoreOTP]=profile-ignore-otp-login</value>
         //   </attribute>
- маппинг свойств сессии на заголовки HTTP
+ маппинг свойств сессии на заголовки HTTP - поддержал, мапится в Context.Items
 
-
-         //   <attribute name="com.sun.identity.agents.config.audit.accesstype">
-        //      <value>LOG_DENY</value>
-        //   </attribute>
- подробность аудита
-
-
+       
          //   <attribute name="com.sun.identity.agents.config.proxy.override.host.port">
         //      <value>false</value>
         //   </attribute>
- переопредялть порт при вычислении политики
+ переопредялть порт при вычислении политики	- поддержал
 
 
          //   <attribute name="com.sun.identity.agents.config.policy.clock.skew">
@@ -67,11 +61,12 @@
         //      <value>agentRootURL=https://login.staging.rapidsoft.ru:443/</value>
         //   </attribute>
  внешний урл сайта со схемой портом и именем - интересен в контексте вычисления политики см com.sun.identity.agents.config.proxy.override.*
+
         
 		 //   <attribute name="com.sun.identity.agents.config.userid.param.type">
         //      <value>session</value>
         //   </attribute>
- определяет где искать имя пользователя (в сессии) - LDAP не поддерживается, всегда ищет в сессии
+ определяет где искать имя пользователя (в сессии) - LDAP не поддержал, всегда ищет в сессии
 
 
          //   <attribute name="com.sun.identity.agents.config.logout.cookie.reset">
@@ -82,21 +77,25 @@
  какие куки ресетить при выходе
 
 
+   //   <attribute name="com.sun.identity.agents.config.audit.accesstype">
+        //      <value>LOG_DENY</value>
+        //   </attribute>
+ подробность аудита	- поддержал
          //   <attribute name="com.sun.identity.agents.config.debug.level">
         //      <value>All</value>
         //   </attribute>
         //   <attribute name="com.sun.identity.agents.config.local.log.rotate">
         //      <value>true</value>
         //   </attribute>
- логирование
+ логирование - поддержал
          //   <attribute name="com.sun.identity.agents.config.local.log.size">
         //      <value>52428800</value>
         //   </attribute>
- размер лога при ротации
+ размер лога при ротации - поддержал
          //   <attribute name="com.sun.identity.agents.config.debug.file.size">
         //      <value>10000000</value>
         //   </attribute>
- размер лога при ротации
+ размер лога при ротации - не поддержал беру из com.sun.identity.agents.config.local.log.size
 
 
          //   <attribute name="com.sun.identity.agents.config.client.ip.validation.enable">
@@ -108,7 +107,7 @@
          //   <attribute name="com.sun.identity.agents.config.override.protocol">
         //      <value>true</value>
         //   </attribute>
- переопредялть схему при вычислении политики
+ переопредялть схему при вычислении политики - поддержал
 
 
          //   <attribute name="com.sun.identity.agents.config.ignore.path.info">
@@ -124,7 +123,7 @@
          //   <attribute name="com.sun.identity.agents.config.session.attribute.fetch.mode">
         //      <value>HTTP_HEADER</value>
         //   </attribute>
- куда писать свойства сессии (заголовки сесссия куки request attributes)
+ куда писать свойства сессии (заголовки сесссия куки request attributes) - не поддеждал всегда идет в Context.Items
 
          //   <attribute name="com.sun.identity.agents.config.policy.cache.polling.interval">
         //      <value>1</value>
@@ -162,17 +161,17 @@
          //   <attribute name="com.sun.identity.agents.config.userid.param">
         //      <value>UserToken</value>
         //   </attribute>
- в каком свойстве лежит имя пользователя (см com.sun.identity.agents.config.userid.param.type)
+ в каком свойстве лежит имя пользователя (см com.sun.identity.agents.config.userid.param.type) - поддержал
 
          //   <attribute name="com.sun.identity.agents.config.agenturi.prefix">
         //      <value>https://ibank.staging.rapidsoft.ru:443/amagent</value>
         //   </attribute>
- имя сайта
+ имя сайта - поддержал, используется чтоб вычислить протокол и порт при редиректе
 
         //   <attribute name="com.sun.identity.agents.config.override.host">
         //      <value>true</value>
         //   </attribute>
- переопределять имя сайта
+ переопределять имя сайта - поддержал
 
    //   <attribute name="com.sun.identity.agents.config.access.denied.url" />
  куда направить пользователя при отказе в авториазции
@@ -206,7 +205,7 @@
          //   <attribute name="com.sun.identity.agents.config.redirect.param">
         //      <value>goto</value>
         //   </attribute>
- в каком параметре передается возвратный урл
+ в каком параметре передается возвратный урл - поддержал
 
          //   <attribute name="com.sun.identity.agents.config.logout.url">
         //      <value>[0]=https://login.staging.rapidsoft.ru:444/auth/UI/Logout</value>
@@ -217,3 +216,13 @@
         //      <value>anonymous</value>
         //   </attribute>
  см ="com.sun.identity.agents.config.anonymous.user.enable">  - не поддержал
+
+
+ Вопросы
+ 1. Ты говорил что нужно делать 2 запроса на аутентификацию и авторизацию. сейчас я делаю долько getSession, а что еще надо?
+ 2. Если много параметров про логофф, но на проде мы переходим на внешнюю ссылку https://qbank.ru/auth/UI/Logout, надо ли на агенте отслеживать логофф урл из конфига
+ 2. Откуда брать значения для com.sun.identity.agents.config.profile.attribute.mapping
+ 3. com.sun.identity.agents.config.debug.level приходит как All, но в описании формата написано что должен быть all:4, цифра означает уровень логирования - откуда брать уровень логирования?
+ 4. com.sun.identity.agents.config.cookie.reset - как разобрать формат?
+ 6. Не понял как это обрабатывать com.sun.identity.agents.config.ignore.path.info
+ 7. com.sun.identity.agents.config.session.attribute.fetch.mode написано HTTP_HEADER но на деле писалось в ServerVariables которые работают через раз, по этому всегда буду писать в Context.Items. Ок?
