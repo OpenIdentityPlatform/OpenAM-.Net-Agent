@@ -46,26 +46,46 @@ namespace ru.org.openam.sdk
 				fileTarget.FileName = "${basedir}/App_Data/Logs/${logger}/${date:format=yyyy-MM-dd}.txt";
 				fileTarget.Encoding = Encoding.UTF8;
 
+				LogLevel nlogLevel = LogLevel.Error;
 				// todo проверить
-				if (Agent.Instance.HasConfig() && (string)Agent.Instance.GetConfig()["com.sun.identity.agents.config.local.log.rotate"] == "true")
+				if (Agent.Instance.HasConfig())
 				{
-					long temp;
-					fileTarget.ArchiveAboveSize = 104857600;
-					fileTarget.MaxArchiveFiles = 9999;
-					fileTarget.ArchiveFileName = "${basedir}/App_Data/Logs/${logger}/${date:format=yyyy-MM-dd}_{#}.txt";
-					fileTarget.ArchiveNumbering = ArchiveNumberingMode.Sequence;
-					fileTarget.ArchiveEvery = FileArchivePeriod.None;
-					if (long.TryParse((string)Agent.Instance.GetConfig()["com.sun.identity.agents.config.local.log.size"], out temp))
+					if (Agent.Instance.GetSingle("com.sun.identity.agents.config.local.log.rotate") == "true")
 					{
-						fileTarget.ArchiveAboveSize = temp;
+						long temp;
+						fileTarget.ArchiveAboveSize = 104857600;
+						fileTarget.MaxArchiveFiles = 9999;
+						fileTarget.ArchiveFileName = "${basedir}/App_Data/Logs/${logger}/${date:format=yyyy-MM-dd}_{#}.txt";
+						fileTarget.ArchiveNumbering = ArchiveNumberingMode.Sequence;
+						fileTarget.ArchiveEvery = FileArchivePeriod.None;
+						if (long.TryParse(Agent.Instance.GetSingle("com.sun.identity.agents.config.local.log.size"), out temp))
+						{
+							fileTarget.ArchiveAboveSize = temp;
+						}
+					}
+
+					var configLevel = Agent.Instance.GetSingle("com.sun.identity.agents.config.debug.level");
+					switch (configLevel)
+					{
+						case "Error":
+							nlogLevel = LogLevel.Error;
+							break;
+						case "Warning":
+							nlogLevel = LogLevel.Warn;
+							break;
+						case "Info":
+							nlogLevel = LogLevel.Info;
+							break;
+						default:
+							nlogLevel = LogLevel.Trace;
+							break;
 					}
 				}
 
-				// todo взять лог левел из конфига
-				var rule = new LoggingRule("PolicyAgentDebug", LogLevel.Trace, fileTarget);
+				var rule = new LoggingRule("PolicyAgentDebug", nlogLevel, fileTarget);
 				config.LoggingRules.Add(rule);
 				
-				var rule2 = new LoggingRule("PolicyAgentAudit", LogLevel.Trace, fileTarget);
+				var rule2 = new LoggingRule("PolicyAgentAudit", LogLevel.Info, fileTarget);
 				config.LoggingRules.Add(rule2);
 
 				LogManager.Configuration = config;
@@ -73,7 +93,7 @@ namespace ru.org.openam.sdk
 
 			_debugLogger = LogManager.GetLogger("PolicyAgentDebug");
 
-			if (!_dafaultConfig || Agent.Instance.HasConfig() && (string)Agent.Instance.GetConfig()["com.sun.identity.agents.config.audit.accesstype"] == "LOG_ALLOW")
+			if (!_dafaultConfig || Agent.Instance.HasConfig() && Agent.Instance.GetSingle("com.sun.identity.agents.config.audit.accesstype") == "LOG_ALLOW")
 			{
 				_auditLogger = LogManager.GetLogger("PolicyAgentAudit");
 			}

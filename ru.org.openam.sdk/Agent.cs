@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ru.org.openam.sdk.auth.callback;
 
 namespace ru.org.openam.sdk
@@ -381,6 +382,62 @@ namespace ru.org.openam.sdk
 				Log.InitLog();
 			}
 			return config;
+		}
+
+		public string GetSingle(string name) 
+		{
+			if(!GetConfig().ContainsKey(name))
+			{
+				return null;
+			}
+
+			var opt = GetConfig()[name];
+			
+			return opt as string;
+		}
+
+		public string GetFirst(string name) 
+		{
+			if(!GetConfig().ContainsKey(name))
+			{
+				return null;
+			}
+
+			var opt = GetConfig()[name];
+			if(opt != null && opt is string)
+			{
+				return ((string)opt).Replace("[0]=", "");
+			}
+			else if(opt != null &&opt is HashSet<string>)
+			{
+				var hashSet = ((HashSet<string>)opt);
+				if(hashSet.Count > 0)
+				{
+					return hashSet.First().Replace("[0]=", "");
+				}
+				return null;
+			}
+
+			return null;
+		}
+
+		public HashSet<string> GetHashSet(string name) 
+		{
+			if(!GetConfig().ContainsKey(name))
+			{
+				return new HashSet<string>();
+			}
+			var opt = GetConfig()[name];
+			if(opt is string)
+			{
+				return new HashSet<string>(new []{(string)opt});
+			}
+			else if(opt is HashSet<string>)
+			{
+				return (HashSet<string>)opt;
+			}
+
+			return new HashSet<string>();
 		}
 
 		public string GetCookieName()
