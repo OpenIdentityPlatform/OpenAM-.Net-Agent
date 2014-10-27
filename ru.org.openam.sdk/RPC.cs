@@ -8,7 +8,7 @@ using System.IO;
 
 namespace ru.org.openam.sdk
 {
-    class RPC
+	public class RPC
     {
         public static HttpWebRequest getHttpWebRequest(Uri uri)
         {

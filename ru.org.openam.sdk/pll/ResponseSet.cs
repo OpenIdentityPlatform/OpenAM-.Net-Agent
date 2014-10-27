@@ -6,7 +6,7 @@ using System.Xml;
 
 namespace ru.org.openam.sdk.pll
 {
-    class ResponseSet:List<Response>
+    public class ResponseSet:List<Response>
     {
         public String vers;
         public String svcid;

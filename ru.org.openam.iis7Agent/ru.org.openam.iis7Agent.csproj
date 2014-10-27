@@ -42,7 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ru.org.openam.sdk\ru.org.openam.sdk.csproj">
-      <Project>{e00c3d8d-6d8f-46d4-b305-be5e89c8e085}</Project>
+      <Project>{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}</Project>
       <Name>ru.org.openam.sdk</Name>
     </ProjectReference>
   </ItemGroup>

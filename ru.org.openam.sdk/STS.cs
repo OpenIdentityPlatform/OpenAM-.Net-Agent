@@ -29,7 +29,7 @@ namespace ru.org.openam.sdk
             messageSecurity.AllowSerializedSigningTokenOnReply = true;
             messageSecurity.MessageSecurityVersion = MessageSecurityVersion.WSSecurity10WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10;
             messageSecurity.MessageSecurityVersion = MessageSecurityVersion.WSSecurity10WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10;
-            messageSecurity.EnableUnsecuredResponse = true;
+			//messageSecurity.EnableUnsecuredResponse = true;
             messageSecurity.IncludeTimestamp = false;
             messageSecurity.DefaultAlgorithmSuite = SecurityAlgorithmSuite.Basic128Rsa15;
             messageSecurity.SecurityHeaderLayout = SecurityHeaderLayout.Lax;

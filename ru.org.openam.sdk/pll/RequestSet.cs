@@ -6,7 +6,7 @@ using System.Xml;
 
 namespace ru.org.openam.sdk.pll
 {
-    class RequestSet: List<Request>
+    public class RequestSet: List<Request>
     {
         static int reqid = 1;
 

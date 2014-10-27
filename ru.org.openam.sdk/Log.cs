@@ -46,7 +46,7 @@ namespace ru.org.openam.sdk
 				fileTarget.FileName = "${basedir}/App_Data/Logs/${logger}/${date:format=yyyy-MM-dd}.txt";
 				fileTarget.Encoding = Encoding.UTF8;
 
-				LogLevel nlogLevel = LogLevel.Error;
+				LogLevel nlogLevel = LogLevel.Debug;
 				// todo проверить
 				if (Agent.Instance.HasConfig())
 				{
