@@ -8,7 +8,7 @@ using ru.org.openam.sdk.pll;
 namespace ru.org.openam.sdk.nunit
 {
 	[TestFixture ()]
-	public class AgentTest
+	public class TestCase
 	{
 		[Test ()]
 		public void Agent_getSession()
