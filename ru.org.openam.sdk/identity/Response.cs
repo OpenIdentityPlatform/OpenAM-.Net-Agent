@@ -66,9 +66,7 @@ namespace ru.org.openam.sdk.identity
 										var value = property[attr.Value];
 										var set = value as HashSet<string>;
 										if (set != null)
-										{
                                             set.Add(node2.InnerXml);
-										}
 										else //String to HashSet
                                         {
                                             property.Remove(attr.Value);
@@ -76,9 +74,7 @@ namespace ru.org.openam.sdk.identity
                                         }	
 									}
 									else
-									{
                                         property.Add(attr.Value, node2.InnerXml);
-									}
                                 }
                                 else
                                     throw new Exception("unknown node type=" + node2.LocalName);

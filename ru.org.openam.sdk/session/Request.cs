@@ -19,7 +19,7 @@ namespace ru.org.openam.sdk.session
     {
         static int reqid = 1;
 
-        public Boolean reset = false;
+        public Boolean reset = true;
         public String SessionID;
 
         public Request()

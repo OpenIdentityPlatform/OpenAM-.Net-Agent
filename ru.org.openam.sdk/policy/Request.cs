@@ -37,7 +37,7 @@ namespace ru.org.openam.sdk.policy
         String resourceName;
         Dictionary<String, HashSet<String>> extra=new Dictionary<string,HashSet<string>>();
 
-        public Request(Agent agent, Session session, Uri uri, Dictionary<String, HashSet<String>> extra)
+		public Request(Agent agent, Session session, Uri uri, Dictionary<String, HashSet<String>> EnvParameters)
             : this()
         {
             this.agent = agent;

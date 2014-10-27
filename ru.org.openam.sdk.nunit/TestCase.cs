@@ -60,17 +60,6 @@ namespace ru.org.openam.sdk.nunit
 		}
 
 		[Test ()]
-		public void policy_Get()
-		{
-			Policy.Get(
-				new Agent(),
-				Auth.login("/clients", auth.indexType.service, "ldap", new Callback[] { new NameCallback("11111111111"), new PasswordCallback("1111111111") }),
-				new Uri("http://sssss:80/sdsd?sdsdsd"),
-				null
-			);
-		}
-
-		[Test ()]
 		public void pll_GetTest()
 		{
 			ResponseSet actual = RPC.GetXML(
@@ -97,6 +86,58 @@ namespace ru.org.openam.sdk.nunit
 			{
 				return;
 			}
+		}
+
+		[Test ()]
+		public void policy_404()
+		{
+			Assert.IsFalse(
+				Policy.Get(
+					new Agent(),
+					Auth.login("/clients", auth.indexType.service, "ldap", new Callback[] { new NameCallback("11111111111"), new PasswordCallback("1111111111") }),
+					new Uri("http://sssss:80/sdsd?sdsdsd"),
+					null
+				).result.isAllow("GET")
+			);
+		}
+
+		[Test ()]
+		public void policy_403()
+		{
+			Assert.IsFalse(
+				Policy.Get(
+					new Agent(),
+					Auth.login("/clients", auth.indexType.service, "ldap", new Callback[] { new NameCallback("11111111111"), new PasswordCallback("1111111111") }),
+					new Uri("http://deny.rapidsoft.ru:80/sdsd?sss"),
+					null
+				).result.isAllow("GET")
+			);
+		}
+
+		[Test ()]
+		public void policy_302()
+		{
+			Assert.IsFalse(
+				Policy.Get(
+					new Agent(),
+					Auth.login("/clients", auth.indexType.service, "ldap", new Callback[] { new NameCallback("11111111111"), new PasswordCallback("1111111111") }),
+					new Uri("http://advice.rapidsoft.ru:80/sdsd?sss"),
+					null
+				).result.isAllow("GET")
+			);
+		}
+
+		[Test ()]
+		public void policy_200()
+		{
+			Assert.IsTrue(
+				Policy.Get(
+					new Agent(),
+					Auth.login("/clients", auth.indexType.service, "ldap", new Callback[] { new NameCallback("11111111111"), new PasswordCallback("1111111111") }),
+					new Uri("http://localhost.rapidsoft.ru:80/sdsd?sss"),
+					null
+				).result.isAllow("post")
+			);
 		}
 	}
 }

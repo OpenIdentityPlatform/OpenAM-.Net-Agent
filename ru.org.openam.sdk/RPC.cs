@@ -78,8 +78,6 @@ namespace ru.org.openam.sdk
 				http.ContentType, 
 				body
 			));
-            
-            //UTF8Encoding encoding = new UTF8Encoding();
             byte[] postBytes = (new UTF8Encoding()).GetBytes(body);
             http.ContentLength = postBytes.Length;
 

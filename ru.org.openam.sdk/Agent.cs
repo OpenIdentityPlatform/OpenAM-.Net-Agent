@@ -386,9 +386,7 @@ namespace ru.org.openam.sdk
 		public string GetSingle(string name) 
 		{
 			if(!GetConfig().ContainsKey(name))
-			{
 				return null;
-			}
 
 			var opt = GetConfig()[name];
 			
@@ -398,22 +396,16 @@ namespace ru.org.openam.sdk
 		public string GetFirst(string name) 
 		{
 			if(!GetConfig().ContainsKey(name))
-			{
 				return null;
-			}
 
 			var opt = GetConfig()[name];
 			if(opt != null && opt is string)
-			{
 				return ((string)opt).Replace("[0]=", "");
-			}
 			else if(opt != null &&opt is HashSet<string>)
 			{
 				var hashSet = ((HashSet<string>)opt);
 				if(hashSet.Count > 0)
-				{
 					return hashSet.First().Replace("[0]=", "");
-				}
 				return null;
 			}
 
@@ -423,18 +415,12 @@ namespace ru.org.openam.sdk
 		public HashSet<string> GetHashSet(string name) 
 		{
 			if(!GetConfig().ContainsKey(name))
-			{
 				return new HashSet<string>();
-			}
 			var opt = GetConfig()[name];
 			if(opt is string)
-			{
 				return new HashSet<string>(new []{(string)opt});
-			}
 			else if(opt is HashSet<string>)
-			{
 				return (HashSet<string>)opt;
-			}
 
 			return new HashSet<string>();
 		}
