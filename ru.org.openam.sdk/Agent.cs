@@ -379,7 +379,6 @@ namespace ru.org.openam.sdk
 							getSession()
 						)
 					 )).property;
-				Log.InitLog();
 			}
 			return config;
 		}

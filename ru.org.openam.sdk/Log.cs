@@ -38,9 +38,7 @@ namespace ru.org.openam.sdk
 					fileTarget.ArchiveNumbering = ArchiveNumberingMode.Sequence;
 					fileTarget.ArchiveEvery = FileArchivePeriod.None;
 					if (long.TryParse(Agent.Instance.GetSingle("com.sun.identity.agents.config.local.log.size"), out temp))
-					{
 						fileTarget.ArchiveAboveSize = temp;
-					}
 				}
 
 				var configLevel = Agent.Instance.GetSingle("com.sun.identity.agents.config.debug.level");
@@ -71,7 +69,7 @@ namespace ru.org.openam.sdk
 	
 			_debugLogger = LogManager.GetLogger("PolicyAgentDebug");
 
-			if (!_defaultConfig || Agent.Instance.HasConfig() && Agent.Instance.GetSingle("com.sun.identity.agents.config.audit.accesstype") == "LOG_ALLOW")
+			if (Agent.Instance.HasConfig() && Agent.Instance.GetSingle("com.sun.identity.agents.config.audit.accesstype") == "LOG_ALLOW")
 				_auditLogger = LogManager.GetLogger("PolicyAgentAudit");
 		}
 
