@@ -29,22 +29,25 @@ namespace ru.org.openam.sdk.policy
         public Request()
             : base()
         {
-            svcid = pll.type.policy;
+			svcid = pll.type.policy;    
         }
 
         Agent agent;
         Session session;
         String resourceName;
-        Dictionary<String, HashSet<String>> extra=new Dictionary<string,HashSet<string>>();
+		Dictionary<String, ISet<String>> extra=null;
+		ICollection<String> attributes=null; 
 
-		public Request(Agent agent, Session session, Uri uri, Dictionary<String, HashSet<String>> EnvParameters)
+		public Request(Agent agent, Session session, Uri uri, Dictionary<String, ISet<String>> EnvParameters, ICollection<String> attributes)
             : this()
         {
             this.agent = agent;
             this.session = session;
             this.resourceName = uri.ToString(); //TODO 
-            if (extra!=null)
-                this.extra = extra;
+			if (EnvParameters!=null)
+				this.extra = EnvParameters;
+			if (attributes != null)
+				this.attributes = attributes;
         }
 
         override public String ToString()
@@ -85,6 +88,17 @@ namespace ru.org.openam.sdk.policy
                     writer.WriteEndElement();
                     writer.WriteEndElement();
                 }
+				if (attributes != null && attributes.Count > 0)
+				{
+					writer.WriteStartElement("GetResponseDecisions");
+					foreach(String paramName in attributes)
+					{
+						writer.WriteStartElement("Attribute");
+						writer.WriteAttributeString("name", paramName);
+						writer.WriteEndElement();
+					}
+					writer.WriteEndElement();
+				}
                 writer.WriteEndElement();
             writer.WriteEndElement();
             writer.WriteEndElement();

@@ -70,10 +70,10 @@ namespace ru.org.openam.sdk.policy
 //</PolicyResponse>
 //</PolicyService>
 
-		Uri url;
+		Uri url=null;
 		Dictionary<string, object> ResponseAttributes=new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 		Dictionary<string, object> ActionDecision=new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-		Dictionary<string, object> Advices=new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+		Dictionary<string, object> Advices=new Dictionary<string,object>(StringComparer.OrdinalIgnoreCase);
 
 		public bool isAllow(String method){
 			Object Decision;
@@ -83,6 +83,11 @@ namespace ru.org.openam.sdk.policy
 				&& (	(Decision is String && "allow".Equals (Decision)) 
 					|| 	(Decision is HashSet<String> && ((HashSet<String>)Decision).Contains("allow") && !((HashSet<String>)Decision).Contains("deny"))
 				); 
+		}
+
+		public Dictionary<string, object> attributes
+		{
+			get { return ResponseAttributes; }
 		}
 
         public Response(XmlNode element)
@@ -103,36 +108,52 @@ namespace ru.org.openam.sdk.policy
 							foreach (XmlNode node3 in node2.ChildNodes)
 							{
 								if (node3.LocalName.Equals ("ResponseAttributes")) {
+									bool hasAttributeValuePair = false;
 									foreach (XmlNode node4 in node3.ChildNodes)
 										if (node4.LocalName.Equals ("AttributeValuePair"))
-											;
+											hasAttributeValuePair = true;
 										else
 											throw new Exception("unknown node type=" + node4.LocalName);
-									processAttributeValuePair(ResponseAttributes,node3);
+									if (hasAttributeValuePair)
+										processAttributeValuePair(ResponseAttributes,node3);
+								}
+								else if (node3.LocalName.Equals ("ResponseDecisions")) {
+									bool hasAttributeValuePair = false;
+									foreach (XmlNode node4 in node3.ChildNodes)
+										if (node4.LocalName.Equals ("AttributeValuePair"))
+											hasAttributeValuePair = true;
+										else
+											throw new Exception("unknown node type=" + node4.LocalName);
+									if (hasAttributeValuePair)
+										processAttributeValuePair(ResponseAttributes,node3);
 								}
 								else if (node3.LocalName.Equals ("ActionDecision")) 
 								{
 									foreach (XmlAttribute attr in node3.Attributes)
 										if (attr.LocalName.Equals("timeToLive"))
-											;
+											continue;
 										else
 											throw new Exception("unknown node type=" + attr.LocalName);
+									bool hasAttributeValuePair = false;
 									foreach (XmlNode node4 in node3.ChildNodes){
+										bool hasAttributeValuePair2 = false;
 										if (node4.LocalName.Equals ("AttributeValuePair"))
-											;
+											hasAttributeValuePair = true;
 										else if (node4.LocalName.Equals ("Advices"))
 										{
 											foreach (XmlNode node5 in node4.ChildNodes)
 												if (node5.LocalName.Equals ("AttributeValuePair"))
-													;
+													hasAttributeValuePair2 = true;
 												else
 													throw new Exception("unknown node type=" + node5.LocalName);
-											processAttributeValuePair(Advices,node4);
+											if (hasAttributeValuePair2)
+												processAttributeValuePair(Advices,node4);
 										}
 										else
 											throw new Exception("unknown node type=" + node4.LocalName);
 									}
-									processAttributeValuePair(ActionDecision,node3);
+									if (hasAttributeValuePair)
+										processAttributeValuePair(ActionDecision,node3);
 								}
 								else
 									throw new Exception("unknown node type=" + node3.LocalName);
@@ -172,9 +193,8 @@ namespace ru.org.openam.sdk.policy
 						}else
 							throw new Exception ("unknown node type=" + node2.LocalName);
 					}
-					if (name != null && value != null && !res.ContainsKey(name)) {
+					if (name != null && value != null && !res.ContainsKey(name)) 
 						res.Add (name, value);
-					}
 				}
 		}
     }

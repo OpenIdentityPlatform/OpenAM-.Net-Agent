@@ -14,10 +14,10 @@ namespace ru.org.openam.sdk
         }
 
         public policy.Response result;
-        Policy(Agent agent, Session session, Uri uri, Dictionary<String, HashSet<String>> extra)
+		Policy(Agent agent, Session session, Uri uri, Dictionary<string, ISet<String>> extra,ICollection<string> attributes)
             : this(agent)
         {
-            result=Get(new policy.Request(agent,session,uri,extra)); //TODO cache
+			result=Get(new policy.Request(agent,session,uri,extra,attributes)); 
         }
 
         policy.Response Get(policy.Request request)
@@ -28,9 +28,10 @@ namespace ru.org.openam.sdk
             return new policy.Response();
         }
 
-        public static Policy Get(Agent agent, Session session, Uri uri, Dictionary<String, HashSet<String>> extra)
+		//TODO memorycache
+		public static Policy Get(Agent agent, Session session, Uri uri, Dictionary<string, ISet<string>> extra,ICollection<string> attributes)
         {
-            return new Policy(agent,  session,  uri,  extra);
+			return new Policy(agent,  session,  uri,  extra, attributes);
         }
     }
 }

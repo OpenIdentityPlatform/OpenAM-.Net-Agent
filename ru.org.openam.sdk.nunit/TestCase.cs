@@ -38,6 +38,7 @@ namespace ru.org.openam.sdk.nunit
 			try
 			{
 				Session actual = Auth.login("/", auth.indexType.moduleInstance, "Application", new Callback[] { new NameCallback(Bootstrap.getAppUser()), new PasswordCallback("xxxxxxxxxxxxx") });
+				Assert.IsNotNull(actual);
 			}
 			catch (AuthException)
 			{ 
@@ -57,6 +58,7 @@ namespace ru.org.openam.sdk.nunit
 			Assert.AreNotEqual(null, global);
 
 			naming.Response personal = new Agent().GetNaming();
+			Assert.IsTrue(personal.property.Count>0);
 		}
 
 		[Test ()]
@@ -65,6 +67,7 @@ namespace ru.org.openam.sdk.nunit
 			ResponseSet actual = RPC.GetXML(
 				Bootstrap.GetNaming(), 
 				new RequestSet(new ru.org.openam.sdk.pll.Request[]{new auth.Request("/",auth.indexType.moduleInstance,"Application")}));
+			Assert.IsNotNull(actual);
 		}
 
 		[Test ()]
@@ -80,7 +83,8 @@ namespace ru.org.openam.sdk.nunit
 		{
 			try
 			{
-				Session Session = new Session("000000000000000000000000000000");
+				new Session("000000000000000000000000000000");
+				Assert.IsTrue(true);
 			}
 			catch (SessionException)
 			{
@@ -96,6 +100,7 @@ namespace ru.org.openam.sdk.nunit
 					new Agent(),
 					Auth.login("/clients", auth.indexType.service, "ldap", new Callback[] { new NameCallback("11111111111"), new PasswordCallback("1111111111") }),
 					new Uri("http://sssss:80/sdsd?sdsdsd"),
+					null,
 					null
 				).result.isAllow("GET")
 			);
@@ -109,6 +114,7 @@ namespace ru.org.openam.sdk.nunit
 					new Agent(),
 					Auth.login("/clients", auth.indexType.service, "ldap", new Callback[] { new NameCallback("11111111111"), new PasswordCallback("1111111111") }),
 					new Uri("http://deny.rapidsoft.ru:80/sdsd?sss"),
+					null,
 					null
 				).result.isAllow("GET")
 			);
@@ -122,6 +128,7 @@ namespace ru.org.openam.sdk.nunit
 					new Agent(),
 					Auth.login("/clients", auth.indexType.service, "ldap", new Callback[] { new NameCallback("11111111111"), new PasswordCallback("1111111111") }),
 					new Uri("http://advice.rapidsoft.ru:80/sdsd?sss"),
+					null,
 					null
 				).result.isAllow("GET")
 			);
@@ -130,14 +137,17 @@ namespace ru.org.openam.sdk.nunit
 		[Test ()]
 		public void policy_200()
 		{
-			Assert.IsTrue(
-				Policy.Get(
-					new Agent(),
-					Auth.login("/clients", auth.indexType.service, "ldap", new Callback[] { new NameCallback("11111111111"), new PasswordCallback("1111111111") }),
-					new Uri("http://localhost.rapidsoft.ru:80/sdsd?sss"),
-					null
-				).result.isAllow("post")
-			);
+			Policy policy=Policy.Get(
+				new Agent (),
+				Auth.login ("/clients", auth.indexType.service, "ldap", new Callback[] {
+					new NameCallback ("11111111111"),
+					new PasswordCallback ("1111111111")
+				}),
+				new Uri ("http://localhost.rapidsoft.ru:80/sdsd?sss"),
+				null,
+				new String[]{"uid","inetuserStatus","unknown","cn"});
+			Assert.IsTrue(policy.result.isAllow("post"));
+			Assert.IsTrue (policy.result.attributes.Count > 0);
 		}
 	}
 }
