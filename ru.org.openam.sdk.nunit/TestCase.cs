@@ -95,43 +95,40 @@ namespace ru.org.openam.sdk.nunit
 		[Test ()]
 		public void policy_404()
 		{
-			Assert.IsFalse(
-				Policy.Get(
+			Policy policy=Policy.Get(
 					new Agent(),
 					Auth.login("/clients", auth.indexType.service, "ldap", new Callback[] { new NameCallback("11111111111"), new PasswordCallback("1111111111") }),
 					new Uri("http://sssss:80/sdsd?sdsdsd"),
 					null,
 					null
-				).result.isAllow("GET")
-			);
+				);
+			Assert.IsFalse(policy.result.isAllow("GET"));
 		}
 
 		[Test ()]
 		public void policy_403()
 		{
-			Assert.IsFalse(
-				Policy.Get(
+			Policy policy=Policy.Get(
 					new Agent(),
 					Auth.login("/clients", auth.indexType.service, "ldap", new Callback[] { new NameCallback("11111111111"), new PasswordCallback("1111111111") }),
 					new Uri("http://deny.rapidsoft.ru:80/sdsd?sss"),
 					null,
 					null
-				).result.isAllow("GET")
-			);
+				);
+			Assert.IsFalse(policy.result.isAllow("GET"));
 		}
 
 		[Test ()]
 		public void policy_302()
 		{
-			Assert.IsFalse(
-				Policy.Get(
+			Policy policy=Policy.Get(
 					new Agent(),
 					Auth.login("/clients", auth.indexType.service, "ldap", new Callback[] { new NameCallback("11111111111"), new PasswordCallback("1111111111") }),
 					new Uri("http://advice.rapidsoft.ru:80/sdsd?sss"),
 					null,
 					null
-				).result.isAllow("GET")
-			);
+				);
+			Assert.IsFalse(policy.result.isAllow("GET"));
 		}
 
 		[Test ()]
@@ -147,7 +144,30 @@ namespace ru.org.openam.sdk.nunit
 				null,
 				new String[]{"uid","inetuserStatus","unknown","cn"});
 			Assert.IsTrue(policy.result.isAllow("post"));
+			Assert.IsTrue(policy.result.isAllow("head"));
 			Assert.IsTrue (policy.result.attributes.Count > 0);
+
+			policy=Policy.Get(
+				new Agent (),
+				Auth.login ("/clients", auth.indexType.service, "ldap", new Callback[] {
+					new NameCallback ("11111111111"),
+					new PasswordCallback ("1111111111")
+				}),
+				new Uri ("http://localhost.rapidsoft.ru:80"),
+				null,
+				new String[]{"uid","inetuserStatus","unknown","cn"});
+			Assert.IsTrue(policy.result.isAllow("post"));
+
+			policy=Policy.Get(
+				new Agent (),
+				Auth.login ("/clients", auth.indexType.service, "ldap", new Callback[] {
+					new NameCallback ("11111111111"),
+					new PasswordCallback ("1111111111")
+				}),
+				new Uri ("http://localhost.rapidsoft.ru:80/"),
+				null,
+				new String[]{"uid","inetuserStatus","unknown","cn"});
+			Assert.IsTrue(policy.result.isAllow("post"));
 		}
 	}
 }
