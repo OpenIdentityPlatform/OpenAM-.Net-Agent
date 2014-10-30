@@ -73,12 +73,6 @@
         //      <value>HTTP_HEADER</value>
         //   </attribute>
  куда писать свойства сессии (заголовки сесссия куки request attributes) - поддеждал
-
-         //   <attribute name="com.sun.identity.agents.config.policy.cache.polling.interval">
-        //      <value>1</value>
-        //   </attribute>
- время кешироваиния решения авторизации в минутах - устаревшее, надо брать время из ответа
-
          //   <attribute name="com.sun.identity.agents.config.cookie.name">
         //      <value>svbid</value>
         //   </attribute>
@@ -125,40 +119,31 @@
         //      <value>[1]=SvyaznoyBank.InternetBank.Site=;Domain=.staging.rapidsoft.ru</value>
         //   </attribute>
  какие куки ресетить при выходе - поддержал 
-
-  
-==============================================
-
- непонятные
-
-         //   <attribute name="com.sun.identity.agents.config.auth.connection.timeout">
+  //   <attribute name="com.sun.identity.agents.config.auth.connection.timeout">
         //      <value>5</value>
         //   </attribute>
- SLA с сервером авторизации	- поидее надо в транспорте прописать таймаут 
-         //   <attribute name="com.sun.identity.agents.config.fetch.from.root.resource">
+ SLA с сервером авторизации	- поддержал
+        //   <attribute name="com.sun.identity.agents.config.fetch.from.root.resource">
         //      <value>false</value>
         //   </attribute>
- откидывать PATH при вычислении политики
-    //   <attribute name="com.sun.identity.agents.config.logout.url">
-        //      <value>[0]=https://login.staging.rapidsoft.ru:444/auth/UI/Logout</value>
-        //   </attribute>
- на каком урле производится выход - зачем он мне?
+ откидывать PATH при вычислении политики - поддержал  
    //   <attribute name="com.sun.identity.agents.config.ignore.path.info">
         //      <value>false</value>
         //   </attribute>
- игнорировать query string при вычислении политики
+ игнорировать query string при вычислении политики - поддержал
+  //   <attribute name="com.sun.identity.agents.config.policy.cache.polling.interval">
+        //      <value>1</value>
+        //   </attribute>
+минуты кэша для полиси - поддержал
 
- =====================================
-   
  todo разделить когда будет getPolicy
           //   <attribute name="com.sun.identity.agents.config.login.url">
         //      <value>[0]=http://localhost.rapidsoft.ru:8080/auth/UI/Login?service=qbank</value>
         //   </attribute>
- на какой урл отправлять не аутентифицированных - поддержал
+ на какой урл отправлять не аутентифицированных	 - поддержал
      //   <attribute name="com.sun.identity.agents.config.access.denied.url" />
- куда направить пользователя при отказе в авториазции
-
- todo жду getPolicy
+ куда направить пользователя при отказе в авториазции  - поддержал
+  todo жду getPolicy
          //   <attribute name="com.sun.identity.agents.config.profile.attribute.mapping">
         //      <value>[employeeNumber]=profile-clientid</value>
         //      <value>[telephoneNumber]=profile-phone</value>
@@ -172,33 +157,50 @@
         //      <value>[sunIdentityServerPPCommonNameMN]=profile-name-middle</value>
         //      <value>[mail]=profile-mail</value>
         //   </attribute>
- как мапить профайл учетки клиента
-
- todo жду когда в Session добавится старый IP
-          //   <attribute name="com.sun.identity.agents.config.client.ip.validation.enable">
+ как мапить профайл учетки клиента - поддержал
+   //   <attribute name="com.sun.identity.agents.config.sso.only">
         //      <value>false</value>
         //   </attribute>
- контролировать смену ИП на клиенте
-
- todo  жду getPolicy 
-         //   <attribute name="com.sun.identity.agents.config.policy.clock.skew">
+ только аутентификация без авторизации - поддержал
+    //   <attribute name="com.sun.identity.agents.config.policy.clock.skew">
         //      <value>600</value>
         //   </attribute>
-         //   <attribute name="com.sun.identity.agents.config.sso.only">
+ хз надо ли обрабатывать - не надо
+
+
+   //   <attribute name="com.sun.identity.agents.config.client.ip.validation.enable">
         //      <value>false</value>
         //   </attribute>
- только аутентификация без авторизации
+ контролировать смену ИП на клиенте	- поддержал
+ com.sun.identity.agents.config.client.ip.validation.enable  значение из сессии  //<Property name="Host" value="192.168.1.206"></Property>
+ сравнивается со значением текущего ИП который определяется как первое до запятой значение из заголовка определенного в свойстве агента  <attribute name="com.sun.identity.agents.config.client.ip.header" /> или реального ИП, если ИП поменялся, то 403
+[16:39:41] Харсеко Валерий: выведи в модуле все дествия в 401 (нет аутентификации) 403 (нет авторизации или смена ИП)
+HTTP_X_FORWARDED_FOR
+[16:41:34] Харсеко Валерий: имя заголовка для получения занчения из ServerVariables
+[16:41:59] Харсеко Валерий: 192.168.1.206, 1.2.3.4
+[16:42:46] Харсеко Валерий: если префикс HTTP_ отсуттвует, то имя заголовка из request.headers
+тогда com.sun.identity.agents.config.client.ip.header=x-forwarded-for
+и ИП в аудите должен логироваться тоже реальный
 
- Вопросы
- 1. Ты говорил что нужно делать 2 запроса на аутентификацию и авторизацию. сейчас я делаю долько getSession, а что еще надо?
-  - жду getPolicy
- 3. Откуда брать значения для com.sun.identity.agents.config.profile.attribute.mapping
-  - жду getPolicy или getIdentity
- 4. Не понял как это обрабатывать com.sun.identity.agents.config.ignore.path.info
-   - не понятно
- 5. как мне контролировать смену ip на клиенте com.sun.identity.agents.config.client.ip.validation.enable?
- жду когда в Session добавится старый IP
- надо обратить внимание, что реальный ИП может идти в заголовке, определенным параметром HTTP header name that holds the IP address of the client. (property name: com.sun.identity.agents.config.client.ip.header)
-в данном параметре может чехе зпт быть несолько ИП - брать первый
-если не совпадает - то сессии нет
-401 или редирект на OpenAM login page URL. (property name: com.sun.identity.agents.config.login.url) 
+==============================================
+
+ непонятные
+
+ //   <attribute name="com.sun.identity.agents.config.logout.url">
+        //      <value>[0]=https://login.staging.rapidsoft.ru:444/auth/UI/Logout</value>
+        //   </attribute>
+ на каком урле производится выход - зачем он мне?
+ 
+
+      
+ =====================================
+ 
+ 
+
+https://login.staging.rapidsoft.ru:444/auth/UI/Login?org=/
+amadmin testtest
+Access Control
+/ (Top Level Realm)
+Agents
+ test.domain.com
+Agent Configuration Export: test.domain.com

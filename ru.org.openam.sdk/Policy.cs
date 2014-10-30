@@ -1,37 +1,66 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace ru.org.openam.sdk
 {
-    public class Policy
-    {
-        Agent agent;
-        Policy(Agent agent)
-        {
-            this.agent = agent;
-        }
+	public class Policy
+	{
+		readonly Agent agent;
+		Policy(Agent agent)
+		{
+			this.agent = agent;
+		}
 
-        public policy.Response result;
-		Policy(Agent agent, Session session, Uri uri, Dictionary<string, ISet<String>> extra,ICollection<string> attributes)
-            : this(agent)
-        {
-			result=Get(new policy.Request(agent,session,uri,extra,attributes)); 
-        }
+		public policy.Response result;
+		Policy(Agent agent, Session session, Uri uri, Dictionary<string, ISet<String>> extra, ICollection<string> attributes)
+			: this(agent)
+		{
+			var url = GetUrl(agent, uri);
+			result = Get(new policy.Request(agent, session, url, extra, attributes));
+		}
 
-        policy.Response Get(policy.Request request)
-        {
-            pll.ResponseSet responses = RPC.GetXML(agent.GetNaming(), new pll.RequestSet(new policy.Request[] { request }));
-            if (responses.Count > 0)
-                return (policy.Response)responses[0];
-            return new policy.Response();
-        }
+		policy.Response Get(policy.Request request)
+		{
+			pll.ResponseSet responses = RPC.GetXML(agent.GetNaming(), new pll.RequestSet(new[] { request }));
+			if (responses.Count > 0)
+				return (policy.Response)responses[0];
+			return new policy.Response();
+		}
 
-		//TODO memorycache
-		public static Policy Get(Agent agent, Session session, Uri uri, Dictionary<string, ISet<string>> extra,ICollection<string> attributes)
-        {
-			return new Policy(agent,  session,  uri,  extra, attributes);
-        }
-    }
+		public static Policy Get(Agent agent, Session session, Uri uri, Dictionary<string, ISet<string>> extra, ICollection<string> attributes)
+		{
+			var minsStr = agent.GetSingle("com.sun.identity.agents.config.policy.cache.polling.interval");
+			int mins;
+			if (!int.TryParse(minsStr, out mins))
+			{
+				mins = 1;
+			}
+
+			var policy = session.PolicyCache.GetOrDefault
+			(
+				"policy_" + GetUrl(agent, uri),
+				() => new Policy(agent, session, uri, extra, attributes),
+				mins
+			);
+			return policy;
+		}
+
+		private static string GetUrl(Agent agent, Uri uri)
+		{
+			string url;
+			if (agent.GetSingle("com.sun.identity.agents.config.fetch.from.root.resource") == "true")
+			{
+				url = uri.Scheme + "://" + uri.Host;
+			}
+			else if (agent.GetSingle("com.sun.identity.agents.config.ignore.path.info") == "true")
+			{
+				url = uri.Scheme + "://" + uri.Host + uri.AbsolutePath;
+			}
+			else
+			{
+				url = uri.OriginalString;
+			}
+			return url;
+		}
+	}
 }

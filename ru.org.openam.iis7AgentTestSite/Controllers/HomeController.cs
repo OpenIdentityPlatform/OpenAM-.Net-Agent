@@ -6,9 +6,16 @@ namespace ru.org.openam.iis7AgentTestSite.Controllers
 {
 	public class HomeController : Controller
 	{
+		[HttpGet]
 		public ActionResult Index()
 		{
 			return View();
+		}
+
+		[HttpPost]
+		public ActionResult Post()
+		{
+			return RedirectToAction("Index");
 		}
 
 		public ActionResult Logoff()

@@ -4,6 +4,12 @@
 <a href="https://ibank.staging.rapidsoft.ru:443/LogOn/LogOff">Logoff</a>
 <br>
 <br>
+<form method="POST" action="/Home/Post">
+	<input type="submit" value="submit"/>
+</form>	
+<br>
+<a href="/403">deny</a>
+<br>
 Context.Items<br>
 @foreach (DictionaryEntry item in HttpContext.Current.Items)
 {

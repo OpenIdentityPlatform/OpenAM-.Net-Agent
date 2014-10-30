@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Security.Principal;
 using System.Web;
 using ru.org.openam.sdk;
@@ -6,15 +7,17 @@ using ru.org.openam.sdk.session;
 
 // todo доимплиментировать настройки
 // todo проверить все кейсы авторизации
-// todo авторизация
-
+// todo маппинг policy.result.attributes.Count > 0); проверить
+// todo проверить sla timeout
+// todo потестить новый кэш в сессии и в полиси
+// todo брать сессию 1 раз
 namespace ru.org.openam.iis7Agent
 {
 	public class iis7AgentModule : IHttpModule
 	{
 		private HttpApplication _app;
 
-		private readonly Agent agent = new Agent();
+		private readonly Agent _agent = new Agent();
 
 		public void Init(HttpApplication context)
 		{
@@ -31,7 +34,7 @@ namespace ru.org.openam.iis7Agent
 
 		private void OnBeginRequest(object sender, EventArgs e)
 		{	
-			Log.Trace(string.Format("Begin request url: {0} ip: {1}",  _app.Context.Request.Url.AbsoluteUri, _app.Context.Request.UserHostAddress));
+			Log.Trace(string.Format("Begin request url: {0} ip: {1}",  _app.Context.Request.Url.AbsoluteUri, GetUserIp()));
 		}
 
 		void OnAuthentication(object sender, EventArgs a)
@@ -52,10 +55,10 @@ namespace ru.org.openam.iis7Agent
 
 					ResetCookie("com.sun.identity.agents.config.logout.cookie.reset");
 
-					var url = agent.GetFirst("com.sun.identity.agents.config.logout.redirect.url");
+					var url = _agent.GetFirst("com.sun.identity.agents.config.logout.redirect.url");
 					if(url == null)
 					{
-						url = agent.GetFirst("com.sun.identity.agents.config.login.url");
+						url = _agent.GetFirst("com.sun.identity.agents.config.login.url");
 					}
 					_app.Response.Redirect(url);
 					return;
@@ -63,7 +66,7 @@ namespace ru.org.openam.iis7Agent
 
 				if (IsFree())
 				{
-					if(agent.GetSingle("com.sun.identity.agents.config.notenforced.url.attributes.enable") == "true")
+					if(_agent.GetSingle("com.sun.identity.agents.config.notenforced.url.attributes.enable") == "true")
 					{
 						_app.Context.User = GetUser();
 					}
@@ -74,17 +77,41 @@ namespace ru.org.openam.iis7Agent
 
 					Log.AuditTrace(string.Format("Free access allowed to {0}", _app.Context.Request.Url.AbsoluteUri));
 					return;
-				}
-
+				}	 
 				
 				var user = GetUser();
-				if (user != null)
+				var autorized = false;
+				if(user != null)
+				{
+					if(_agent.GetSingle("com.sun.identity.agents.config.sso.only") != "true")
+					{
+						var policy = Policy.Get(_agent, GetUserSession(), _app.Context.Request.Url, null, GetAttrsNames());
+						if(policy.result.isAllow(_app.Context.Request.HttpMethod))
+						{
+							MapPolicyProps(policy.result.attributes);
+							autorized = true;
+							Log.AuditTrace(string.Format("User {0} was autorized to {1}", user.Identity.Name, _app.Context.Request.Url.AbsoluteUri));
+						}
+					}
+					else
+					{
+						Log.AuditTrace(string.Format("User {0} was not autorized to {1}", user.Identity.Name, _app.Context.Request.Url.AbsoluteUri));
+						autorized = true;
+					}
+				}
+
+				if(IsInvalidIp())
+				{
+					autorized = false;
+				}
+
+				if (user != null && autorized)
 				{	
 					_app.Context.User = user;
 					MapArrtsProps();
 					Log.Audit(string.Format("User {0} was allowed access to {1}", user.Identity.Name, _app.Context.Request.Url.AbsoluteUri));
 				}
-				else if(agent.GetSingle("com.sun.identity.agents.config.anonymous.user.enable") == "true")
+				else if(_agent.GetSingle("com.sun.identity.agents.config.anonymous.user.enable") == "true")
 				{
 					_app.Context.User = GetAnonymous();
 					Log.AuditTrace(string.Format("Anonymous access allowed to {0}", _app.Context.Request.Url.AbsoluteUri));
@@ -93,9 +120,23 @@ namespace ru.org.openam.iis7Agent
 				{
 					ResetCookie("com.sun.identity.agents.config.cookie.reset");
 
-					// todo юзер ид
-					Log.Audit(string.Format("User {0} was denied access to {1}", null, _app.Context.Request.Url.AbsoluteUri));
-					_app.Response.Redirect(GetLogoffUrl());
+					string userId = null;
+					if(user != null)
+					{
+						userId = user.Identity.Name;
+					}
+					var status = user == null ? 401 : 403;
+					Log.Audit(string.Format("User {0} was denied access to {1} ({2})", userId, _app.Context.Request.Url.AbsoluteUri, status));
+					var logoffUrl = GetLogoffUrl(user == null ? "com.sun.identity.agents.config.login.url" : "com.sun.identity.agents.config.access.denied.url");
+					if(logoffUrl != null)
+					{
+						_app.Response.Redirect(logoffUrl);
+					}
+					else
+					{
+						_app.Response.StatusCode = user == null ? 401 : 403;
+						_app.Response.End();
+					}
 				}
 			}
 			catch (Exception ex)
@@ -105,22 +146,88 @@ namespace ru.org.openam.iis7Agent
 			}
 		}
 
+		private bool IsInvalidIp()
+		{
+			if(_agent.GetSingle("com.sun.identity.agents.config.client.ip.validation.enable") != "true")
+			{
+				return false;
+			}
+
+			var session = GetUserSession();
+			var props = session.token.property;
+			if(!props.ContainsKey("Host"))
+			{
+				return false;
+			}
+			var host = props["Host"];
+			var userIp = GetUserIp();
+			if(host == userIp)
+			{
+				return false;
+			}
+									   
+			Log.AuditTrace(string.Format("User {0} ip change detected, last: {1} current: {2}", GetUserId(session), host, userIp));
+			return true;
+		}
+
+		private string GetUserIp(){
+			var headerName = _agent.GetSingle("com.sun.identity.agents.config.client.ip.header");
+			var userIp = _app.Request.UserHostAddress;
+			if(!string.IsNullOrWhiteSpace(headerName))
+			{
+				if(headerName.StartsWith("HTTP_"))
+				{
+					var c = _app.Context.Request.ServerVariables.Count;
+					userIp = _app.Context.Request.ServerVariables[headerName];
+				}
+				else
+				{
+					userIp = _app.Context.Request.Headers[headerName];
+				}
+			}
+
+			if(userIp != null && userIp.Contains(","))
+			{
+				userIp = userIp.Substring(0, userIp.IndexOf(",", StringComparison.Ordinal) + 1);
+			}
+
+			return userIp;
+		}
+
+		private ICollection<string> GetAttrsNames()
+		{
+			var attrs = _agent.GetHashSet("com.sun.identity.agents.config.profile.attribute.mapping");
+			var list = new List<string>();
+			foreach (var attr in attrs)
+			{
+				var vals = attr.Split('=');
+				if(vals.Length != 2)
+				{
+					continue;
+				}
+
+				var key = vals[0].Substring(1);
+				key = key.Substring(0, key.Length-1);
+				list.Add(key);
+			}
+
+			return list;
+		}
+
 		private void ResetCookie(string cfg)
 		{
-			var resetCookie = agent.GetHashSet(cfg);
-			foreach (var c in resetCookie)
+			var resetCookie = _agent.GetOrderedHashSet(cfg);
+			foreach (var cookie in resetCookie)
 			{
-				var cookie = c.Substring(c.IndexOf("=") + 1);
 				_app.Context.Response.AddHeader("Set-Cookie", cookie);
 			}
 		}
 
 		private bool IsLogOff()
 		{
-			var logOffUrls = agent.GetHashSet("com.sun.identity.agents.config.agent.logout.url");
-			foreach (var u in logOffUrls)
+			var logOffUrls = _agent.GetOrderedHashSet("com.sun.identity.agents.config.agent.logout.url");
+			foreach (var url in logOffUrls)
 			{
-				var url = u.Substring(u.IndexOf("=")+1);
 				if(new Uri(url).AbsoluteUri == _app.Context.Request.Url.AbsoluteUri)
 				{
 					return true;
@@ -131,12 +238,12 @@ namespace ru.org.openam.iis7Agent
 		}
 
 
-		private string GetLogoffUrl()
+		private string GetLogoffUrl(string urlProp)
 		{	 
-			var url = agent.GetFirst("com.sun.identity.agents.config.login.url");
+			var url = _agent.GetFirst(urlProp);
 			if (url != null)
 			{ 
-				var gotoName = agent.GetSingle("com.sun.identity.agents.config.redirect.param");
+				var gotoName = _agent.GetSingle("com.sun.identity.agents.config.redirect.param");
 				if(!string.IsNullOrWhiteSpace(gotoName))
 				{
 					if(url.Contains("?"))
@@ -188,10 +295,9 @@ namespace ru.org.openam.iis7Agent
 
 		private bool IsFree()
 		{
-			var freeUrls = agent.GetHashSet("com.sun.identity.agents.config.notenforced.url");
-			foreach (var u in freeUrls)
+			var freeUrls = _agent.GetOrderedHashSet("com.sun.identity.agents.config.notenforced.url");
+			foreach (var url in freeUrls)
 			{
-				var url = u.Substring(u.IndexOf("=")+1);
 				if(url.EndsWith("*") && _app.Context.Request.Url.AbsoluteUri.StartsWith(url, StringComparison.InvariantCultureIgnoreCase))
 				{
 					return true;
@@ -208,9 +314,8 @@ namespace ru.org.openam.iis7Agent
 		private void MapArrtsProps()
 		{
 			var props = GetUserSession().token.property;
-			var mapStrs = agent.GetHashSet("com.sun.identity.agents.config.session.attribute.mapping");
-			var fetchMode = agent.GetSingle("com.sun.identity.agents.config.session.attribute.fetch.mode");
-			// todo var mapStrs = agent.GetConfig()["com.sun.identity.agents.config.profile.attribute.mapping"] as HashSet<string>;
+			var mapStrs = _agent.GetHashSet("com.sun.identity.agents.config.session.attribute.mapping");
+			var fetchMode = _agent.GetSingle("com.sun.identity.agents.config.session.attribute.fetch.mode");
 			if(mapStrs == null)
 			{
 				return;
@@ -240,19 +345,56 @@ namespace ru.org.openam.iis7Agent
 				}
 			}
 
-			_app.Context.Items["am_auth_cookie"] = GetAuthCookie();
+			_app.Context.Items["am_auth_cookie"] = _agent.GetAuthCookie(_app.Context.Request);
+		}
+
+		private void MapPolicyProps(Dictionary<string, object> attributes)
+		{
+			var props = attributes;
+			var fetchMode = _agent.GetSingle("com.sun.identity.agents.config.profile.attribute.fetch.mode");
+			var mapStrs = _agent.GetConfig()["com.sun.identity.agents.config.profile.attribute.mapping"] as HashSet<string>;
+			if(mapStrs == null)
+			{
+				return;
+			}
+
+			foreach (var mapStr in mapStrs)
+			{
+				var vals = mapStr.Split('=');
+				if(vals.Length != 2)
+				{
+					continue;
+				}
+
+				var key = vals[0].Substring(1);
+				key = key.Substring(0, key.Length-1);
+				if(props.ContainsKey(key))
+				{
+					_app.Context.Items[vals[1]] = props[key];
+					if(fetchMode == "HTTP_HEADER")
+					{
+						_app.Context.Request.ServerVariables[vals[1]] = Convert.ToString(props[key]);
+					}
+					else if(fetchMode == "HTTP_COOKIE")
+					{
+						_app.Context.Request.Cookies.Set(new HttpCookie(vals[1], Convert.ToString(props[key])));
+					}
+				}
+			}
+
+			_app.Context.Items["am_auth_cookie"] = _agent.GetAuthCookie(_app.Context.Request);
 		}
 
 		private string CheckUrl()
 		{
-			var enabled = agent.GetSingle("com.sun.identity.agents.config.override.host") == "true";
-			var url = agent.GetSingle("com.sun.identity.agents.config.fqdn.default");
+			var enabled = _agent.GetSingle("com.sun.identity.agents.config.override.host") == "true";
+			var url = _agent.GetSingle("com.sun.identity.agents.config.fqdn.default");
 			if(enabled && !string.IsNullOrWhiteSpace(url) 
 				&& !_app.Context.Request.Url.Host.Equals(url, StringComparison.InvariantCultureIgnoreCase))
 			{
-				var agentUrlStr = agent.GetSingle("com.sun.identity.agents.config.agenturi.prefix"); 
-				var rewriteProtocol = agent.GetSingle("com.sun.identity.agents.config.override.protocol") == "true";
-				var rewritePort = agent.GetSingle("com.sun.identity.agents.config.override.port") == "true";
+				var agentUrlStr = _agent.GetSingle("com.sun.identity.agents.config.agenturi.prefix"); 
+				var rewriteProtocol = _agent.GetSingle("com.sun.identity.agents.config.override.protocol") == "true";
+				var rewritePort = _agent.GetSingle("com.sun.identity.agents.config.override.port") == "true";
 				var res = "";
 
 				int? port = null;
@@ -295,45 +437,13 @@ namespace ru.org.openam.iis7Agent
 				return null;
 			}
 
-			var uid = session.token.property[agent.GetSingle("com.sun.identity.agents.config.userid.param")];
+			var uid = session.token.property[_agent.GetSingle("com.sun.identity.agents.config.userid.param")];
 			return uid;
 		}
 
 		private Session GetUserSession()
 		{
-			var auth = GetAuthCookie();
-			if (auth == null)
-			{
-				return null;
-			}
-
-			var userSession = Cache.GetOrDefault
-			(
-				"am_" + auth,
-				() => Session.getSession(agent, _app.Context.Request)
-				, r =>
-				{
-					if (r != null && r.token != null)
-					{
-						return r.token.maxcaching;
-					}
-
-					return 0;
-				}
-			);
-			return userSession;
-		}
-
-
-		private string GetAuthCookie()
-		{
-			var cookie = _app.Context.Request.Cookies[agent.GetCookieName()];
-			if (cookie == null || string.IsNullOrWhiteSpace(cookie.Value))
-			{
-				return null;
-			}
-
-			return cookie.Value;
+			return Session.getSession(_agent, _app.Context.Request);
 		}
 
 		public void Dispose() { }

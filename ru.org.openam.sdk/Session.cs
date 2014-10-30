@@ -1,32 +1,55 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace ru.org.openam.sdk
 {
 	public class Session
     {
-        public String sessionId;
-        public session.Response token;
+		private readonly Agent agent;
 
-        public Session(String sessionId)
+		private static readonly Cache _cache = new Cache();
+
+		internal Cache PolicyCache {get; private set;}
+
+        public String sessionId;
+
+        public session.Response token;
+		
+        public Session(string sessionId)
         {
+			PolicyCache = new Cache();
             token = Get(new session.Request(sessionId));
             this.sessionId = sessionId;
-        }
-
-        Agent agent;
-        Session(Agent agent, System.Web.HttpRequest request)
-            : this((request.Cookies[agent.GetCookieName()] != null) ? request.Cookies[agent.GetCookieName()].Value : null)
+        }	 
+        
+        private Session(Agent agent, System.Web.HttpRequest request)
+            : this(agent.GetAuthCookie(request))
         {
             this.agent = agent;
         }
 
-        //static Dictionary<String, Session> sessions;
         public static Session getSession(Agent agent, System.Web.HttpRequest request)
         {
-            return new Session(agent,request);
+			var auth = agent.GetAuthCookie(request);
+			if (auth == null)
+			{
+				return null;
+			}
+
+			var userSession = _cache.GetOrDefault
+			(
+				"am_" + auth,
+				() => new Session(agent,request)
+				, r =>
+				{
+					if (r != null && r.token != null)
+					{
+						return r.token.maxcaching;
+					}
+
+					return 0;
+				}
+			);
+            return userSession;
         }
 
         public void Validate() 

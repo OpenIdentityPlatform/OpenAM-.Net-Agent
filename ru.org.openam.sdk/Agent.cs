@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using ru.org.openam.sdk.auth.callback;
 
 namespace ru.org.openam.sdk
@@ -396,31 +397,58 @@ namespace ru.org.openam.sdk
 		public string GetFirst(string name) 
 		{
 			if(!GetConfig().ContainsKey(name))
-				return null;
-
-			var opt = GetConfig()[name];
-			if(opt != null && opt is string)
-				return ((string)opt).Replace("[0]=", "");
-			else if(opt != null &&opt is HashSet<string>)
 			{
-				var hashSet = ((HashSet<string>)opt);
-				if(hashSet.Count > 0)
-					return hashSet.First().Replace("[0]=", "");
 				return null;
 			}
 
-			return null;
+			var hs = GetOrderedHashSet(name);
+			return hs.FirstOrDefault();	
+		}
+
+		private readonly Regex _numRegex = new Regex(@"\[(\d+)\]=", RegexOptions.Compiled);
+		public HashSet<string> GetOrderedHashSet(string name) 
+		{
+			if(!GetConfig().ContainsKey(name))
+			{
+				return new HashSet<string>();
+			}
+			var opt = GetConfig()[name];
+			if(opt is string)
+			{
+				return new HashSet<string>(new []{_numRegex.Replace((string)opt, "")});
+			}
+			else if(opt is HashSet<string>)
+			{
+				var res = (HashSet<string>)opt;
+				res = new HashSet<string>(res.OrderBy(o => {
+					var m = _numRegex.Match(o);
+					if(m.Success)
+					{
+						return int.Parse(m.Groups[1].Value);
+					}
+					return 0;
+				}).Select(o => _numRegex.Replace(o, "")));
+				return res;
+			}
+
+			return new HashSet<string>();
 		}
 
 		public HashSet<string> GetHashSet(string name) 
 		{
 			if(!GetConfig().ContainsKey(name))
+			{
 				return new HashSet<string>();
+			}
 			var opt = GetConfig()[name];
 			if(opt is string)
+			{
 				return new HashSet<string>(new []{(string)opt});
+			}
 			else if(opt is HashSet<string>)
+			{
 				return (HashSet<string>)opt;
+			}
 
 			return new HashSet<string>();
 		}
@@ -428,6 +456,17 @@ namespace ru.org.openam.sdk
 		public string GetCookieName()
 		{
 			return (string)GetConfig()["com.sun.identity.agents.config.cookie.name"];
-		}									 
+		}
+		
+		public string GetAuthCookie(System.Web.HttpRequest request)
+		{
+			var cookie = request.Cookies[GetCookieName()];
+			if (cookie == null || string.IsNullOrWhiteSpace(cookie.Value))
+			{
+				return null;
+			}
+
+			return cookie.Value;
+		}					 
 	}
 }

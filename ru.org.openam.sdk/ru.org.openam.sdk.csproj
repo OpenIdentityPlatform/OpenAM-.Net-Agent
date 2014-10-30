@@ -34,6 +34,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web" />
@@ -59,6 +60,7 @@
     <Compile Include="auth\Response.cs" />
     <Compile Include="Bootstrap.cs" />
     <Compile Include="Agent.cs" />
+    <Compile Include="Cache.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Policy.cs" />
     <Compile Include="identity\Request.cs" />
@@ -85,9 +87,6 @@
     <Compile Include="sts\fixWCF\StrippingRequestChannel.cs" />
     <Compile Include="sts\Token.cs" />
     <Compile Include="ConfigurationManager.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="lib\x86\Microsoft.IdentityModel.dll" />

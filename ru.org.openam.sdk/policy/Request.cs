@@ -38,12 +38,12 @@ namespace ru.org.openam.sdk.policy
 		Dictionary<String, ISet<String>> extra=null;
 		ICollection<String> attributes=null; 
 
-		public Request(Agent agent, Session session, Uri uri, Dictionary<String, ISet<String>> EnvParameters, ICollection<String> attributes)
+		public Request(Agent agent, Session session, string uri, Dictionary<String, ISet<String>> EnvParameters, ICollection<String> attributes)
             : this()
         {
             this.agent = agent;
             this.session = session;
-            this.resourceName = uri.ToString(); //TODO 
+            this.resourceName = uri; 
 			if (EnvParameters!=null)
 				this.extra = EnvParameters;
 			if (attributes != null)

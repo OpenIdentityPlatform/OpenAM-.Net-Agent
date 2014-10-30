@@ -12,7 +12,7 @@ namespace ru.org.openam.sdk
 	{
 		static Log()
 		{
-			var config = LogManager.Configuration == null ? new LoggingConfiguration():LogManager.Configuration;
+			var config = LogManager.Configuration ?? new LoggingConfiguration();
 
 			var fileTarget = new FileTarget();
 			var retryTargetWrapper = new RetryingTargetWrapper(fileTarget, 3, 100);
@@ -73,9 +73,9 @@ namespace ru.org.openam.sdk
 				_auditLogger = LogManager.GetLogger("PolicyAgentAudit");
 		}
 
-		private static Logger _debugLogger;
+		private static readonly Logger _debugLogger;
 
-		private static Logger _auditLogger;
+		private static readonly Logger _auditLogger;
 		
 		public static void Fatal(Exception e)
 		{
