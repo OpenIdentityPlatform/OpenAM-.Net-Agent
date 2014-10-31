@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -28,14 +28,19 @@
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Moq">
+      <HintPath>..\packages\Moq.4.2.1409.1722\lib\net40\Moq.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Iis7AgentModuleTest.cs" />
     <Compile Include="TestCase.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
@@ -46,6 +51,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ru.org.openam.iis7Agent\ru.org.openam.iis7Agent.csproj">
+      <Project>{AF367FB4-2E40-4682-8496-D0C9732BC8DF}</Project>
+      <Name>ru.org.openam.iis7Agent</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ru.org.openam.sdk\ru.org.openam.sdk.csproj">
       <Project>{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}</Project>
       <Name>ru.org.openam.sdk</Name>

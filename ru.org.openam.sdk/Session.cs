@@ -21,24 +21,23 @@ namespace ru.org.openam.sdk
             this.sessionId = sessionId;
         }	 
         
-        private Session(Agent agent, System.Web.HttpRequest request)
-            : this(agent.GetAuthCookie(request))
+        private Session(Agent agent, string authCookie)
+            : this(authCookie)
         {
             this.agent = agent;
         }
 
-        public static Session getSession(Agent agent, System.Web.HttpRequest request)
+        public static Session getSession(Agent agent, string authCookie)
         {
-			var auth = agent.GetAuthCookie(request);
-			if (auth == null)
+			if (authCookie == null)
 			{
 				return null;
 			}
 
 			var userSession = _cache.GetOrDefault
 			(
-				"am_" + auth,
-				() => new Session(agent,request)
+				"am_" + authCookie,
+				() => new Session(agent,authCookie)
 				, r =>
 				{
 					if (r != null && r.token != null)
@@ -77,7 +76,7 @@ namespace ru.org.openam.sdk
 
         public session.Response Get(session.Request request)
         {
-            pll.ResponseSet responses = RPC.GetXML(GetNaming(), new pll.RequestSet(new session.Request[] { request }));
+            pll.ResponseSet responses = RPC.GetXML(GetNaming(), new pll.RequestSet(new [] { request }));
             if (responses.Count > 0)
                 return (session.Response)responses[0];
             return new session.Response();
@@ -91,7 +90,7 @@ namespace ru.org.openam.sdk
         public String GetProperty(String key, String value)
         {
             String res = GetProperty(key);
-            return res == null ? value : res;
+            return res ?? value;
         }
         public String GetProperty(String key)
         {

@@ -37,6 +37,7 @@
     <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseHttpModule.cs" />
     <Compile Include="iis7AgentModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

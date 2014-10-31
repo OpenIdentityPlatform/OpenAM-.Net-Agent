@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Web;
 using ru.org.openam.sdk.auth.callback;
 
 namespace ru.org.openam.sdk
@@ -384,7 +385,8 @@ namespace ru.org.openam.sdk
 			return config;
 		}
 
-		public string GetSingle(string name) 
+		// виртуальный для тестов
+		public virtual string GetSingle(string name) 
 		{
 			if(!GetConfig().ContainsKey(name))
 				return null;
@@ -394,63 +396,66 @@ namespace ru.org.openam.sdk
 			return opt as string;
 		}
 
-		public string GetFirst(string name) 
+		// виртуальный для тестов
+		public virtual string GetFirst(string name) 
 		{
 			if(!GetConfig().ContainsKey(name))
 			{
 				return null;
 			}
 
-			var hs = GetOrderedHashSet(name);
+			var hs = GetOrderedArray(name);
 			return hs.FirstOrDefault();	
 		}
-
+		
 		private readonly Regex _numRegex = new Regex(@"\[(\d+)\]=", RegexOptions.Compiled);
-		public HashSet<string> GetOrderedHashSet(string name) 
+		// виртуальный для тестов
+		public virtual string[] GetOrderedArray(string name) 
 		{
 			if(!GetConfig().ContainsKey(name))
 			{
-				return new HashSet<string>();
+				return new string[0];
 			}
 			var opt = GetConfig()[name];
 			if(opt is string)
 			{
-				return new HashSet<string>(new []{_numRegex.Replace((string)opt, "")});
+				return new []{_numRegex.Replace((string)opt, "")};
 			}
 			else if(opt is HashSet<string>)
 			{
-				var res = (HashSet<string>)opt;
-				res = new HashSet<string>(res.OrderBy(o => {
+				var hs = (HashSet<string>)opt;
+				var res = hs.OrderBy(o => {
 					var m = _numRegex.Match(o);
 					if(m.Success)
 					{
 						return int.Parse(m.Groups[1].Value);
 					}
 					return 0;
-				}).Select(o => _numRegex.Replace(o, "")));
+				}).Select(o => _numRegex.Replace(o, "")).ToArray();
 				return res;
 			}
 
-			return new HashSet<string>();
+			return new string[0];
 		}
 
-		public HashSet<string> GetHashSet(string name) 
+		// виртуальный для тестов
+		public virtual string[] GetHashSet(string name) 
 		{
 			if(!GetConfig().ContainsKey(name))
 			{
-				return new HashSet<string>();
+				return new string[0];
 			}
 			var opt = GetConfig()[name];
 			if(opt is string)
 			{
-				return new HashSet<string>(new []{(string)opt});
+				return new []{(string)opt};
 			}
 			else if(opt is HashSet<string>)
 			{
-				return (HashSet<string>)opt;
+				return ((HashSet<string>)opt).ToArray();
 			}
 
-			return new HashSet<string>();
+			return new string[0];
 		}
 
 		public string GetCookieName()
@@ -458,9 +463,9 @@ namespace ru.org.openam.sdk
 			return (string)GetConfig()["com.sun.identity.agents.config.cookie.name"];
 		}
 		
-		public string GetAuthCookie(System.Web.HttpRequest request)
+		public string GetAuthCookie(HttpCookieCollection cookies)
 		{
-			var cookie = request.Cookies[GetCookieName()];
+			var cookie = cookies[GetCookieName()];
 			if (cookie == null || string.IsNullOrWhiteSpace(cookie.Value))
 			{
 				return null;
