@@ -225,7 +225,7 @@ namespace ru.org.openam.iis7Agent
 
 			if(userIp != null && userIp.Contains(","))
 			{
-				userIp = userIp.Substring(0, userIp.IndexOf(",", StringComparison.Ordinal) + 1);
+				userIp = userIp.Substring(0, userIp.IndexOf(",", StringComparison.Ordinal));
 			}
 
 			return userIp;
@@ -233,7 +233,7 @@ namespace ru.org.openam.iis7Agent
 
 		private ICollection<string> GetAttrsNames()
 		{
-			var attrs = _agent.GetHashSet("com.sun.identity.agents.config.profile.attribute.mapping");
+			var attrs = _agent.GetArray("com.sun.identity.agents.config.profile.attribute.mapping");
 			var list = new List<string>();
 			foreach (var attr in attrs)
 			{
@@ -339,7 +339,7 @@ namespace ru.org.openam.iis7Agent
 		private void MapArrtsProps(Session session, HttpContextBase context)
 		{
 			var props = session.token.property;
-			var mapStrs = _agent.GetHashSet("com.sun.identity.agents.config.session.attribute.mapping");
+			var mapStrs = _agent.GetArray("com.sun.identity.agents.config.session.attribute.mapping");
 			var fetchMode = _agent.GetSingle("com.sun.identity.agents.config.session.attribute.fetch.mode");
 			if(mapStrs == null)
 			{
@@ -377,7 +377,7 @@ namespace ru.org.openam.iis7Agent
 		{
 			var props = attributes;
 			var fetchMode = _agent.GetSingle("com.sun.identity.agents.config.profile.attribute.fetch.mode");
-			var mapStrs = _agent.GetConfig()["com.sun.identity.agents.config.profile.attribute.mapping"] as HashSet<string>;
+			var mapStrs = _agent.GetArray("com.sun.identity.agents.config.profile.attribute.mapping");
 			if(mapStrs == null)
 			{
 				return;
@@ -405,9 +405,7 @@ namespace ru.org.openam.iis7Agent
 						context.Request.Cookies.Set(new HttpCookie(vals[1], Convert.ToString(props[key])));
 					}
 				}
-			}
-
-			context.Items["am_auth_cookie"] = _agent.GetAuthCookie(context.Request.Cookies);
+			} 
 		}
 
 		private string CheckUrl(Uri url)
@@ -469,7 +467,7 @@ namespace ru.org.openam.iis7Agent
 			var userIdParam = _agent.GetSingle("com.sun.identity.agents.config.userid.param");
 			if(string.IsNullOrWhiteSpace(userIdParam))
 			{
-				throw new InvalidOperationException("com.sun.identity.agents.config.userid.param can't be empty");
+				return null;
 			}
 
 			var uid = session.token.property[userIdParam];

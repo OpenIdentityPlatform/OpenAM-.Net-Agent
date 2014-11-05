@@ -439,7 +439,7 @@ namespace ru.org.openam.sdk
 		}
 
 		// виртуальный для тестов
-		public virtual string[] GetHashSet(string name) 
+		public virtual string[] GetArray(string name) 
 		{
 			if(!GetConfig().ContainsKey(name))
 			{
