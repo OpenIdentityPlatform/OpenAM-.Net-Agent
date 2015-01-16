@@ -132,12 +132,12 @@ namespace ru.org.openam.iis7Agent
 					}
 				}
 
-				if(IsInvalidIp(session, request))
-				{
-					autorized = false;
-				}
+			    if (session != null && IsInvalidIp(session, request))
+			    {
+			        autorized = false;
+			    }
 
-				if (user != null && autorized)
+			    if (user != null && autorized)
 				{	
 					context.User = user;
 					MapArrtsProps(session, context);

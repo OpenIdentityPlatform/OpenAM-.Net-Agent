@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Security.Principal;
 using System.Web;
 using Moq;
@@ -72,28 +74,28 @@ namespace ru.org.openam.sdk.nunit
         [Description("Редиректим, если урлы не совпадают без переопределения протокола и порта")]
         public void OnAuthentication_CheckUrlTest()
         {
-            CheckUrlTest(DefaultUrl + "path/?id=1", "http://redirect.url:80/path/?id=1", "true", "redirect.url", "", "false", "false");
+            CheckUrlTest(DefaultUrl + "path/?id=1", "http://redirect.url:80/path/?id=1", "true", "redirect.url", null, "false", "false");
         }
 
         [Test]
         [Description("Редиректим, если урлы не совпадают без переопределения протокола и порта")]
         public void OnAuthentication_CheckUrlWithRewriteProtocolTrueTest()
         {
-            CheckUrlTest(DefaultUrl + "path/?id=1", "http://redirect.url:80/path/?id=1", "true", "redirect.url", "", "true", "false");
+            CheckUrlTest(DefaultUrl + "path/?id=1", "http://redirect.url:80/path/?id=1", "true", "redirect.url", null, "true", "false");
         }
 
         [Test]
         [Description("Редиректим, если урлы не совпадают без переопределения протокола и порта")]
         public void OnAuthentication_CheckUrlWithRewritePortTrueTest()
         {
-            CheckUrlTest(DefaultUrl + "path/?id=1", "http://redirect.url:80/path/?id=1", "true", "redirect.url", "", "false", "true");
+            CheckUrlTest(DefaultUrl + "path/?id=1", "http://redirect.url:80/path/?id=1", "true", "redirect.url", null, "false", "true");
         }
 
         [Test]
         [Description("Редиректим, если урлы не совпадают без переопределения протокола и порта")]
         public void OnAuthentication_CheckUrlWithRewriteProtocolTrueAndRewritePortTrueTest()
         {
-            CheckUrlTest(DefaultUrl + "path/?id=1", "http://redirect.url:80/path/?id=1", "true", "redirect.url", "", "true", "true");
+            CheckUrlTest(DefaultUrl + "path/?id=1", "http://redirect.url:80/path/?id=1", "true", "redirect.url", null, "true", "true");
         }
 
         [Test]
@@ -130,7 +132,7 @@ namespace ru.org.openam.sdk.nunit
         {
             const string logoutRedirectUrl = "redirect.url";
 
-            SetupAgent("false", "", logoutUrls: new[] { TestUrl, DefaultUrl }, resetCookies: new[] { "cookie1", "cookie2" }, logoutRedirectUrl: logoutRedirectUrl);
+            SetupAgent("false", null, logoutUrls: new[] { TestUrl, DefaultUrl }, logoutResetCookies: new[] { "cookie1", "cookie2" }, logoutRedirectUrl: logoutRedirectUrl);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
             _response.Setup(x => x.AddHeader("Set-Cookie", "cookie1"));
             _response.Setup(x => x.AddHeader("Set-Cookie", "cookie2"));
@@ -138,8 +140,8 @@ namespace ru.org.openam.sdk.nunit
 
             _module.OnAuthentication(_context.Object);
 
+            VerifyAgent("false", null, logoutUrls: new[] { TestUrl, DefaultUrl }, logoutResetCookies: new[] { "cookie1", "cookie2" }, logoutRedirectUrl: logoutRedirectUrl);
             _request.Verify(x => x.Url, Times.Exactly(2));
-            VerifyAgentConfig(logout: true);
             _response.Verify(x => x.AddHeader("Set-Cookie", "cookie1"), Times.Once());
             _response.Verify(x => x.AddHeader("Set-Cookie", "cookie2"), Times.Once());
             _response.Verify(x => x.Redirect(logoutRedirectUrl), Times.Once());
@@ -151,14 +153,14 @@ namespace ru.org.openam.sdk.nunit
         {
             const string loginUrl = "login.url";
 
-            SetupAgent("false", "", logoutUrls: new[] { TestUrl, DefaultUrl }, resetCookies: new string[0], logoutRedirectUrl: null, loginUrl: loginUrl);
+            SetupAgent("false", null, logoutUrls: new[] { TestUrl, DefaultUrl }, logoutResetCookies: new string[0], logoutRedirectUrl: null, loginUrl: loginUrl);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
             _response.Setup(x => x.Redirect(loginUrl));
 
             _module.OnAuthentication(_context.Object);
 
+            VerifyAgent("false", null, logoutUrls: new[] { TestUrl, DefaultUrl }, logoutResetCookies: new string[0], logoutRedirectUrl: null, loginUrl: loginUrl);
             _request.Verify(x => x.Url, Times.Exactly(2));
-            VerifyAgentConfig(logout: true);
             _response.Verify(x => x.Redirect(loginUrl), Times.Once());
         }
 
@@ -167,7 +169,7 @@ namespace ru.org.openam.sdk.nunit
         [Description("Бросаем InvalidOperationException, если не определены com.sun.identity.agents.config.logout.redirect.url и com.sun.identity.agents.config.login.url")]
         public void OnAuthentication_IsLogoffWithoutLogoutRedirectUrlAndLoginUrlTest()
         {
-            SetupAgent("false", "", logoutUrls: new[] { TestUrl, DefaultUrl }, resetCookies: new string[0], logoutRedirectUrl: null, loginUrl: null);
+            SetupAgent("false", null, logoutUrls: new[] { TestUrl, DefaultUrl }, logoutResetCookies: new string[0], logoutRedirectUrl: null, loginUrl: null);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
 
             _module.OnAuthentication(_context.Object);
@@ -177,17 +179,16 @@ namespace ru.org.openam.sdk.nunit
         [Description("Пользователь зашел по нетребующему авторизации урлу без AuthCookie")]
         public void OnAuthentication_IsFreeUrlWithoutAuthCookieTest()
         {
-            var cookies = new HttpCookieCollection();
-
-            SetupAgent("false", "", logoutUrls: new string[0], notEnforcedUrls: new[] { TestUrl, DefaultUrl + "*" }, notEnforcedEnabled: "true");
+            SetupAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new[] { TestUrl, DefaultUrl + "*" }, enableNotEnforced: "true");
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
-            _request.Setup(x => x.Cookies).Returns(cookies);
+            _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection());
             _context.SetupSet(x => x.User = null);
 
             _module.OnAuthentication(_context.Object);
 
+            VerifyAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new[] { TestUrl, DefaultUrl + "*" }, enableNotEnforced: "true");
             _request.Verify(x => x.Url, Times.Exactly(3));
-            VerifyAgentConfig(freeUrl: true);
+            _request.Verify(x => x.Cookies, Times.Once());
             _context.VerifySet(x => x.User = null, Times.Once());
         }
 
@@ -195,17 +196,16 @@ namespace ru.org.openam.sdk.nunit
         [Description("Пользователь зашел по нетребующему авторизации урлу c AuthCookie")]
         public void OnAuthentication_IsFreeUrlWithAuthCookieTest()
         {
-            var cookies = new HttpCookieCollection { new HttpCookie("svbid", GetAuthCookie()) };
-
-            SetupAgent("false", "", logoutUrls: new string[0], notEnforcedUrls: new[] { TestUrl, DefaultUrl }, notEnforcedEnabled: "true");
+            SetupAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new[] { TestUrl, DefaultUrl }, enableNotEnforced: "true", userIdParamName: "UserId");
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
-            _request.Setup(x => x.Cookies).Returns(cookies);
+            _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection { new HttpCookie("svbid", GetAuthCookie()) });
             _context.SetupSet(x => x.User = It.IsAny<GenericPrincipal>());
 
             _module.OnAuthentication(_context.Object);
 
+            VerifyAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new[] { TestUrl, DefaultUrl }, enableNotEnforced: "true");
             _request.Verify(x => x.Url, Times.Exactly(3));
-            VerifyAgentConfig(freeUrl: true);
+            _request.Verify(x => x.Cookies, Times.Once());
             _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "11111111111" && u.Identity.IsAuthenticated), Times.Once());
         }
 
@@ -213,18 +213,150 @@ namespace ru.org.openam.sdk.nunit
         [Description("Пользователь зашел по нетребующему авторизации урлу и com.sun.identity.agents.config.notenforced.url.attributes.enable выключена")]
         public void OnAuthentication_IsFreeUrlAndAnonymousTest()
         {
-            var cookies = new HttpCookieCollection { new HttpCookie("svbid", GetAuthCookie()) };
-
-            SetupAgent("false", "", logoutUrls: new string[0], notEnforcedUrls: new[] { TestUrl, DefaultUrl }, notEnforcedEnabled: "false");
+            SetupAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new[] { TestUrl, DefaultUrl }, enableNotEnforced: "false");
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
-            _request.Setup(x => x.Cookies).Returns(cookies);
             _context.SetupSet(x => x.User = It.IsAny<GenericPrincipal>());
 
             _module.OnAuthentication(_context.Object);
 
+            VerifyAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new[] { TestUrl, DefaultUrl }, enableNotEnforced: "false");
             _request.Verify(x => x.Url, Times.Exactly(3));
-            VerifyAgentConfig(freeUrl: true);
             _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "" && !u.Identity.IsAuthenticated), Times.Once());
+        }
+
+        [Test]
+        [Description("Попытка авторизации пользователя без куки при включенной анонимной аутенфикации")]
+        public void OnAuthentication_WithoutCookieAndWithAnonymousEnabledTest()
+        {
+            SetupAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], enableAnonymous: "true");
+            _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
+            _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection());
+            _context.SetupSet(x => x.User = It.IsAny<GenericPrincipal>());
+
+            _module.OnAuthentication(_context.Object);
+
+            VerifyAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], enableAnonymous: "true");
+            _request.Verify(x => x.Url, Times.Exactly(3));
+            _request.Verify(x => x.Cookies, Times.Once());
+            _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "" && !u.Identity.IsAuthenticated), Times.Once());
+        }
+
+        [Test]
+        [Description(@"Попытка авторизации пользователя без куки при выключенной анонимной аутенфикации 
+                        c com.sun.identity.agents.config.login.url и com.sun.identity.agents.config.redirect.param")]
+        public void OnAuthentication_WithoutCookieAndWithAnonymousDisabledAndLoginUrlAndRedirectParamTest()
+        {
+            const string loginUrl = "login.url";
+            const string redirectParam = "redirect.param";
+
+            SetupAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], enableAnonymous: "false", resetCookies: new[] { "cookie2", "cookie1" },
+                loginUrl: loginUrl, redirectParam: redirectParam);
+            _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
+            _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection());
+            _response.Setup(x => x.AddHeader("Set-Cookie", "cookie1"));
+            _response.Setup(x => x.AddHeader("Set-Cookie", "cookie2"));
+            _response.Setup(x => x.Redirect(loginUrl + "?" + redirectParam + "=" + DefaultUrl));
+
+            _module.OnAuthentication(_context.Object);
+
+            VerifyAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], enableAnonymous: "false", resetCookies: new[] { "cookie2", "cookie1" },
+                loginUrl: loginUrl, redirectParam: redirectParam);
+            _request.Verify(x => x.Url, Times.Exactly(3));
+            _request.Verify(x => x.Cookies, Times.Once());
+            _response.Verify(x => x.AddHeader("Set-Cookie", "cookie1"), Times.Once());
+            _response.Verify(x => x.AddHeader("Set-Cookie", "cookie2"), Times.Once());
+            _response.Verify(x => x.Redirect(loginUrl + "?" + redirectParam + "=" + DefaultUrl), Times.Once());
+        }
+
+        [Test]
+        [Description(@"Попытка авторизации пользователя без куки при выключенной анонимной аутенфикации 
+                        c com.sun.identity.agents.config.login.url и без com.sun.identity.agents.config.redirect.param")]
+        public void OnAuthentication_WithoutCookieAndWithAnonymousDisabledAndLoginUrlAndWithoutRedirectParamTest()
+        {
+            const string loginUrl = "login.url";
+
+            SetupAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], enableAnonymous: "false", resetCookies: new string[0], loginUrl: loginUrl,
+                redirectParam: null);
+            _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
+            _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection());
+            _response.Setup(x => x.Redirect(loginUrl));
+
+            _module.OnAuthentication(_context.Object);
+
+            VerifyAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], enableAnonymous: "false", resetCookies: new string[0], loginUrl: loginUrl,
+                redirectParam: null);
+            _request.Verify(x => x.Url, Times.Exactly(3));
+            _request.Verify(x => x.Cookies, Times.Once());
+            _response.Verify(x => x.Redirect(loginUrl));
+        }
+
+        [Test]
+        [Description(@"Попытка авторизации пользователя без куки при выключенной анонимной аутенфикации без com.sun.identity.agents.config.login.url")]
+        public void OnAuthentication_WithoutCookieAndWithAnonymousDisabledAndWithoutLoginUrlTest()
+        {
+            SetupAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], enableAnonymous: "false", resetCookies: new string[0], loginUrl: null);
+            _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
+            _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection());
+            _response.SetupSet(x => x.StatusCode = 401);
+            _response.Setup(x => x.End());
+
+            _module.OnAuthentication(_context.Object);
+
+            VerifyAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], enableAnonymous: "false", resetCookies: new string[0], loginUrl: null);
+            _request.Verify(x => x.Url, Times.Exactly(3));
+            _request.Verify(x => x.Cookies, Times.Once());
+            _response.VerifySet(x => x.StatusCode = 401, Times.Once());
+            _response.Verify(x => x.End(), Times.Once());
+        }
+
+        [Test]
+        [Description(@"Попытка авторизации пользователя c кукой без com.sun.identity.agents.config.userid.param")]
+        public void OnAuthentication_WithCookieAndUserIdParamTest()
+        {
+            SetupAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], userIdParamName: null, enableAnonymous: "true", enableIpValidation: "false");
+            _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
+            _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection { new HttpCookie("svbid", GetAuthCookie()) });
+            _context.SetupSet(x => x.User = It.IsAny<GenericPrincipal>());
+
+            _module.OnAuthentication(_context.Object);
+
+            VerifyAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], userIdParamName: null, enableAnonymous: "true", enableIpValidation: "false");
+            _request.Verify(x => x.Url, Times.Exactly(3));
+            _request.Verify(x => x.Cookies, Times.Once()); 
+            _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "" && !u.Identity.IsAuthenticated), Times.Once());
+        }
+
+        [Test]
+        [Description(@"Попытка авторизации пользователя c кукой, SSO only, без валидации IP и заполнением HTTP_HEADER'")]
+        public void OnAuthentication_WithCookieAndSsoOnlyTest()
+        {
+            var items = new Dictionary<string, object>();
+            var serverVariables = new NameValueCollection();
+            var authCookie = GetAuthCookie();
+
+            SetupAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], userIdParamName: "UserId", ssoOnly: "true", enableIpValidation: "false",
+                mappingProps: new[] { "[MaxIdleTime]=profile-maxidletime", "[ignoreOTP]=profile-ignore-otp", "test" }, fetchMode: "HTTP_HEADER");
+            _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
+            _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection { new HttpCookie("svbid", authCookie) });
+            _request.Setup(x => x.ServerVariables).Returns(serverVariables);
+            _context.Setup(x => x.Items).Returns(items);
+            _context.SetupSet(x => x.User = It.IsAny<GenericPrincipal>());
+
+            _module.OnAuthentication(_context.Object);
+            Assert.AreEqual(3, items.Count);
+            Assert.AreEqual(2, serverVariables.Count);
+            Assert.AreEqual(authCookie, items["am_auth_cookie"]);
+            Assert.IsNotNull(items["profile-maxidletime"]);
+            Assert.IsNotNull(serverVariables["profile-maxidletime"]);
+            Assert.IsNotNull(items["profile-ignore-otp"]);
+            Assert.IsNotNull(serverVariables["profile-ignore-otp"]);
+
+            VerifyAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], userIdParamName: "UserId", ssoOnly: "true", enableIpValidation: "false");
+            _request.Verify(x => x.Url, Times.Exactly(4));
+            _request.Verify(x => x.Cookies, Times.Exactly(2));
+            _request.Verify(x => x.ServerVariables, Times.Exactly(2));
+            _context.Verify(x => x.Items, Times.Exactly(3));
+            _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "11111111111" && u.Identity.IsAuthenticated), Times.Once());
         }
 
         private void CheckUrlTest(
@@ -242,12 +374,10 @@ namespace ru.org.openam.sdk.nunit
 
             _module.OnAuthentication(_context.Object);
 
+            VerifyAgent(enableRedirect, redirectHost, redirectPrefix, overrideProtocol, overridePort);
             _request.Verify(x => x.Url, Times.Exactly(2));
-            VerifyAgentConfig(true);
             _response.Verify(x => x.Redirect(redirectUrl), Times.Once());
         }
-
-        
 
         private void SetupAgent(
             string enableRedirect = DefaultStringValue,
@@ -256,11 +386,19 @@ namespace ru.org.openam.sdk.nunit
             string overrideProtocol = DefaultStringValue,
             string overridePort = DefaultStringValue,
             string[] logoutUrls = null,
-            string[] resetCookies = null,
+            string[] logoutResetCookies = null,
             string logoutRedirectUrl = DefaultStringValue,
             string loginUrl = DefaultStringValue,
             string[] notEnforcedUrls = null,
-            string notEnforcedEnabled = DefaultStringValue)
+            string enableNotEnforced = DefaultStringValue,
+            string userIdParamName = DefaultStringValue,
+            string enableAnonymous = DefaultStringValue,
+            string[] resetCookies = null,
+            string redirectParam = DefaultStringValue,
+            string enableIpValidation = DefaultStringValue,
+            string ssoOnly = DefaultStringValue,
+            string[] mappingProps = null,
+            string fetchMode = DefaultStringValue)
         {
             if (enableRedirect != DefaultStringValue)
             {
@@ -292,9 +430,9 @@ namespace ru.org.openam.sdk.nunit
                 _agent.Setup(x => x.GetOrderedArray("com.sun.identity.agents.config.agent.logout.url")).Returns(logoutUrls);
             }
 
-            if (resetCookies != null)
+            if (logoutResetCookies != null)
             {
-                _agent.Setup(x => x.GetOrderedArray("com.sun.identity.agents.config.logout.cookie.reset")).Returns(resetCookies);
+                _agent.Setup(x => x.GetOrderedArray("com.sun.identity.agents.config.logout.cookie.reset")).Returns(logoutResetCookies);
             }
 
             if (logoutRedirectUrl != DefaultStringValue)
@@ -312,40 +450,168 @@ namespace ru.org.openam.sdk.nunit
                 _agent.Setup(x => x.GetOrderedArray("com.sun.identity.agents.config.notenforced.url")).Returns(notEnforcedUrls);
             }
 
-            if (notEnforcedEnabled != DefaultStringValue)
+            if (enableNotEnforced != DefaultStringValue)
             {
-                _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.notenforced.url.attributes.enable")).Returns(notEnforcedEnabled);
+                _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.notenforced.url.attributes.enable")).Returns(enableNotEnforced);
+            }
+
+            if (userIdParamName != DefaultStringValue)
+            {
+                _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.userid.param")).Returns(userIdParamName);
+            }
+
+            if (enableAnonymous != DefaultStringValue)
+            {
+                _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.anonymous.user.enable")).Returns(enableAnonymous);
+            }
+
+            if (resetCookies != null)
+            {
+                _agent.Setup(x => x.GetOrderedArray("com.sun.identity.agents.config.cookie.reset")).Returns(resetCookies);
+            }
+
+            if (redirectParam != DefaultStringValue)
+            {
+                _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.redirect.param")).Returns(redirectParam);
+            }
+
+            if (enableIpValidation != DefaultStringValue)
+            {
+                _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.client.ip.validation.enable")).Returns(enableIpValidation);
+            }
+
+            if (ssoOnly != DefaultStringValue)
+            {
+                _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.sso.only")).Returns(ssoOnly);
+            }
+
+            if (mappingProps != null)
+            {
+                _agent.Setup(x => x.GetArray("com.sun.identity.agents.config.session.attribute.mapping")).Returns(mappingProps);
+            }
+
+            if (fetchMode != DefaultStringValue)
+            {
+                _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.session.attribute.fetch.mode")).Returns(fetchMode);
             }
 
             _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.auth.connection.timeout")).Returns("1");
-            _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.userid.param")).Returns("UserId");
         }
 
-        private void VerifyAgentConfig(bool redirect = false, bool logout = false, bool freeUrl = false, bool anonymous = false)
+        private void VerifyAgent(
+            string enableRedirect = DefaultStringValue,
+            string redirectHost = DefaultStringValue,
+            string redirectPrefix = DefaultStringValue,
+            string overrideProtocol = DefaultStringValue,
+            string overridePort = DefaultStringValue,
+            string[] logoutUrls = null,
+            string[] logoutResetCookies = null,
+            string logoutRedirectUrl = DefaultStringValue,
+            string loginUrl = DefaultStringValue,
+            string[] notEnforcedUrls = null,
+            string enableNotEnforced = DefaultStringValue,
+            string userIdParamName = DefaultStringValue,
+            string enableAnonymous = DefaultStringValue,
+            string[] resetCookies = null,
+            string redirectParam = DefaultStringValue,
+            string enableIpValidation = DefaultStringValue,
+            string ssoOnly = DefaultStringValue,
+            string[] mappingProps = null,
+            string fetchMode = DefaultStringValue)
         {
-            _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.override.host"), Times.Once());
-            _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.fqdn.default"), Times.Once());
+            if (enableRedirect != DefaultStringValue)
+            {
+                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.override.host"), Times.Once());
+            }
 
-            if (redirect)
+            if (redirectHost != DefaultStringValue)
+            {
+                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.fqdn.default"), Times.Once());
+            }
+
+            if (redirectPrefix != DefaultStringValue)
             {
                 _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.agenturi.prefix"), Times.Once());
-                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.override.protocol"), Times.Once());
-                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.override.port"), Times.Once());
-                return;
             }
 
-            _agent.Verify(x => x.GetOrderedArray("com.sun.identity.agents.config.agent.logout.url"), Times.Once());
-            if (logout)
+            if (overrideProtocol != DefaultStringValue)
+            {
+                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.override.protocol"), Times.Once());
+            }
+
+            if (overridePort != DefaultStringValue)
+            {
+                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.override.port"), Times.Once());
+            }
+
+            if (logoutUrls != null)
+            {
+                _agent.Verify(x => x.GetOrderedArray("com.sun.identity.agents.config.agent.logout.url"), Times.Once());
+            }
+
+            if (logoutResetCookies != null)
             {
                 _agent.Verify(x => x.GetOrderedArray("com.sun.identity.agents.config.logout.cookie.reset"), Times.Once());
-                _agent.Verify(x => x.GetFirst("com.sun.identity.agents.config.logout.redirect.url"), Times.Once());
-                return;
             }
 
-            _agent.Verify(x => x.GetOrderedArray("com.sun.identity.agents.config.notenforced.url"), Times.Once());
-            if (freeUrl)
+            if (logoutRedirectUrl != DefaultStringValue)
+            {
+                _agent.Verify(x => x.GetFirst("com.sun.identity.agents.config.logout.redirect.url"), Times.Once());
+            }
+
+            if (loginUrl != DefaultStringValue)
+            {
+                _agent.Verify(x => x.GetFirst("com.sun.identity.agents.config.login.url"), Times.Once());
+            }
+
+            if (notEnforcedUrls != null)
+            {
+                _agent.Verify(x => x.GetOrderedArray("com.sun.identity.agents.config.notenforced.url"), Times.Once());
+            }
+
+            if (enableNotEnforced != DefaultStringValue)
             {
                 _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.notenforced.url.attributes.enable"), Times.Once());
+            }
+
+            if (userIdParamName != DefaultStringValue)
+            {
+                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.userid.param"), Times.Once());
+            }
+
+            if (enableAnonymous != DefaultStringValue)
+            {
+                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.anonymous.user.enable"), Times.Once());
+            }
+
+            if (resetCookies != null)
+            {
+                _agent.Verify(x => x.GetOrderedArray("com.sun.identity.agents.config.cookie.reset"), Times.Once());
+            }
+
+            if (redirectParam != DefaultStringValue)
+            {
+                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.redirect.param"), Times.Once());
+            }
+
+            if (enableIpValidation != DefaultStringValue)
+            {
+                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.client.ip.validation.enable"), Times.Once());
+            }
+
+            if (ssoOnly != DefaultStringValue)
+            {
+                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.sso.only"), Times.Once());
+            }
+
+            if (mappingProps != null)
+            {
+                _agent.Verify(x => x.GetArray("com.sun.identity.agents.config.session.attribute.mapping"), Times.Once());
+            }
+
+            if (fetchMode != DefaultStringValue)
+            {
+                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.session.attribute.fetch.mode"), Times.Once());
             }
         }
 
