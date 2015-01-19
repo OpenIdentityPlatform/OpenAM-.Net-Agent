@@ -14,7 +14,7 @@ namespace ru.org.openam.sdk.nunit
     [TestFixture]
     public class Iis7AgentModuleTests
     {
-        private const string DefaultStringValue = "~DefaultStringValue~";
+        private const string RapidsoftUrl = "http://localhost.rapidsoft.ru:80";
         private const string DefaultUrl = "http://example.com/";
         private const string TestUrl = "http://test.com/";
         private Mock<Agent> _agent;
@@ -130,38 +130,53 @@ namespace ru.org.openam.sdk.nunit
         [Description("Логаутим пользователя по com.sun.identity.agents.config.logout.redirect.url, если урл совпадает с одним из com.sun.identity.agents.config.agent.logout.url")]
         public void OnAuthentication_IsLogoffTest()
         {
-            const string logoutRedirectUrl = "redirect.url";
-
-            SetupAgent("false", null, logoutUrls: new[] { TestUrl, DefaultUrl }, logoutResetCookies: new[] { "cookie1", "cookie2" }, logoutRedirectUrl: logoutRedirectUrl);
+            var settings = new Dictionary<string, object>
+            {
+                { "com.sun.identity.agents.config.override.host", "false" },
+                { "com.sun.identity.agents.config.fqdn.default", null },
+                { "com.sun.identity.agents.config.agent.logout.url", new[] { TestUrl, DefaultUrl } },
+                { "com.sun.identity.agents.config.logout.cookie.reset", new[] { "cookie1", "cookie2" } },
+                { "com.sun.identity.agents.config.logout.redirect.url", "redirect.url" }
+            };
+            
+            SetupAgent(settings);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
             _response.Setup(x => x.AddHeader("Set-Cookie", "cookie1"));
             _response.Setup(x => x.AddHeader("Set-Cookie", "cookie2"));
-            _response.Setup(x => x.Redirect(logoutRedirectUrl));
+            _response.Setup(x => x.Redirect((string)settings["com.sun.identity.agents.config.logout.redirect.url"]));
 
             _module.OnAuthentication(_context.Object);
 
-            VerifyAgent("false", null, logoutUrls: new[] { TestUrl, DefaultUrl }, logoutResetCookies: new[] { "cookie1", "cookie2" }, logoutRedirectUrl: logoutRedirectUrl);
+            VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(2));
             _response.Verify(x => x.AddHeader("Set-Cookie", "cookie1"), Times.Once());
             _response.Verify(x => x.AddHeader("Set-Cookie", "cookie2"), Times.Once());
-            _response.Verify(x => x.Redirect(logoutRedirectUrl), Times.Once());
+            _response.Verify(x => x.Redirect((string)settings["com.sun.identity.agents.config.logout.redirect.url"]), Times.Once());
         }
 
         [Test]
         [Description("Логаутим пользователя по com.sun.identity.agents.config.login.url, если урл совпадает с одним из com.sun.identity.agents.config.agent.logout.url")]
         public void OnAuthentication_IsLogoffWithoutLogoutRedirectUrlTest()
         {
-            const string loginUrl = "login.url";
+            var settings = new Dictionary<string, object>
+            {
+                { "com.sun.identity.agents.config.override.host", "false" },
+                { "com.sun.identity.agents.config.fqdn.default", null },
+                { "com.sun.identity.agents.config.agent.logout.url", new[] { TestUrl, DefaultUrl } },
+                { "com.sun.identity.agents.config.logout.cookie.reset", new string[0] },
+                { "com.sun.identity.agents.config.logout.redirect.url", null },
+                { "com.sun.identity.agents.config.login.url", "login.url" }
+            };
 
-            SetupAgent("false", null, logoutUrls: new[] { TestUrl, DefaultUrl }, logoutResetCookies: new string[0], logoutRedirectUrl: null, loginUrl: loginUrl);
+            SetupAgent(settings);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
-            _response.Setup(x => x.Redirect(loginUrl));
+            _response.Setup(x => x.Redirect((string)settings["com.sun.identity.agents.config.login.url"]));
 
             _module.OnAuthentication(_context.Object);
 
-            VerifyAgent("false", null, logoutUrls: new[] { TestUrl, DefaultUrl }, logoutResetCookies: new string[0], logoutRedirectUrl: null, loginUrl: loginUrl);
+            VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(2));
-            _response.Verify(x => x.Redirect(loginUrl), Times.Once());
+            _response.Verify(x => x.Redirect((string)settings["com.sun.identity.agents.config.login.url"]), Times.Once());
         }
 
         [Test]
@@ -169,7 +184,17 @@ namespace ru.org.openam.sdk.nunit
         [Description("Бросаем InvalidOperationException, если не определены com.sun.identity.agents.config.logout.redirect.url и com.sun.identity.agents.config.login.url")]
         public void OnAuthentication_IsLogoffWithoutLogoutRedirectUrlAndLoginUrlTest()
         {
-            SetupAgent("false", null, logoutUrls: new[] { TestUrl, DefaultUrl }, logoutResetCookies: new string[0], logoutRedirectUrl: null, loginUrl: null);
+            var settings = new Dictionary<string, object>
+            {
+                { "com.sun.identity.agents.config.override.host", "false" },
+                { "com.sun.identity.agents.config.fqdn.default", null },
+                { "com.sun.identity.agents.config.agent.logout.url", new[] { TestUrl, DefaultUrl } },
+                { "com.sun.identity.agents.config.logout.cookie.reset", new string[0] },
+                { "com.sun.identity.agents.config.logout.redirect.url", null },
+                { "com.sun.identity.agents.config.login.url", null }
+            };
+
+            SetupAgent(settings);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
 
             _module.OnAuthentication(_context.Object);
@@ -179,14 +204,23 @@ namespace ru.org.openam.sdk.nunit
         [Description("Пользователь зашел по нетребующему авторизации урлу без AuthCookie")]
         public void OnAuthentication_IsFreeUrlWithoutAuthCookieTest()
         {
-            SetupAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new[] { TestUrl, DefaultUrl + "*" }, enableNotEnforced: "true");
+            var settings = new Dictionary<string, object>
+            {
+                { "com.sun.identity.agents.config.override.host", "false" },
+                { "com.sun.identity.agents.config.fqdn.default", null },
+                { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
+                { "com.sun.identity.agents.config.notenforced.url", new[] { TestUrl, DefaultUrl + "*" } },
+                { "com.sun.identity.agents.config.notenforced.url.attributes.enable", "true" }
+            };
+
+            SetupAgent(settings); 
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
             _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection());
             _context.SetupSet(x => x.User = null);
 
             _module.OnAuthentication(_context.Object);
 
-            VerifyAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new[] { TestUrl, DefaultUrl + "*" }, enableNotEnforced: "true");
+            VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(3));
             _request.Verify(x => x.Cookies, Times.Once());
             _context.VerifySet(x => x.User = null, Times.Once());
@@ -196,14 +230,25 @@ namespace ru.org.openam.sdk.nunit
         [Description("Пользователь зашел по нетребующему авторизации урлу c AuthCookie")]
         public void OnAuthentication_IsFreeUrlWithAuthCookieTest()
         {
-            SetupAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new[] { TestUrl, DefaultUrl }, enableNotEnforced: "true", userIdParamName: "UserId");
+            var settings = new Dictionary<string, object>
+            {
+                { "com.sun.identity.agents.config.auth.connection.timeout", "1" },
+                { "com.sun.identity.agents.config.override.host", "false" },
+                { "com.sun.identity.agents.config.fqdn.default", null },
+                { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
+                { "com.sun.identity.agents.config.notenforced.url", new[] { TestUrl, DefaultUrl } },
+                { "com.sun.identity.agents.config.notenforced.url.attributes.enable", "true" },
+                { "com.sun.identity.agents.config.userid.param", "UserId" }
+            };
+
+            SetupAgent(settings); 
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
             _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection { new HttpCookie("svbid", GetAuthCookie()) });
             _context.SetupSet(x => x.User = It.IsAny<GenericPrincipal>());
 
             _module.OnAuthentication(_context.Object);
 
-            VerifyAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new[] { TestUrl, DefaultUrl }, enableNotEnforced: "true");
+            VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(3));
             _request.Verify(x => x.Cookies, Times.Once());
             _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "11111111111" && u.Identity.IsAuthenticated), Times.Once());
@@ -213,13 +258,22 @@ namespace ru.org.openam.sdk.nunit
         [Description("Пользователь зашел по нетребующему авторизации урлу и com.sun.identity.agents.config.notenforced.url.attributes.enable выключена")]
         public void OnAuthentication_IsFreeUrlAndAnonymousTest()
         {
-            SetupAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new[] { TestUrl, DefaultUrl }, enableNotEnforced: "false");
+            var settings = new Dictionary<string, object>
+            {
+                { "com.sun.identity.agents.config.override.host", "false" },
+                { "com.sun.identity.agents.config.fqdn.default", null },
+                { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
+                { "com.sun.identity.agents.config.notenforced.url", new[] { TestUrl, DefaultUrl } },
+                { "com.sun.identity.agents.config.notenforced.url.attributes.enable", "false" }
+            }; 
+            
+            SetupAgent(settings);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
             _context.SetupSet(x => x.User = It.IsAny<GenericPrincipal>());
 
             _module.OnAuthentication(_context.Object);
 
-            VerifyAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new[] { TestUrl, DefaultUrl }, enableNotEnforced: "false");
+            VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(3));
             _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "" && !u.Identity.IsAuthenticated), Times.Once());
         }
@@ -228,14 +282,23 @@ namespace ru.org.openam.sdk.nunit
         [Description("Попытка авторизации пользователя без куки при включенной анонимной аутенфикации")]
         public void OnAuthentication_WithoutCookieAndWithAnonymousEnabledTest()
         {
-            SetupAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], enableAnonymous: "true");
+            var settings = new Dictionary<string, object>
+            {
+                { "com.sun.identity.agents.config.override.host", "false" },
+                { "com.sun.identity.agents.config.fqdn.default", null },
+                { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
+                { "com.sun.identity.agents.config.notenforced.url", new string[0] },
+                { "com.sun.identity.agents.config.anonymous.user.enable", "true" }
+            };
+
+            SetupAgent(settings);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
             _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection());
             _context.SetupSet(x => x.User = It.IsAny<GenericPrincipal>());
 
             _module.OnAuthentication(_context.Object);
 
-            VerifyAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], enableAnonymous: "true");
+            VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(3));
             _request.Verify(x => x.Cookies, Times.Once());
             _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "" && !u.Identity.IsAuthenticated), Times.Once());
@@ -246,26 +309,35 @@ namespace ru.org.openam.sdk.nunit
                         c com.sun.identity.agents.config.login.url и com.sun.identity.agents.config.redirect.param")]
         public void OnAuthentication_WithoutCookieAndWithAnonymousDisabledAndLoginUrlAndRedirectParamTest()
         {
-            const string loginUrl = "login.url";
-            const string redirectParam = "redirect.param";
-
-            SetupAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], enableAnonymous: "false", resetCookies: new[] { "cookie2", "cookie1" },
-                loginUrl: loginUrl, redirectParam: redirectParam);
+            var settings = new Dictionary<string, object>
+            {
+                { "com.sun.identity.agents.config.override.host", "false" },
+                { "com.sun.identity.agents.config.fqdn.default", null },
+                { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
+                { "com.sun.identity.agents.config.notenforced.url", new string[0] },
+                { "com.sun.identity.agents.config.anonymous.user.enable", "false" },
+                { "com.sun.identity.agents.config.cookie.reset", new[] { "cookie2", "cookie1" } },
+                { "com.sun.identity.agents.config.login.url", "login.url" },
+                { "com.sun.identity.agents.config.redirect.param", "redirect.param" }
+            };
+            var redirectUrl = string.Format(
+                "{0}?{1}={2}", settings["com.sun.identity.agents.config.login.url"], settings["com.sun.identity.agents.config.redirect.param"], DefaultUrl);
+                    
+            SetupAgent(settings);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
             _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection());
             _response.Setup(x => x.AddHeader("Set-Cookie", "cookie1"));
             _response.Setup(x => x.AddHeader("Set-Cookie", "cookie2"));
-            _response.Setup(x => x.Redirect(loginUrl + "?" + redirectParam + "=" + DefaultUrl));
+            _response.Setup(x => x.Redirect(redirectUrl));
 
             _module.OnAuthentication(_context.Object);
 
-            VerifyAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], enableAnonymous: "false", resetCookies: new[] { "cookie2", "cookie1" },
-                loginUrl: loginUrl, redirectParam: redirectParam);
+            VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(3));
             _request.Verify(x => x.Cookies, Times.Once());
             _response.Verify(x => x.AddHeader("Set-Cookie", "cookie1"), Times.Once());
             _response.Verify(x => x.AddHeader("Set-Cookie", "cookie2"), Times.Once());
-            _response.Verify(x => x.Redirect(loginUrl + "?" + redirectParam + "=" + DefaultUrl), Times.Once());
+            _response.Verify(x => x.Redirect(redirectUrl), Times.Once());
         }
 
         [Test]
@@ -273,28 +345,47 @@ namespace ru.org.openam.sdk.nunit
                         c com.sun.identity.agents.config.login.url и без com.sun.identity.agents.config.redirect.param")]
         public void OnAuthentication_WithoutCookieAndWithAnonymousDisabledAndLoginUrlAndWithoutRedirectParamTest()
         {
-            const string loginUrl = "login.url";
-
-            SetupAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], enableAnonymous: "false", resetCookies: new string[0], loginUrl: loginUrl,
-                redirectParam: null);
+            var settings = new Dictionary<string, object>
+            {
+                { "com.sun.identity.agents.config.override.host", "false" },
+                { "com.sun.identity.agents.config.fqdn.default", null },
+                { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
+                { "com.sun.identity.agents.config.notenforced.url", new string[0] },
+                { "com.sun.identity.agents.config.anonymous.user.enable", "false" },
+                { "com.sun.identity.agents.config.cookie.reset", new string[0] },
+                { "com.sun.identity.agents.config.login.url", "login.url" },
+                { "com.sun.identity.agents.config.redirect.param", null }
+            };
+            
+            SetupAgent(settings);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
             _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection());
-            _response.Setup(x => x.Redirect(loginUrl));
+            _response.Setup(x => x.Redirect((string)settings["com.sun.identity.agents.config.login.url"]));
 
             _module.OnAuthentication(_context.Object);
 
-            VerifyAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], enableAnonymous: "false", resetCookies: new string[0], loginUrl: loginUrl,
-                redirectParam: null);
+            VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(3));
             _request.Verify(x => x.Cookies, Times.Once());
-            _response.Verify(x => x.Redirect(loginUrl));
+            _response.Verify(x => x.Redirect((string)settings["com.sun.identity.agents.config.login.url"]), Times.Once());
         }
 
         [Test]
         [Description(@"Попытка авторизации пользователя без куки при выключенной анонимной аутенфикации без com.sun.identity.agents.config.login.url")]
         public void OnAuthentication_WithoutCookieAndWithAnonymousDisabledAndWithoutLoginUrlTest()
         {
-            SetupAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], enableAnonymous: "false", resetCookies: new string[0], loginUrl: null);
+            var settings = new Dictionary<string, object>
+            {
+                { "com.sun.identity.agents.config.override.host", "false" },
+                { "com.sun.identity.agents.config.fqdn.default", null },
+                { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
+                { "com.sun.identity.agents.config.notenforced.url", new string[0] },
+                { "com.sun.identity.agents.config.anonymous.user.enable", "false" },
+                { "com.sun.identity.agents.config.cookie.reset", new string[0] },
+                { "com.sun.identity.agents.config.login.url", null }
+            }; 
+            
+            SetupAgent(settings);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
             _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection());
             _response.SetupSet(x => x.StatusCode = 401);
@@ -302,7 +393,7 @@ namespace ru.org.openam.sdk.nunit
 
             _module.OnAuthentication(_context.Object);
 
-            VerifyAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], enableAnonymous: "false", resetCookies: new string[0], loginUrl: null);
+            VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(3));
             _request.Verify(x => x.Cookies, Times.Once());
             _response.VerifySet(x => x.StatusCode = 401, Times.Once());
@@ -313,29 +404,53 @@ namespace ru.org.openam.sdk.nunit
         [Description(@"Попытка авторизации пользователя c кукой без com.sun.identity.agents.config.userid.param")]
         public void OnAuthentication_WithCookieAndUserIdParamTest()
         {
-            SetupAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], userIdParamName: null, enableAnonymous: "true", enableIpValidation: "false");
+            var settings = new Dictionary<string, object>
+            {
+                { "com.sun.identity.agents.config.auth.connection.timeout", "1" },
+                { "com.sun.identity.agents.config.override.host", "false" },
+                { "com.sun.identity.agents.config.fqdn.default", null },
+                { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
+                { "com.sun.identity.agents.config.notenforced.url", new string[0] },
+                { "com.sun.identity.agents.config.userid.param", null },
+                { "com.sun.identity.agents.config.anonymous.user.enable", "true" },
+                { "com.sun.identity.agents.config.client.ip.validation.enable", "false" }
+            };
+            
+            SetupAgent(settings);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
             _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection { new HttpCookie("svbid", GetAuthCookie()) });
             _context.SetupSet(x => x.User = It.IsAny<GenericPrincipal>());
 
             _module.OnAuthentication(_context.Object);
 
-            VerifyAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], userIdParamName: null, enableAnonymous: "true", enableIpValidation: "false");
+            VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(3));
-            _request.Verify(x => x.Cookies, Times.Once()); 
+            _request.Verify(x => x.Cookies, Times.Once());
             _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "" && !u.Identity.IsAuthenticated), Times.Once());
         }
 
         [Test]
         [Description(@"Попытка авторизации пользователя c кукой, SSO only, без валидации IP и заполнением HTTP_HEADER'")]
-        public void OnAuthentication_WithCookieAndSsoOnlyTest()
+        public void OnAuthentication_WithCookieAndSsoOnlyAndFillHeadersWithoutIpValidationTest()
         {
             var items = new Dictionary<string, object>();
             var serverVariables = new NameValueCollection();
             var authCookie = GetAuthCookie();
+            var settings = new Dictionary<string, object>
+            {
+                { "com.sun.identity.agents.config.auth.connection.timeout", "1" },
+                { "com.sun.identity.agents.config.override.host", "false" },
+                { "com.sun.identity.agents.config.fqdn.default", null },
+                { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
+                { "com.sun.identity.agents.config.notenforced.url", new string[0] },
+                { "com.sun.identity.agents.config.userid.param", "UserId" },
+                { "com.sun.identity.agents.config.sso.only", "true" },
+                { "com.sun.identity.agents.config.client.ip.validation.enable", "false" },
+                {"com.sun.identity.agents.config.session.attribute.mapping",  new[] { "[MaxIdleTime]=profile-maxidletime", "[ignoreOTP]=profile-ignore-otp", "test" }},
+                {"com.sun.identity.agents.config.session.attribute.fetch.mode", "HTTP_HEADER"}
+            };
 
-            SetupAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], userIdParamName: "UserId", ssoOnly: "true", enableIpValidation: "false",
-                mappingProps: new[] { "[MaxIdleTime]=profile-maxidletime", "[ignoreOTP]=profile-ignore-otp", "test" }, fetchMode: "HTTP_HEADER");
+            SetupAgent(settings);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
             _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection { new HttpCookie("svbid", authCookie) });
             _request.Setup(x => x.ServerVariables).Returns(serverVariables);
@@ -351,11 +466,189 @@ namespace ru.org.openam.sdk.nunit
             Assert.IsNotNull(items["profile-ignore-otp"]);
             Assert.IsNotNull(serverVariables["profile-ignore-otp"]);
 
-            VerifyAgent("false", null, logoutUrls: new string[0], notEnforcedUrls: new string[0], userIdParamName: "UserId", ssoOnly: "true", enableIpValidation: "false");
+            VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(4));
             _request.Verify(x => x.Cookies, Times.Exactly(2));
             _request.Verify(x => x.ServerVariables, Times.Exactly(2));
             _context.Verify(x => x.Items, Times.Exactly(3));
+            _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "11111111111" && u.Identity.IsAuthenticated), Times.Once());
+        }
+
+        [Test]
+        [Description(@"Попытка авторизации пользователя c кукой, SSO only, с валидацией IP и заполнением HTTP_COOKIE'")]
+        public void OnAuthentication_WithCookieAndSsoOnlyAndFillCookiesAndIpValidationTest()
+        {
+            var items = new Dictionary<string, object>();
+            var authCookie = GetAuthCookie();
+            var cookies = new HttpCookieCollection { new HttpCookie("svbid", authCookie) };
+            var settings = new Dictionary<string, object>
+            {
+                { "com.sun.identity.agents.config.auth.connection.timeout", "1" },
+                { "com.sun.identity.agents.config.override.host", "false" },
+                { "com.sun.identity.agents.config.fqdn.default", null },
+                { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
+                { "com.sun.identity.agents.config.notenforced.url", new string[0] },
+                { "com.sun.identity.agents.config.userid.param", "UserId" },
+                { "com.sun.identity.agents.config.sso.only", "true" },
+                { "com.sun.identity.agents.config.client.ip.validation.enable", "true" },
+                { "com.sun.identity.agents.config.session.attribute.mapping", new[] { "[ignoreOTP]=profile-ignore-otp", "[test]=test" } },
+                { "com.sun.identity.agents.config.session.attribute.fetch.mode", "HTTP_COOKIE" },
+                { "com.sun.identity.agents.config.client.ip.header", null }
+            };
+
+            SetupAgent(settings);
+            _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
+            _request.Setup(x => x.Cookies).Returns(cookies);
+            _request.Setup(x => x.UserHostAddress).Returns("127.0.0.2");
+            _context.Setup(x => x.Items).Returns(items);
+            _context.SetupSet(x => x.User = It.IsAny<GenericPrincipal>());
+
+            _module.OnAuthentication(_context.Object);
+            Assert.AreEqual(2, items.Count);
+            Assert.AreEqual(2, cookies.Count);
+            Assert.AreEqual(authCookie, items["am_auth_cookie"]);
+            Assert.IsNotNull(items["profile-ignore-otp"]);
+
+            VerifyAgent(settings);
+            _request.Verify(x => x.Url, Times.Exactly(4));
+            _request.Verify(x => x.Cookies, Times.Exactly(3));
+            _request.Verify(x => x.UserHostAddress, Times.Once());
+            _context.Verify(x => x.Items, Times.Exactly(2));
+            _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "11111111111" && u.Identity.IsAuthenticated), Times.Once());
+        }
+
+        [Test]
+        [Description(@"Попытка авторизации пользователя c кукой, SSO only, с валидацией IP и без указания com.sun.identity.agents.config.session.attribute.fetch.mode")]
+        public void OnAuthentication_WithCookieAndSsoOnlyAndFillNothingAndIpValidationTest()
+        {
+            var items = new Dictionary<string, object>();
+            var authCookie = GetAuthCookie();
+            var settings = new Dictionary<string, object>
+            {
+                { "com.sun.identity.agents.config.auth.connection.timeout", "1" },
+                { "com.sun.identity.agents.config.override.host", "false" },
+                { "com.sun.identity.agents.config.fqdn.default", null },
+                { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
+                { "com.sun.identity.agents.config.notenforced.url", new string[0] },
+                { "com.sun.identity.agents.config.userid.param", "UserId" },
+                { "com.sun.identity.agents.config.sso.only", "true" },
+                { "com.sun.identity.agents.config.client.ip.validation.enable", "true" },
+                { "com.sun.identity.agents.config.session.attribute.mapping", new[] { "[ignoreOTP]=profile-ignore-otp" } },
+                { "com.sun.identity.agents.config.session.attribute.fetch.mode", null },
+                { "com.sun.identity.agents.config.client.ip.header", "ip-header" }
+            };
+
+            SetupAgent(settings);
+            _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
+            _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection { new HttpCookie("svbid", authCookie) });
+            _request.Setup(x => x.UserHostAddress).Returns("127.0.0.3");
+            _request.Setup(x => x.Headers).Returns(new NameValueCollection { {"ip-header", "127.0.0.2,127.0.0.1" }});
+            _context.Setup(x => x.Items).Returns(items);
+            _context.SetupSet(x => x.User = It.IsAny<GenericPrincipal>());
+
+            _module.OnAuthentication(_context.Object);
+            Assert.AreEqual(2, items.Count);
+            Assert.AreEqual(authCookie, items["am_auth_cookie"]);
+            Assert.IsNotNull(items["profile-ignore-otp"]);
+
+            VerifyAgent(settings);
+            _request.Verify(x => x.Url, Times.Exactly(4));
+            _request.Verify(x => x.Cookies, Times.Exactly(2));
+            _request.Verify(x => x.UserHostAddress, Times.Once());
+            _request.Verify(x => x.Headers, Times.Once());
+            _context.Verify(x => x.Items, Times.Exactly(2));
+            _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "11111111111" && u.Identity.IsAuthenticated), Times.Once());
+        }
+
+        [Test]
+        [Description(@"Попытка авторизации пользователя c кукой и анонимной авторизацией, без валидации IP, без SSO only и без Policy")]
+        public void OnAuthentication_WithCookieAndWihoutSsoOnlyAndPolicyTest()
+        {
+            var authCookie = GetAuthCookie();
+            var settings = new Dictionary<string, object>
+            {
+                { "com.sun.identity.agents.config.auth.connection.timeout", "1" },
+                { "com.sun.identity.agents.config.policy.cache.polling.interval", null },
+                { "com.sun.identity.agents.config.override.host", "false" },
+                { "com.sun.identity.agents.config.fqdn.default", null },
+                { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
+                { "com.sun.identity.agents.config.notenforced.url", new string[0] },
+                { "com.sun.identity.agents.config.userid.param", "UserId" },
+                { "com.sun.identity.agents.config.sso.only", "false" },
+                { "com.sun.identity.agents.config.client.ip.validation.enable", "false" },
+                { "com.sun.identity.agents.config.profile.attribute.mapping", new[] { "[test]=test" } },
+                { "com.sun.identity.agents.config.fetch.from.root.resource", "true" },
+                { "com.sun.identity.agents.config.anonymous.user.enable", "true" }
+            };
+
+            SetupAgent(settings);
+            _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
+            _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection { new HttpCookie("svbid", authCookie) });
+            _request.Setup(x => x.HttpMethod).Returns("POST");
+            _context.SetupSet(x => x.User = It.IsAny<GenericPrincipal>());
+
+            _module.OnAuthentication(_context.Object);
+            
+            VerifyAgent(settings);
+            _request.Verify(x => x.Url, Times.Exactly(4));
+            _request.Verify(x => x.Cookies, Times.Once());
+            _request.Verify(x => x.HttpMethod, Times.Once());
+            _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "" && !u.Identity.IsAuthenticated), Times.Once());
+        }
+
+        [Test]
+        [Description(@"Попытка авторизации пользователя c кукой и анонимной авторизацией, без валидации IP, без SSO only и c Policy и заполнением HEADER из Policy и COOKIE из сессии")]
+        public void OnAuthentication_WithCookieAndWihoutSsoOnlyAndWithPolicyTest()
+        {
+            var items = new Dictionary<string, object>();
+            var serverVariables = new NameValueCollection();
+            var authCookie = GetAuthCookie();
+            var cookies = new HttpCookieCollection { new HttpCookie("svbid", authCookie) };
+            var settings = new Dictionary<string, object>
+            {
+                { "com.sun.identity.agents.config.auth.connection.timeout", "1" },
+                { "com.sun.identity.agents.config.policy.cache.polling.interval", null },
+                { "com.sun.identity.agents.config.override.host", "false" },
+                { "com.sun.identity.agents.config.fqdn.default", null },
+                { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
+                { "com.sun.identity.agents.config.notenforced.url", new string[0] },
+                { "com.sun.identity.agents.config.userid.param", "UserId" },
+                { "com.sun.identity.agents.config.sso.only", "false" },
+                { "com.sun.identity.agents.config.client.ip.validation.enable", "false" },
+                { "com.sun.identity.agents.config.profile.attribute.mapping", new[] { "[employeeNumber]=profile-clientid", "[sn]=profile-type" } },
+                { "com.sun.identity.agents.config.profile.attribute.fetch.mode", "HTTP_HEADER" },
+                { "com.sun.identity.agents.config.session.attribute.mapping", new[] { "[ignoreOTP]=profile-ignore-otp" } },
+                { "com.sun.identity.agents.config.session.attribute.fetch.mode", "HTTP_COOKIE" },
+                { "com.sun.identity.agents.config.fetch.from.root.resource", "false" },
+                { "com.sun.identity.agents.config.ignore.path.info", "false" }
+            };
+
+            SetupAgent(settings);
+            _request.Setup(x => x.Url).Returns(new Uri(RapidsoftUrl));
+            _request.Setup(x => x.Cookies).Returns(cookies);
+            _request.Setup(x => x.HttpMethod).Returns("POST");
+            _request.Setup(x => x.ServerVariables).Returns(serverVariables);
+            _context.Setup(x => x.Items).Returns(items);
+            _context.SetupSet(x => x.User = It.IsAny<GenericPrincipal>());
+
+            _module.OnAuthentication(_context.Object);
+            Assert.AreEqual(4, items.Count);
+            Assert.AreEqual(2, serverVariables.Count);
+            Assert.AreEqual(2, cookies.Count);
+            Assert.AreEqual(authCookie, items["am_auth_cookie"]);
+            Assert.IsNotNull(items["profile-ignore-otp"]);
+            Assert.IsNotNull(cookies["profile-ignore-otp"]);
+            Assert.IsNotNull(items["profile-clientid"]);
+            Assert.IsNotNull(serverVariables["profile-clientid"]);
+            Assert.IsNotNull(items["profile-type"]);
+            Assert.IsNotNull(serverVariables["profile-type"]);
+            
+            VerifyAgent(settings);
+            _request.Verify(x => x.Url, Times.Exactly(5));
+            _request.Verify(x => x.Cookies, Times.Exactly(3));
+            _request.Verify(x => x.HttpMethod, Times.Once());
+            _request.Verify(x => x.ServerVariables, Times.Exactly(2));
+            _context.Verify(x => x.Items, Times.Exactly(4));
             _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "11111111111" && u.Identity.IsAuthenticated), Times.Once());
         }
 
@@ -364,254 +657,90 @@ namespace ru.org.openam.sdk.nunit
             string redirectUrl,
             string enableRedirect,
             string redirectHost,
-            string redirectPrefix = DefaultStringValue,
-            string overrideProtocol = DefaultStringValue,
-            string overridePort = DefaultStringValue)
+            string redirectPrefix = null,
+            string overrideProtocol = null,
+            string overridePort = null)
         {
-            SetupAgent(enableRedirect, redirectHost, redirectPrefix, overrideProtocol, overridePort);
+            var settings = new Dictionary<string, object>
+            {
+                { "com.sun.identity.agents.config.override.host", enableRedirect },
+                { "com.sun.identity.agents.config.fqdn.default", redirectHost },
+                { "com.sun.identity.agents.config.agenturi.prefix", redirectPrefix },
+                { "com.sun.identity.agents.config.override.protocol", overrideProtocol },
+                { "com.sun.identity.agents.config.override.port", overridePort }
+            };
+
+            SetupAgent(settings);
             _request.Setup(x => x.Url).Returns(new Uri(url));
             _response.Setup(x => x.Redirect(redirectUrl));
 
             _module.OnAuthentication(_context.Object);
 
-            VerifyAgent(enableRedirect, redirectHost, redirectPrefix, overrideProtocol, overridePort);
+            VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(2));
             _response.Verify(x => x.Redirect(redirectUrl), Times.Once());
         }
 
-        private void SetupAgent(
-            string enableRedirect = DefaultStringValue,
-            string redirectHost = DefaultStringValue,
-            string redirectPrefix = DefaultStringValue,
-            string overrideProtocol = DefaultStringValue,
-            string overridePort = DefaultStringValue,
-            string[] logoutUrls = null,
-            string[] logoutResetCookies = null,
-            string logoutRedirectUrl = DefaultStringValue,
-            string loginUrl = DefaultStringValue,
-            string[] notEnforcedUrls = null,
-            string enableNotEnforced = DefaultStringValue,
-            string userIdParamName = DefaultStringValue,
-            string enableAnonymous = DefaultStringValue,
-            string[] resetCookies = null,
-            string redirectParam = DefaultStringValue,
-            string enableIpValidation = DefaultStringValue,
-            string ssoOnly = DefaultStringValue,
-            string[] mappingProps = null,
-            string fetchMode = DefaultStringValue)
+        private void SetupAgent(IDictionary<string, object> settings)
         {
-            if (enableRedirect != DefaultStringValue)
+            foreach (var pair in settings)
             {
-                _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.override.host")).Returns(enableRedirect);
+                var setting = pair;
+                switch (setting.Key)
+                {
+                    case "com.sun.identity.agents.config.logout.redirect.url":
+                    case "com.sun.identity.agents.config.login.url":
+                        _agent.Setup(x => x.GetFirst(setting.Key)).Returns((string)setting.Value);
+                        break;
+                    case "com.sun.identity.agents.config.session.attribute.mapping":
+                    case "com.sun.identity.agents.config.profile.attribute.mapping":
+                        _agent.Setup(x => x.GetArray(setting.Key)).Returns((string[])setting.Value);
+                        break;
+                    case "com.sun.identity.agents.config.agent.logout.url":
+                    case "com.sun.identity.agents.config.logout.cookie.reset":
+                    case "com.sun.identity.agents.config.notenforced.url":
+                    case "com.sun.identity.agents.config.cookie.reset":
+                        _agent.Setup(x => x.GetOrderedArray(setting.Key)).Returns((string[])setting.Value);
+                        break;
+                    default:
+                         _agent.Setup(x => x.GetSingle(setting.Key)).Returns((string)setting.Value);
+                        break;
+                }
             }
-
-            if (redirectHost != DefaultStringValue)
-            {
-                _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.fqdn.default")).Returns(redirectHost);
-            }
-
-            if (redirectPrefix != DefaultStringValue)
-            {
-                _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.agenturi.prefix")).Returns(redirectPrefix);
-            }
-
-            if (overrideProtocol != DefaultStringValue)
-            {
-                _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.override.protocol")).Returns(overrideProtocol);
-            }
-
-            if (overridePort != DefaultStringValue)
-            {
-                _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.override.port")).Returns(overridePort);
-            }
-
-            if (logoutUrls != null)
-            {
-                _agent.Setup(x => x.GetOrderedArray("com.sun.identity.agents.config.agent.logout.url")).Returns(logoutUrls);
-            }
-
-            if (logoutResetCookies != null)
-            {
-                _agent.Setup(x => x.GetOrderedArray("com.sun.identity.agents.config.logout.cookie.reset")).Returns(logoutResetCookies);
-            }
-
-            if (logoutRedirectUrl != DefaultStringValue)
-            {
-                _agent.Setup(x => x.GetFirst("com.sun.identity.agents.config.logout.redirect.url")).Returns(logoutRedirectUrl);
-            }
-
-            if (loginUrl != DefaultStringValue)
-            {
-                _agent.Setup(x => x.GetFirst("com.sun.identity.agents.config.login.url")).Returns(loginUrl);
-            }
-
-            if (notEnforcedUrls != null)
-            {
-                _agent.Setup(x => x.GetOrderedArray("com.sun.identity.agents.config.notenforced.url")).Returns(notEnforcedUrls);
-            }
-
-            if (enableNotEnforced != DefaultStringValue)
-            {
-                _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.notenforced.url.attributes.enable")).Returns(enableNotEnforced);
-            }
-
-            if (userIdParamName != DefaultStringValue)
-            {
-                _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.userid.param")).Returns(userIdParamName);
-            }
-
-            if (enableAnonymous != DefaultStringValue)
-            {
-                _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.anonymous.user.enable")).Returns(enableAnonymous);
-            }
-
-            if (resetCookies != null)
-            {
-                _agent.Setup(x => x.GetOrderedArray("com.sun.identity.agents.config.cookie.reset")).Returns(resetCookies);
-            }
-
-            if (redirectParam != DefaultStringValue)
-            {
-                _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.redirect.param")).Returns(redirectParam);
-            }
-
-            if (enableIpValidation != DefaultStringValue)
-            {
-                _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.client.ip.validation.enable")).Returns(enableIpValidation);
-            }
-
-            if (ssoOnly != DefaultStringValue)
-            {
-                _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.sso.only")).Returns(ssoOnly);
-            }
-
-            if (mappingProps != null)
-            {
-                _agent.Setup(x => x.GetArray("com.sun.identity.agents.config.session.attribute.mapping")).Returns(mappingProps);
-            }
-
-            if (fetchMode != DefaultStringValue)
-            {
-                _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.session.attribute.fetch.mode")).Returns(fetchMode);
-            }
-
-            _agent.Setup(x => x.GetSingle("com.sun.identity.agents.config.auth.connection.timeout")).Returns("1");
         }
 
-        private void VerifyAgent(
-            string enableRedirect = DefaultStringValue,
-            string redirectHost = DefaultStringValue,
-            string redirectPrefix = DefaultStringValue,
-            string overrideProtocol = DefaultStringValue,
-            string overridePort = DefaultStringValue,
-            string[] logoutUrls = null,
-            string[] logoutResetCookies = null,
-            string logoutRedirectUrl = DefaultStringValue,
-            string loginUrl = DefaultStringValue,
-            string[] notEnforcedUrls = null,
-            string enableNotEnforced = DefaultStringValue,
-            string userIdParamName = DefaultStringValue,
-            string enableAnonymous = DefaultStringValue,
-            string[] resetCookies = null,
-            string redirectParam = DefaultStringValue,
-            string enableIpValidation = DefaultStringValue,
-            string ssoOnly = DefaultStringValue,
-            string[] mappingProps = null,
-            string fetchMode = DefaultStringValue)
+        private void VerifyAgent(IDictionary<string, object> settings)
         {
-            if (enableRedirect != DefaultStringValue)
+            foreach (var pair in settings)
             {
-                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.override.host"), Times.Once());
-            }
-
-            if (redirectHost != DefaultStringValue)
-            {
-                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.fqdn.default"), Times.Once());
-            }
-
-            if (redirectPrefix != DefaultStringValue)
-            {
-                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.agenturi.prefix"), Times.Once());
-            }
-
-            if (overrideProtocol != DefaultStringValue)
-            {
-                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.override.protocol"), Times.Once());
-            }
-
-            if (overridePort != DefaultStringValue)
-            {
-                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.override.port"), Times.Once());
-            }
-
-            if (logoutUrls != null)
-            {
-                _agent.Verify(x => x.GetOrderedArray("com.sun.identity.agents.config.agent.logout.url"), Times.Once());
-            }
-
-            if (logoutResetCookies != null)
-            {
-                _agent.Verify(x => x.GetOrderedArray("com.sun.identity.agents.config.logout.cookie.reset"), Times.Once());
-            }
-
-            if (logoutRedirectUrl != DefaultStringValue)
-            {
-                _agent.Verify(x => x.GetFirst("com.sun.identity.agents.config.logout.redirect.url"), Times.Once());
-            }
-
-            if (loginUrl != DefaultStringValue)
-            {
-                _agent.Verify(x => x.GetFirst("com.sun.identity.agents.config.login.url"), Times.Once());
-            }
-
-            if (notEnforcedUrls != null)
-            {
-                _agent.Verify(x => x.GetOrderedArray("com.sun.identity.agents.config.notenforced.url"), Times.Once());
-            }
-
-            if (enableNotEnforced != DefaultStringValue)
-            {
-                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.notenforced.url.attributes.enable"), Times.Once());
-            }
-
-            if (userIdParamName != DefaultStringValue)
-            {
-                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.userid.param"), Times.Once());
-            }
-
-            if (enableAnonymous != DefaultStringValue)
-            {
-                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.anonymous.user.enable"), Times.Once());
-            }
-
-            if (resetCookies != null)
-            {
-                _agent.Verify(x => x.GetOrderedArray("com.sun.identity.agents.config.cookie.reset"), Times.Once());
-            }
-
-            if (redirectParam != DefaultStringValue)
-            {
-                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.redirect.param"), Times.Once());
-            }
-
-            if (enableIpValidation != DefaultStringValue)
-            {
-                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.client.ip.validation.enable"), Times.Once());
-            }
-
-            if (ssoOnly != DefaultStringValue)
-            {
-                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.sso.only"), Times.Once());
-            }
-
-            if (mappingProps != null)
-            {
-                _agent.Verify(x => x.GetArray("com.sun.identity.agents.config.session.attribute.mapping"), Times.Once());
-            }
-
-            if (fetchMode != DefaultStringValue)
-            {
-                _agent.Verify(x => x.GetSingle("com.sun.identity.agents.config.session.attribute.fetch.mode"), Times.Once());
+                var setting = pair;
+                switch (setting.Key)
+                {
+                    case "com.sun.identity.agents.config.logout.redirect.url":
+                    case "com.sun.identity.agents.config.login.url":
+                        _agent.Verify(x => x.GetFirst(setting.Key), Times.Once());
+                        break;
+                    case "com.sun.identity.agents.config.session.attribute.mapping":
+                        _agent.Verify(x => x.GetArray(setting.Key), Times.Once());
+                        break;
+                    case "com.sun.identity.agents.config.profile.attribute.mapping":
+                        _agent.Verify(x => x.GetArray(setting.Key), Times.AtLeastOnce());
+                        break;
+                    case "com.sun.identity.agents.config.agent.logout.url":
+                    case "com.sun.identity.agents.config.logout.cookie.reset":
+                    case "com.sun.identity.agents.config.notenforced.url":
+                    case "com.sun.identity.agents.config.cookie.reset":
+                        _agent.Verify(x => x.GetOrderedArray(setting.Key), Times.Once());
+                        break;
+                    case "com.sun.identity.agents.config.fetch.from.root.resource":
+                    case "com.sun.identity.agents.config.ignore.path.info":
+                    case "com.sun.identity.agents.config.auth.connection.timeout":
+                        _agent.Verify(x => x.GetSingle(setting.Key), Times.AtLeastOnce());
+                        break;
+                    default:
+                        _agent.Verify(x => x.GetSingle(setting.Key), Times.Once());
+                        break;
+                }
             }
         }
 
