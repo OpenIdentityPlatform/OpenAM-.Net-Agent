@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-VisualStudioVersion = 12.0.30723.0
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ru.org.openam.sdk", "ru.org.openam.sdk\ru.org.openam.sdk.csproj", "{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}"
 EndProject
@@ -19,14 +19,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{4410A14E-391A-41C3-8694-3813613D2B6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4410A14E-391A-41C3-8694-3813613D2B6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4410A14E-391A-41C3-8694-3813613D2B6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4410A14E-391A-41C3-8694-3813613D2B6A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{69B04FAF-CA4E-4D4B-AB43-D4BC21D48944}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{69B04FAF-CA4E-4D4B-AB43-D4BC21D48944}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{69B04FAF-CA4E-4D4B-AB43-D4BC21D48944}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{69B04FAF-CA4E-4D4B-AB43-D4BC21D48944}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AF367FB4-2E40-4682-8496-D0C9732BC8DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AF367FB4-2E40-4682-8496-D0C9732BC8DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF367FB4-2E40-4682-8496-D0C9732BC8DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -35,15 +31,19 @@ Global
 		{B00B0209-83DF-43D4-822D-751467380007}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B00B0209-83DF-43D4-822D-751467380007}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B00B0209-83DF-43D4-822D-751467380007}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = ru.org.openam.sdk\ru.org.openam.sdk.csproj
+		{69B04FAF-CA4E-4D4B-AB43-D4BC21D48944}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69B04FAF-CA4E-4D4B-AB43-D4BC21D48944}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69B04FAF-CA4E-4D4B-AB43-D4BC21D48944}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69B04FAF-CA4E-4D4B-AB43-D4BC21D48944}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4410A14E-391A-41C3-8694-3813613D2B6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4410A14E-391A-41C3-8694-3813613D2B6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4410A14E-391A-41C3-8694-3813613D2B6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4410A14E-391A-41C3-8694-3813613D2B6A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = ru.org.openam.sdk\ru.org.openam.sdk.csproj
 	EndGlobalSection
 EndGlobal
