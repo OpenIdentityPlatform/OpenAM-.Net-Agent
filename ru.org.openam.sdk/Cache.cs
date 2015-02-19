@@ -25,7 +25,7 @@ namespace ru.org.openam.sdk
 		
 		public T Get<T>(string key)
 		{  
-			Log.Trace(string.Format("{0} retrieved from cache by key", key));
+			Log.Trace(string.Format("{0} retrieved from cache", key));
 			var value = _cache[key];
 			
 			if (value != null && value is T)

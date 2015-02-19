@@ -68,7 +68,7 @@ namespace ru.org.openam.iis7Agent
 				if(nUrl != null)
 				{
 					Log.AuditTrace(string.Format("Request {0} was redirected to {1}",  url.AbsoluteUri, nUrl));
-					response.Redirect(nUrl);
+					Redirect(nUrl, context);
 					return;
 				}
 
@@ -85,7 +85,7 @@ namespace ru.org.openam.iis7Agent
 					}
 					if(!string.IsNullOrWhiteSpace(logoutUrl))
 					{
-						context.Response.Redirect(logoutUrl);
+						Redirect(logoutUrl, context);
 					}
 					else
 					{
@@ -174,7 +174,7 @@ namespace ru.org.openam.iis7Agent
 			var logoffUrl = GetLogoffUrl(isNotAuth ? "com.sun.identity.agents.config.login.url" : "com.sun.identity.agents.config.access.denied.url", url);
 			if(logoffUrl != null)
 			{
-				context.Response.Redirect(logoffUrl);
+				Redirect(logoffUrl, context);
 			}
 			else
 			{
@@ -323,11 +323,11 @@ namespace ru.org.openam.iis7Agent
 			var freeUrls = _agent.GetOrderedArray("com.sun.identity.agents.config.notenforced.url");
 			foreach (var u in freeUrls)
 			{
-				if(u.EndsWith("*") && url.AbsoluteUri.StartsWith(u.Substring(0, u.Length-1), StringComparison.InvariantCultureIgnoreCase))
+				if(u.EndsWith("*") && url.OriginalString.StartsWith(u.Substring(0, u.Length-1), StringComparison.InvariantCultureIgnoreCase))
 				{
 					return true;
 				}
-				else if(url.AbsoluteUri.Equals(u, StringComparison.InvariantCultureIgnoreCase))
+				else if(url.OriginalString.Equals(u, StringComparison.InvariantCultureIgnoreCase))
 				{
 					return true;
 				}
@@ -362,6 +362,8 @@ namespace ru.org.openam.iis7Agent
 					if(fetchMode == "HTTP_HEADER")
 					{
 						context.Request.ServerVariables[vals[1]] = props[key];
+						var compName = "HTTP_" + vals[1].ToUpper().Replace("-", "_");
+						context.Request.ServerVariables[compName] = Convert.ToString(props[key]);
 					}
 					else if(fetchMode == "HTTP_COOKIE")
 					{
@@ -399,6 +401,8 @@ namespace ru.org.openam.iis7Agent
 					if(fetchMode == "HTTP_HEADER")
 					{
 						context.Request.ServerVariables[vals[1]] = Convert.ToString(props[key]);
+						var compName = "HTTP_" + vals[1].ToUpper().Replace("-", "_");
+						context.Request.ServerVariables[compName] = Convert.ToString(props[key]);
 					}
 					else if(fetchMode == "HTTP_COOKIE")
 					{

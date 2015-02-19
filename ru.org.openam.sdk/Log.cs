@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using System.Web;
 using NLog;
@@ -12,8 +13,36 @@ namespace ru.org.openam.sdk
 	{
 		static Log()
 		{
+			Init();
+		}
+
+		private static object _sync = new Object();
+
+		private static Logger _debugLogger;
+
+		private static Logger _auditLogger;
+		
+		private const string DEBUG_LOGGER = "PolicyAgentDebug";
+
+		private const string AUDIT_LOGGER = "PolicyAgentAudit";
+
+		private static bool _noConfig;
+
+		public static void Init()
+		{
 			var config = LogManager.Configuration ?? new LoggingConfiguration();
 
+			var debugRule = config.LoggingRules.FirstOrDefault(l => l.LoggerNamePattern == DEBUG_LOGGER);
+			var auditRule = config.LoggingRules.FirstOrDefault(l => l.LoggerNamePattern == AUDIT_LOGGER);
+			if(debugRule != null && auditRule != null && !_noConfig)
+			{
+				_debugLogger = LogManager.GetLogger(DEBUG_LOGGER);
+				_auditLogger = LogManager.GetLogger(AUDIT_LOGGER);
+				return;
+			}
+			
+			_noConfig = true;
+			var logAudit = false;
 			var fileTarget = new FileTarget();
 			var retryTargetWrapper = new RetryingTargetWrapper(fileTarget, 3, 100);
 			var asyncTargetWrapper = new AsyncTargetWrapper(retryTargetWrapper);
@@ -29,6 +58,8 @@ namespace ru.org.openam.sdk
 			//TODO failover FATAL log to WINDOWS SYSTEM LOG
 			if (Agent.Instance.HasConfig())
 			{
+				logAudit = Agent.Instance.GetSingle("com.sun.identity.agents.config.audit.accesstype") == "LOG_ALLOW";
+
 				if (Agent.Instance.GetSingle("com.sun.identity.agents.config.local.log.rotate") == "true")
 				{
 					long temp;
@@ -59,24 +90,31 @@ namespace ru.org.openam.sdk
 				}
 			}
 
-			var rule = new LoggingRule("PolicyAgentDebug", nlogLevel, fileTarget);
-			config.LoggingRules.Add(rule);
-			
-			var rule2 = new LoggingRule("PolicyAgentAudit", LogLevel.Info, fileTarget);
-			config.LoggingRules.Add(rule2);
+			lock(_sync){
+				var oldRule = config.LoggingRules.FirstOrDefault(l => l.LoggerNamePattern == DEBUG_LOGGER);
+				if(oldRule != null){
+					config.LoggingRules.Remove(oldRule);
+				}
+				var rule = new LoggingRule(DEBUG_LOGGER, nlogLevel, fileTarget);
+				config.LoggingRules.Add(rule);
 
-			LogManager.Configuration = config;
-	
-			_debugLogger = LogManager.GetLogger("PolicyAgentDebug");
+				oldRule = config.LoggingRules.FirstOrDefault(l => l.LoggerNamePattern == AUDIT_LOGGER);
+				if(oldRule != null){
+					config.LoggingRules.Remove(oldRule);
+				}
+				var rule2 = new LoggingRule(AUDIT_LOGGER, LogLevel.Info, fileTarget);
+				config.LoggingRules.Add(rule2);
 
-			if (Agent.Instance.HasConfig() && Agent.Instance.GetSingle("com.sun.identity.agents.config.audit.accesstype") == "LOG_ALLOW")
-				_auditLogger = LogManager.GetLogger("PolicyAgentAudit");
+				LogManager.Configuration = config;
+
+				_debugLogger = LogManager.GetLogger(DEBUG_LOGGER);
+				if (logAudit){
+					_auditLogger = LogManager.GetLogger(AUDIT_LOGGER);
+				}
+			}
 		}
 
-		private static readonly Logger _debugLogger;
 
-		private static readonly Logger _auditLogger;
-		
 		public static void Fatal(Exception e)
 		{
 			if (e == null)

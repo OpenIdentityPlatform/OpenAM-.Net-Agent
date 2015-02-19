@@ -34,19 +34,28 @@ namespace ru.org.openam.sdk
 				return null;
 			}
 
+			var minsStr = agent.GetSingle("com.sun.identity.agents.config.policy.cache.polling.interval");
+			int mins;
+			if (!int.TryParse(minsStr, out mins))
+			{
+				mins = 1;
+			}
+
 			var userSession = _cache.GetOrDefault
 			(
 				"am_" + authCookie,
-				() => new Session(agent,authCookie)
-				, r =>
-				{
-					if (r != null && r.token != null)
-					{
-						return r.token.maxcaching;
-					}
+				() => new Session(agent,authCookie),
+				mins
+				// всегда приходит 0
+				//, r =>
+				//{
+				//	if (r != null && r.token != null)
+				//	{
+				//		return r.token.maxcaching;
+				//	}
 
-					return 0;
-				}
+				//	return 3;
+				//}
 			);
             return userSession;
         }
@@ -84,7 +93,7 @@ namespace ru.org.openam.sdk
 
         override public String ToString()
         {
-            return sessionId;
+            return "Session: " + sessionId;
         }
 
         public String GetProperty(String key, String value)

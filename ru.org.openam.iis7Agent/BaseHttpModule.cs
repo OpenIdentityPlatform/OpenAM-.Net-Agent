@@ -30,5 +30,10 @@ namespace ru.org.openam.iis7Agent
 		public virtual void CompleteRequest(HttpContextBase context){
 			context.ApplicationInstance.CompleteRequest();
 		}
+		
+		public virtual void Redirect(string url, HttpContextBase context){
+			context.Response.Redirect(url, false);
+			context.ApplicationInstance.CompleteRequest();
+		}
 	}
 }
