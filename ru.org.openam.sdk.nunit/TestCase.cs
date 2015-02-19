@@ -7,7 +7,7 @@ using ru.org.openam.sdk.pll;
 
 namespace ru.org.openam.sdk.nunit
 {
-	[TestFixture ()]
+	//[TestFixture ()]
 	public class TestCase
 	{
 		[Test ()]

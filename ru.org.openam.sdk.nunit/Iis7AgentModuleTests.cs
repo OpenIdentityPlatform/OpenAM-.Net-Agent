@@ -29,10 +29,14 @@ namespace ru.org.openam.sdk.nunit
             _context = new Mock<HttpContextBase>(MockBehavior.Strict);
             _request = new Mock<HttpRequestBase>(MockBehavior.Strict);
             _response = new Mock<HttpResponseBase>(MockBehavior.Strict);
+            _response = new Mock<HttpResponseBase>(MockBehavior.Strict);
+			//_applicationInstance = new Mock<HttpApplication>(MockBehavior.Strict);
+
             _agent = new Mock<Agent>(MockBehavior.Strict);
 
             _module = new iis7AgentModule(_agent.Object);
 
+            //_context.Setup(x => x.ApplicationInstance).Returns(_applicationInstance.Object);
             _context.Setup(x => x.Request).Returns(_request.Object);
             _context.Setup(x => x.Response).Returns(_response.Object);
         }
@@ -389,15 +393,17 @@ namespace ru.org.openam.sdk.nunit
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
             _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection());
             _response.SetupSet(x => x.StatusCode = 401);
-            _response.Setup(x => x.End());
 
-            _module.OnAuthentication(_context.Object);
+			var module = new Mock<iis7AgentModule>(_agent.Object);
+			module.Setup(m => m.CompleteRequest(_context.Object));
+			module.CallBase = true;
+            module.Object.OnAuthentication(_context.Object);
 
-            VerifyAgent(settings);
+            VerifyAgent(settings, _agent);
             _request.Verify(x => x.Url, Times.Exactly(3));
             _request.Verify(x => x.Cookies, Times.Once());
             _response.VerifySet(x => x.StatusCode = 401, Times.Once());
-            _response.Verify(x => x.End(), Times.Once());
+            module.Verify(x => x.CompleteRequest(It.IsAny<HttpContextBase>()), Times.Once());
         }
 
         [Test]
@@ -710,6 +716,11 @@ namespace ru.org.openam.sdk.nunit
         }
 
         private void VerifyAgent(IDictionary<string, object> settings)
+		{
+			VerifyAgent(settings, _agent);
+		}
+
+        private void VerifyAgent(IDictionary<string, object> settings, Mock<Agent> agent)
         {
             foreach (var pair in settings)
             {
@@ -718,27 +729,27 @@ namespace ru.org.openam.sdk.nunit
                 {
                     case "com.sun.identity.agents.config.logout.redirect.url":
                     case "com.sun.identity.agents.config.login.url":
-                        _agent.Verify(x => x.GetFirst(setting.Key), Times.Once());
+                        agent.Verify(x => x.GetFirst(setting.Key), Times.Once());
                         break;
                     case "com.sun.identity.agents.config.session.attribute.mapping":
-                        _agent.Verify(x => x.GetArray(setting.Key), Times.Once());
+                        agent.Verify(x => x.GetArray(setting.Key), Times.Once());
                         break;
                     case "com.sun.identity.agents.config.profile.attribute.mapping":
-                        _agent.Verify(x => x.GetArray(setting.Key), Times.AtLeastOnce());
+                        agent.Verify(x => x.GetArray(setting.Key), Times.AtLeastOnce());
                         break;
                     case "com.sun.identity.agents.config.agent.logout.url":
                     case "com.sun.identity.agents.config.logout.cookie.reset":
                     case "com.sun.identity.agents.config.notenforced.url":
                     case "com.sun.identity.agents.config.cookie.reset":
-                        _agent.Verify(x => x.GetOrderedArray(setting.Key), Times.Once());
+                        agent.Verify(x => x.GetOrderedArray(setting.Key), Times.Once());
                         break;
                     case "com.sun.identity.agents.config.fetch.from.root.resource":
                     case "com.sun.identity.agents.config.ignore.path.info":
                     case "com.sun.identity.agents.config.auth.connection.timeout":
-                        _agent.Verify(x => x.GetSingle(setting.Key), Times.AtLeastOnce());
+                        agent.Verify(x => x.GetSingle(setting.Key), Times.AtLeastOnce());
                         break;
                     default:
-                        _agent.Verify(x => x.GetSingle(setting.Key), Times.Once());
+                        agent.Verify(x => x.GetSingle(setting.Key), Times.Once());
                         break;
                 }
             }

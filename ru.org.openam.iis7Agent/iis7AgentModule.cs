@@ -159,7 +159,7 @@ namespace ru.org.openam.iis7Agent
 					}
 					var status = user == null ? 401 : 403;
 					Log.Audit(string.Format("User {0} was denied access to {1} ({2})", userId, context.Request.Url.AbsoluteUri, status));
-					LogOff(user == null, url, response);
+					LogOff(user == null, url, context);
 				}
 			}
 			catch (Exception ex)
@@ -169,17 +169,17 @@ namespace ru.org.openam.iis7Agent
 			}
 		}
 
-		private void LogOff(bool isNotAuth, Uri url, HttpResponseBase response)
+		private void LogOff(bool isNotAuth, Uri url, HttpContextBase context)
 		{
 			var logoffUrl = GetLogoffUrl(isNotAuth ? "com.sun.identity.agents.config.login.url" : "com.sun.identity.agents.config.access.denied.url", url);
 			if(logoffUrl != null)
 			{
-				response.Redirect(logoffUrl);
+				context.Response.Redirect(logoffUrl);
 			}
 			else
 			{
-				response.StatusCode = isNotAuth ? 401 : 403;
-				response.End();
+				context.Response.StatusCode = isNotAuth ? 401 : 403;
+				CompleteRequest(context);
 			}
 		}
 

@@ -24,7 +24,7 @@ namespace ru.org.openam.sdk.nunit
 			_httpContext = new Mock<HttpContextBase>();
 			_httpRequest = new Mock<HttpRequestBase>();
 			_httpResponse = new Mock<HttpResponseBase>();
-
+			
 			_httpContext.SetupGet(c => c.Request).Returns(_httpRequest.Object);
 			_httpContext.SetupGet(c => c.Response).Returns(_httpResponse.Object);
 			_httpContext.SetupGet(c => c.Items).Returns(new Dictionary<string, object>());
@@ -74,9 +74,16 @@ namespace ru.org.openam.sdk.nunit
 			var agent = new Mock<Agent>();
 			agent.Setup(a => a.GetSingle("com.sun.identity.agents.config.override.host")).Returns("false");
 			agent.Setup(a => a.GetSingle("com.sun.identity.agents.config.userid.param")).Returns("UserId");
-			var module = new iis7AgentModule(agent.Object);
-			module.OnAuthentication(_httpContext.Object);
+			
+			//var module = new iis7AgentModule(agent.Object);
+			//module.OnAuthentication(_httpContext.Object);
 
+			var module = new Mock<iis7AgentModule>(agent.Object);
+			module.CallBase = true;
+			module.Setup(m => m.CompleteRequest(_httpContext.Object));
+			module.Object.OnAuthentication(_httpContext.Object);
+
+			module.Verify(x => x.CompleteRequest(It.IsAny<HttpContextBase>()), Times.Once());
 			_httpResponse.Verify(r => r.Redirect("http://ibank.staging.rapidsoft.ru:80/"), Times.Never());
 		}
 
@@ -90,9 +97,12 @@ namespace ru.org.openam.sdk.nunit
 			var agent = new Mock<Agent>();
 			agent.Setup(a => a.GetSingle("com.sun.identity.agents.config.override.host")).Returns("true");
 			agent.Setup(a => a.GetSingle("com.sun.identity.agents.config.userid.param")).Returns("UserId");
-			var module = new iis7AgentModule(agent.Object);
-			module.OnAuthentication(_httpContext.Object);
+			var module = new Mock<iis7AgentModule>(agent.Object);
+			module.CallBase = true;
+			module.Setup(m => m.CompleteRequest(_httpContext.Object));
+			module.Object.OnAuthentication(_httpContext.Object);
 
+            module.Verify(x => x.CompleteRequest(It.IsAny<HttpContextBase>()), Times.Once());
 			_httpResponse.Verify(r => r.Redirect("http://ibank.staging.rapidsoft.ru:80/"), Times.Never());
 		}
 
@@ -103,9 +113,12 @@ namespace ru.org.openam.sdk.nunit
 
 			Login();
 
-			var module = new iis7AgentModule();
-			module.OnAuthentication(_httpContext.Object);
+			var module = new Mock<iis7AgentModule>();
+			module.CallBase = true;
+			module.Setup(m => m.CompleteRequest(_httpContext.Object));
+			module.Object.OnAuthentication(_httpContext.Object);
 
+            module.Verify(x => x.CompleteRequest(It.IsAny<HttpContextBase>()), Times.Once());
 			_httpResponse.Verify(r => r.Redirect("http://ibank.staging.rapidsoft.ru:80/"), Times.Never());
 		}
 
@@ -161,8 +174,12 @@ namespace ru.org.openam.sdk.nunit
 				.Returns("https://www.mysite.com:444/logoff");
 			agent.Setup(a => a.GetSingle("com.sun.identity.agents.config.userid.param")).Returns("UserId");
 
-			var module = new iis7AgentModule(agent.Object);
-			module.OnAuthentication(_httpContext.Object);
+			var module = new Mock<iis7AgentModule>(agent.Object);
+			module.CallBase = true;
+			module.Setup(m => m.CompleteRequest(_httpContext.Object));
+			module.Object.OnAuthentication(_httpContext.Object);
+
+            module.Verify(x => x.CompleteRequest(It.IsAny<HttpContextBase>()), Times.Once());
 
 			_httpResponse.Verify(r => r.Redirect("https://www.mysite.com:444/logoff"), Times.Never());
 		}
@@ -219,11 +236,13 @@ namespace ru.org.openam.sdk.nunit
 			agent.Setup(a => a.GetSingle("com.sun.identity.agents.config.userid.param")).Returns("UserId");
 
 			_httpResponse.SetupSet(c => c.StatusCode = 401).Verifiable();
-			_httpResponse.Setup(c => c.End()).Verifiable();
+			
+			var module = new Mock<iis7AgentModule>(agent.Object);
+			module.CallBase = true;
+			module.Setup(m => m.CompleteRequest(_httpContext.Object));
+			module.Object.OnAuthentication(_httpContext.Object);
 
-			var module = new iis7AgentModule(agent.Object);
-			module.OnAuthentication(_httpContext.Object);
-
+            module.Verify(x => x.CompleteRequest(It.IsAny<HttpContextBase>()), Times.Once());
 			_httpResponse.Verify();
 		}
 
@@ -255,11 +274,13 @@ namespace ru.org.openam.sdk.nunit
 			agent.Setup(a => a.GetSingle("com.sun.identity.agents.config.userid.param")).Returns("UserId");
 
 			_httpResponse.SetupSet(c => c.StatusCode = 401).Verifiable();
-			_httpResponse.Setup(c => c.End()).Verifiable();
 
-			var module = new iis7AgentModule(agent.Object);
-			module.OnAuthentication(_httpContext.Object);
+			var module = new Mock<iis7AgentModule>(agent.Object);
+			module.CallBase = true;
+			module.Setup(m => m.CompleteRequest(_httpContext.Object));
+			module.Object.OnAuthentication(_httpContext.Object);
 
+			module.Verify(x => x.CompleteRequest(It.IsAny<HttpContextBase>()), Times.Once());
 			_httpResponse.Verify();
 		}
 
@@ -316,10 +337,12 @@ namespace ru.org.openam.sdk.nunit
 			agent.Setup(a => a.GetSingle("com.sun.identity.agents.config.userid.param")).Returns("UserId");
 
 			_httpResponse.SetupSet(c => c.StatusCode = 401).Verifiable();
-			_httpResponse.Setup(c => c.End()).Verifiable();
+			var module = new Mock<iis7AgentModule>(agent.Object);
+			module.CallBase = true;
+			module.Setup(m => m.CompleteRequest(_httpContext.Object));
+			module.Object.OnAuthentication(_httpContext.Object);
 
-			var module = new iis7AgentModule(agent.Object);
-			module.OnAuthentication(_httpContext.Object);
+			module.Verify(x => x.CompleteRequest(It.IsAny<HttpContextBase>()), Times.Once());
 
 			_httpContext.Verify();
 		}
@@ -424,10 +447,12 @@ namespace ru.org.openam.sdk.nunit
 
 			_httpRequest.SetupGet(c => c.UserHostAddress).Returns("127.0.0.3");
 			_httpResponse.SetupSet(c => c.StatusCode = 401).Verifiable();
-			_httpResponse.Setup(c => c.End()).Verifiable();
+			var module = new Mock<iis7AgentModule>(agent.Object);
+			module.CallBase = true;
+			module.Setup(m => m.CompleteRequest(_httpContext.Object));
+			module.Object.OnAuthentication(_httpContext.Object);
 
-			var module = new iis7AgentModule(agent.Object);
-			module.OnAuthentication(_httpContext.Object);
+			module.Verify(x => x.CompleteRequest(It.IsAny<HttpContextBase>()), Times.Once());
 
 			_httpContext.Verify();
 		}
@@ -506,10 +531,12 @@ namespace ru.org.openam.sdk.nunit
 			var agent = new Mock<Agent>();
 
 			_httpResponse.SetupSet(c => c.StatusCode = 403).Verifiable();
-			_httpResponse.Setup(c => c.End()).Verifiable();
+			var module = new Mock<iis7AgentModule>(agent.Object);
+			module.CallBase = true;
+			module.Setup(m => m.CompleteRequest(_httpContext.Object));
+			module.Object.OnAuthentication(_httpContext.Object);
 
-			var module = new iis7AgentModule(agent.Object);
-			module.OnAuthentication(_httpContext.Object);
+			module.Verify(x => x.CompleteRequest(It.IsAny<HttpContextBase>()), Times.Once());
 
 			_httpContext.Verify();
 		}

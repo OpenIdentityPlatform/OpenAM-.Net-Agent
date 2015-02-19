@@ -25,6 +25,10 @@ namespace ru.org.openam.iis7Agent
 
 		public virtual void OnEndRequest(HttpContextBase context)
 		{
-		} 
+		}
+ 
+		public virtual void CompleteRequest(HttpContextBase context){
+			context.ApplicationInstance.CompleteRequest();
+		}
 	}
 }
