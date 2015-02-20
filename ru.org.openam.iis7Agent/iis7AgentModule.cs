@@ -47,7 +47,15 @@ namespace ru.org.openam.iis7Agent
 			catch (Exception ex)
 			{
 				Log.Fatal(ex);
-				throw;
+				if(context.Request.IsLocal)
+				{
+					throw;
+				}
+				else
+				{
+					context.Response.StatusCode = 500;
+					CompleteRequest(context);	
+				}
 			}
 		}
 
@@ -165,7 +173,15 @@ namespace ru.org.openam.iis7Agent
 			catch (Exception ex)
 			{
 				Log.Fatal(ex);
-				throw;
+				if(context.Request.IsLocal)
+				{
+					throw;
+				}
+				else
+				{
+					context.Response.StatusCode = 500;
+					CompleteRequest(context);	
+				}
 			}
 		}
 

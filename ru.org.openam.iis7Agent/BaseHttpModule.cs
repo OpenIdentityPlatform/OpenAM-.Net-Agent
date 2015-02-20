@@ -28,6 +28,8 @@ namespace ru.org.openam.iis7Agent
 		}
  
 		public virtual void CompleteRequest(HttpContextBase context){
+			context.Response.Clear();
+			context.Response.Write(context.Response.Status);
 			context.ApplicationInstance.CompleteRequest();
 		}
 		
