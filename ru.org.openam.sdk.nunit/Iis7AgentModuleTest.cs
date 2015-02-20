@@ -38,10 +38,11 @@ namespace ru.org.openam.sdk.nunit
 		{
 			_httpRequest.SetupGet(request => request.Url).Returns(new Uri("https://www.mysite.com:444/"));
 
-			_httpResponse.Setup(response => response.Redirect("http://ibank.staging.rapidsoft.ru:80/"));
+			//_httpResponse.Setup(response => response.Redirect("http://ibank.staging.rapidsoft.ru:80/"));
 
-			var module = new iis7AgentModule();
-			module.OnAuthentication(_httpContext.Object);
+			var module = new Mock<iis7AgentModule>();
+			module.CallBase = true;
+			module.Setup(a => a.Redirect("http://ibank.staging.rapidsoft.ru:80/", It.IsAny<HttpContextBase>()));
 
 			_httpResponse.VerifyAll();
 		}
@@ -51,15 +52,16 @@ namespace ru.org.openam.sdk.nunit
 		{
 			_httpRequest.SetupGet(request => request.Url).Returns(new Uri("https://www.mysite.com:444/"));
 
-			_httpResponse.Setup(response => response.Redirect("https://ibank.staging.rapidsoft.ru:444/"));
-
 			var agent = new Mock<Agent>();
 			agent.Setup(a => a.GetSingle("com.sun.identity.agents.config.override.host")).Returns("true");
 			agent.Setup(a => a.GetSingle("com.sun.identity.agents.config.fqdn.default")).Returns("ibank.staging.rapidsoft.ru");
 			agent.Setup(a => a.GetSingle("com.sun.identity.agents.config.agenturi.prefix"))
 				.Returns("http://ibank.staging.rapidsoft.ru:80/");
-			var module = new iis7AgentModule(agent.Object);
-			module.OnAuthentication(_httpContext.Object);
+			var module = new Mock<iis7AgentModule>(agent.Object);
+			module.CallBase = true;
+			module.Setup(a => a.Redirect("https://ibank.staging.rapidsoft.ru:444/", It.IsAny<HttpContextBase>()));
+			
+			module.Object.OnAuthentication(_httpContext.Object);
 
 			_httpResponse.VerifyAll();
 		}
@@ -131,15 +133,18 @@ namespace ru.org.openam.sdk.nunit
 		{
 			_httpRequest.SetupGet(request => request.Url).Returns(new Uri("https://www.mysite.com:444/"));
 
-			_httpResponse.Setup(response => response.Redirect("https://www.mysite.com:444/logoff")).Verifiable();
-
 			var agent = new Mock<Agent>();
 			agent.Setup(a => a.GetOrderedArray("com.sun.identity.agents.config.agent.logout.url"))
 				.Returns(new[] {"https://www.mysite.com:444/"});
 			agent.Setup(a => a.GetFirst("com.sun.identity.agents.config.logout.redirect.url"))
 				.Returns("https://www.mysite.com:444/logoff");
-			var module = new iis7AgentModule(agent.Object);
-			module.OnAuthentication(_httpContext.Object);
+			
+			var module = new Mock<iis7AgentModule>(agent.Object);
+			module.CallBase = true;
+			module.Setup(m => m.Redirect("https://www.mysite.com:444/logoff", _httpContext.Object));
+			module.Object.OnAuthentication(_httpContext.Object);
+
+			module.Verify(m => m.Redirect("https://www.mysite.com:444/logoff", _httpContext.Object), Times.Once());
 
 			_httpResponse.Verify();
 		}
@@ -149,14 +154,18 @@ namespace ru.org.openam.sdk.nunit
 		{
 			_httpRequest.SetupGet(request => request.Url).Returns(new Uri("https://www.mysite.com:444/"));
 
-			_httpResponse.Setup(response => response.Redirect("https://www.mysite.com:444/login")).Verifiable();
-
 			var agent = new Mock<Agent>();
 			agent.Setup(a => a.GetOrderedArray("com.sun.identity.agents.config.agent.logout.url"))
 				.Returns(new[] {"https://www.mysite.com:444/"});
 			agent.Setup(a => a.GetFirst("com.sun.identity.agents.config.login.url")).Returns("https://www.mysite.com:444/login");
-			var module = new iis7AgentModule(agent.Object);
-			module.OnAuthentication(_httpContext.Object);
+			
+			var module = new Mock<iis7AgentModule>(agent.Object);
+			module.CallBase = true;
+			module.Setup(m => m.Redirect("https://www.mysite.com:444/login", _httpContext.Object));
+			module.Object.OnAuthentication(_httpContext.Object);
+
+			module.Verify(m => m.Redirect("https://www.mysite.com:444/login", _httpContext.Object), Times.Once());
+
 
 			_httpResponse.Verify();
 		}
@@ -197,10 +206,13 @@ namespace ru.org.openam.sdk.nunit
 			agent.Setup(a => a.GetOrderedArray("com.sun.identity.agents.config.logout.cookie.reset")).Returns(new[] {"test"});
 			agent.Setup(a => a.GetSingle("com.sun.identity.agents.config.agenturi.prefix"))
 				.Returns("http://ibank.staging.rapidsoft.ru:80/");
-			var module = new iis7AgentModule(agent.Object);
-			module.OnAuthentication(_httpContext.Object);
+			
+			var module = new Mock<iis7AgentModule>(agent.Object);
+			module.CallBase = true;
+			module.Setup(m => m.Redirect("https://www.mysite.com:444/logoff", _httpContext.Object));
+			module.Object.OnAuthentication(_httpContext.Object);
 
-			_httpResponse.Verify(response => response.Redirect("https://www.mysite.com:444/logoff"));
+			module.Verify(m => m.Redirect("https://www.mysite.com:444/logoff", _httpContext.Object), Times.Once());
 			_httpResponse.Verify(r => r.AddHeader("Set-Cookie", "test"));
 		}
 

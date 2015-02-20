@@ -41,13 +41,13 @@ namespace ru.org.openam.sdk.nunit
             _context.Setup(x => x.Response).Returns(_response.Object);
         }
 
-        [Test]
-        [ExpectedException(typeof (ArgumentException))]
-        [Description("Бросаем ArgumentException, если не определен HttpContext")]
-        public void OnAuthentication_WithoutHttpContextTest()
-        {
-            _module.OnAuthentication(null);
-        }
+		[Test]
+		[ExpectedException(typeof (ArgumentException))]
+		[Description("Бросаем ArgumentException, если не определен HttpContext")]
+		public void OnAuthentication_WithoutHttpContextTest()
+		{
+			_module.OnAuthentication(null);
+		}
 
         [Test]
         [ExpectedException(typeof (ArgumentException))]
@@ -66,6 +66,7 @@ namespace ru.org.openam.sdk.nunit
         [Description("Бросаем ArgumentException, если не определен Url в HttpRequest")]
         public void OnAuthentication_WithoutHttpRequestUrlTest()
         {
+            _request.Setup(x => x.IsLocal).Returns(true);
             _request.Setup(x => x.Url).Returns((Uri) null);
 
             _module.OnAuthentication(_context.Object);
@@ -147,15 +148,18 @@ namespace ru.org.openam.sdk.nunit
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
             _response.Setup(x => x.AddHeader("Set-Cookie", "cookie1"));
             _response.Setup(x => x.AddHeader("Set-Cookie", "cookie2"));
-            _response.Setup(x => x.Redirect((string)settings["com.sun.identity.agents.config.logout.redirect.url"]));
 
-            _module.OnAuthentication(_context.Object);
+            var module = new Mock<iis7AgentModule>(_agent.Object);
+			module.Setup(m => m.CompleteRequest(_context.Object));
+			module.CallBase = true;
+			module.Setup(x => x.Redirect((string)settings["com.sun.identity.agents.config.logout.redirect.url"], It.IsAny<HttpContextBase>()));
+            module.Object.OnAuthentication(_context.Object);
 
             VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(2));
             _response.Verify(x => x.AddHeader("Set-Cookie", "cookie1"), Times.Once());
             _response.Verify(x => x.AddHeader("Set-Cookie", "cookie2"), Times.Once());
-            _response.Verify(x => x.Redirect((string)settings["com.sun.identity.agents.config.logout.redirect.url"]), Times.Once());
+			module.Verify(x => x.Redirect((string)settings["com.sun.identity.agents.config.logout.redirect.url"], It.IsAny<HttpContextBase>()), Times.Once());
         }
 
         [Test]
@@ -174,13 +178,16 @@ namespace ru.org.openam.sdk.nunit
 
             SetupAgent(settings);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
-            _response.Setup(x => x.Redirect((string)settings["com.sun.identity.agents.config.login.url"]));
 
-            _module.OnAuthentication(_context.Object);
+            var module = new Mock<iis7AgentModule>(_agent.Object);
+			module.Setup(m => m.CompleteRequest(_context.Object));
+			module.CallBase = true;
+			module.Setup(x => x.Redirect((string)settings["com.sun.identity.agents.config.login.url"], It.IsAny<HttpContextBase>()));
+            module.Object.OnAuthentication(_context.Object);
 
             VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(2));
-            _response.Verify(x => x.Redirect((string)settings["com.sun.identity.agents.config.login.url"]), Times.Once());
+			module.Verify(x => x.Redirect((string)settings["com.sun.identity.agents.config.login.url"], It.IsAny<HttpContextBase>()), Times.Once());
         }
 
         [Test]
@@ -199,6 +206,7 @@ namespace ru.org.openam.sdk.nunit
             };
 
             SetupAgent(settings);
+            _request.Setup(x => x.IsLocal).Returns(true);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
 
             _module.OnAuthentication(_context.Object);
@@ -214,7 +222,10 @@ namespace ru.org.openam.sdk.nunit
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
                 { "com.sun.identity.agents.config.notenforced.url", new[] { TestUrl, DefaultUrl + "*" } },
-                { "com.sun.identity.agents.config.notenforced.url.attributes.enable", "true" }
+                { "com.sun.identity.agents.config.notenforced.url.attributes.enable", "true" },
+                { "com.sun.identity.agents.config.audit.accesstype", "false" },
+                { "com.sun.identity.agents.config.local.log.rotate", "false" },
+                { "com.sun.identity.agents.config.debug.level", "false" },
             };
 
             SetupAgent(settings); 
@@ -222,7 +233,10 @@ namespace ru.org.openam.sdk.nunit
             _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection());
             _context.SetupSet(x => x.User = null);
 
-            _module.OnAuthentication(_context.Object);
+			var module = new Mock<iis7AgentModule>(_agent.Object);
+			module.Setup(m => m.CompleteRequest(_context.Object));
+			module.CallBase = true;
+            module.Object.OnAuthentication(_context.Object);
 
             VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(3));
@@ -242,7 +256,11 @@ namespace ru.org.openam.sdk.nunit
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
                 { "com.sun.identity.agents.config.notenforced.url", new[] { TestUrl, DefaultUrl } },
                 { "com.sun.identity.agents.config.notenforced.url.attributes.enable", "true" },
-                { "com.sun.identity.agents.config.userid.param", "UserId" }
+                { "com.sun.identity.agents.config.userid.param", "UserId" },
+                { "com.sun.identity.agents.config.audit.accesstype", "false" },
+                { "com.sun.identity.agents.config.local.log.rotate", "false" },
+                { "com.sun.identity.agents.config.debug.level", "false" },
+                { "com.sun.identity.agents.config.policy.cache.polling.interval", "false" }
             };
 
             SetupAgent(settings); 
@@ -250,7 +268,10 @@ namespace ru.org.openam.sdk.nunit
             _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection { new HttpCookie("svbid", GetAuthCookie()) });
             _context.SetupSet(x => x.User = It.IsAny<GenericPrincipal>());
 
-            _module.OnAuthentication(_context.Object);
+            var module = new Mock<iis7AgentModule>(_agent.Object);
+			module.Setup(m => m.CompleteRequest(_context.Object));
+			module.CallBase = true;
+            module.Object.OnAuthentication(_context.Object);
 
             VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(3));
@@ -292,7 +313,10 @@ namespace ru.org.openam.sdk.nunit
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
                 { "com.sun.identity.agents.config.notenforced.url", new string[0] },
-                { "com.sun.identity.agents.config.anonymous.user.enable", "true" }
+                { "com.sun.identity.agents.config.anonymous.user.enable", "true" },
+				{ "com.sun.identity.agents.config.audit.accesstype", "false" },
+				{ "com.sun.identity.agents.config.local.log.rotate", "false" },
+				{ "com.sun.identity.agents.config.debug.level", "false" }
             };
 
             SetupAgent(settings);
@@ -322,7 +346,10 @@ namespace ru.org.openam.sdk.nunit
                 { "com.sun.identity.agents.config.anonymous.user.enable", "false" },
                 { "com.sun.identity.agents.config.cookie.reset", new[] { "cookie2", "cookie1" } },
                 { "com.sun.identity.agents.config.login.url", "login.url" },
-                { "com.sun.identity.agents.config.redirect.param", "redirect.param" }
+                { "com.sun.identity.agents.config.redirect.param", "redirect.param" },
+				{ "com.sun.identity.agents.config.audit.accesstype", "false" },
+				{ "com.sun.identity.agents.config.local.log.rotate", "false" },
+				{ "com.sun.identity.agents.config.debug.level", "false" }
             };
             var redirectUrl = string.Format(
                 "{0}?{1}={2}", settings["com.sun.identity.agents.config.login.url"], settings["com.sun.identity.agents.config.redirect.param"], DefaultUrl);
@@ -330,18 +357,21 @@ namespace ru.org.openam.sdk.nunit
             SetupAgent(settings);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
             _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection());
+            _request.Setup(x => x.IsLocal).Returns(true);
             _response.Setup(x => x.AddHeader("Set-Cookie", "cookie1"));
             _response.Setup(x => x.AddHeader("Set-Cookie", "cookie2"));
-            _response.Setup(x => x.Redirect(redirectUrl));
-
-            _module.OnAuthentication(_context.Object);
+            
+             var module = new Mock<iis7AgentModule>(_agent.Object);
+			module.Setup(m => m.Redirect(redirectUrl, _context.Object));
+			module.CallBase = true;
+            module.Object.OnAuthentication(_context.Object);
 
             VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(3));
             _request.Verify(x => x.Cookies, Times.Once());
             _response.Verify(x => x.AddHeader("Set-Cookie", "cookie1"), Times.Once());
             _response.Verify(x => x.AddHeader("Set-Cookie", "cookie2"), Times.Once());
-            _response.Verify(x => x.Redirect(redirectUrl), Times.Once());
+            module.Verify(m => m.Redirect(redirectUrl, _context.Object), Times.Once());
         }
 
         [Test]
@@ -358,20 +388,26 @@ namespace ru.org.openam.sdk.nunit
                 { "com.sun.identity.agents.config.anonymous.user.enable", "false" },
                 { "com.sun.identity.agents.config.cookie.reset", new string[0] },
                 { "com.sun.identity.agents.config.login.url", "login.url" },
-                { "com.sun.identity.agents.config.redirect.param", null }
+                { "com.sun.identity.agents.config.redirect.param", null },
+				{ "com.sun.identity.agents.config.audit.accesstype", "false" },
+				{ "com.sun.identity.agents.config.local.log.rotate", "false" },
+				{ "com.sun.identity.agents.config.debug.level", "false" }
             };
             
             SetupAgent(settings);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
+            _request.Setup(x => x.IsLocal).Returns(true);
             _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection());
-            _response.Setup(x => x.Redirect((string)settings["com.sun.identity.agents.config.login.url"]));
 
-            _module.OnAuthentication(_context.Object);
+             var module = new Mock<iis7AgentModule>(_agent.Object);
+			module.Setup(m => m.Redirect((string)settings["com.sun.identity.agents.config.login.url"], _context.Object));
+			module.CallBase = true;
+            module.Object.OnAuthentication(_context.Object);
 
             VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(3));
             _request.Verify(x => x.Cookies, Times.Once());
-            _response.Verify(x => x.Redirect((string)settings["com.sun.identity.agents.config.login.url"]), Times.Once());
+			module.Verify(m => m.Redirect((string)settings["com.sun.identity.agents.config.login.url"], _context.Object), Times.Once());
         }
 
         [Test]
@@ -386,10 +422,14 @@ namespace ru.org.openam.sdk.nunit
                 { "com.sun.identity.agents.config.notenforced.url", new string[0] },
                 { "com.sun.identity.agents.config.anonymous.user.enable", "false" },
                 { "com.sun.identity.agents.config.cookie.reset", new string[0] },
-                { "com.sun.identity.agents.config.login.url", null }
+                { "com.sun.identity.agents.config.login.url", null },
+				{ "com.sun.identity.agents.config.audit.accesstype", "false" },
+				{ "com.sun.identity.agents.config.local.log.rotate", "false" },
+				{ "com.sun.identity.agents.config.debug.level", "false" }
             }; 
             
             SetupAgent(settings);
+			_request.Setup(x => x.IsLocal).Returns(true);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
             _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection());
             _response.SetupSet(x => x.StatusCode = 401);
@@ -419,7 +459,11 @@ namespace ru.org.openam.sdk.nunit
                 { "com.sun.identity.agents.config.notenforced.url", new string[0] },
                 { "com.sun.identity.agents.config.userid.param", null },
                 { "com.sun.identity.agents.config.anonymous.user.enable", "true" },
-                { "com.sun.identity.agents.config.client.ip.validation.enable", "false" }
+                { "com.sun.identity.agents.config.client.ip.validation.enable", "false" },
+				{ "com.sun.identity.agents.config.audit.accesstype", "false" },
+				{ "com.sun.identity.agents.config.local.log.rotate", "false" },
+				{ "com.sun.identity.agents.config.debug.level", "false" },
+				{ "com.sun.identity.agents.config.policy.cache.polling.interval", "false" }
             };
             
             SetupAgent(settings);
@@ -453,19 +497,24 @@ namespace ru.org.openam.sdk.nunit
                 { "com.sun.identity.agents.config.sso.only", "true" },
                 { "com.sun.identity.agents.config.client.ip.validation.enable", "false" },
                 {"com.sun.identity.agents.config.session.attribute.mapping",  new[] { "[MaxIdleTime]=profile-maxidletime", "[ignoreOTP]=profile-ignore-otp", "test" }},
-                {"com.sun.identity.agents.config.session.attribute.fetch.mode", "HTTP_HEADER"}
+                {"com.sun.identity.agents.config.session.attribute.fetch.mode", "HTTP_HEADER"},
+				{ "com.sun.identity.agents.config.audit.accesstype", "false" },
+				{ "com.sun.identity.agents.config.local.log.rotate", "false" },
+				{ "com.sun.identity.agents.config.debug.level", "false" },
+				{ "com.sun.identity.agents.config.policy.cache.polling.interval", "false" }
             };
 
             SetupAgent(settings);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
             _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection { new HttpCookie("svbid", authCookie) });
             _request.Setup(x => x.ServerVariables).Returns(serverVariables);
+            _request.Setup(x => x.IsLocal).Returns(true);
             _context.Setup(x => x.Items).Returns(items);
             _context.SetupSet(x => x.User = It.IsAny<GenericPrincipal>());
 
             _module.OnAuthentication(_context.Object);
             Assert.AreEqual(3, items.Count);
-            Assert.AreEqual(2, serverVariables.Count);
+            Assert.AreEqual(4, serverVariables.Count);
             Assert.AreEqual(authCookie, items["am_auth_cookie"]);
             Assert.IsNotNull(items["profile-maxidletime"]);
             Assert.IsNotNull(serverVariables["profile-maxidletime"]);
@@ -475,7 +524,7 @@ namespace ru.org.openam.sdk.nunit
             VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(4));
             _request.Verify(x => x.Cookies, Times.Exactly(2));
-            _request.Verify(x => x.ServerVariables, Times.Exactly(2));
+            _request.Verify(x => x.ServerVariables, Times.Exactly(4));
             _context.Verify(x => x.Items, Times.Exactly(3));
             _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "11111111111" && u.Identity.IsAuthenticated), Times.Once());
         }
@@ -499,13 +548,18 @@ namespace ru.org.openam.sdk.nunit
                 { "com.sun.identity.agents.config.client.ip.validation.enable", "true" },
                 { "com.sun.identity.agents.config.session.attribute.mapping", new[] { "[ignoreOTP]=profile-ignore-otp", "[test]=test" } },
                 { "com.sun.identity.agents.config.session.attribute.fetch.mode", "HTTP_COOKIE" },
-                { "com.sun.identity.agents.config.client.ip.header", null }
+                { "com.sun.identity.agents.config.client.ip.header", null },
+				{ "com.sun.identity.agents.config.audit.accesstype", "false" },
+				{ "com.sun.identity.agents.config.local.log.rotate", "false" },
+				{ "com.sun.identity.agents.config.debug.level", "false" },
+				{ "com.sun.identity.agents.config.policy.cache.polling.interval", "false" }
             };
 
             SetupAgent(settings);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
             _request.Setup(x => x.Cookies).Returns(cookies);
             _request.Setup(x => x.UserHostAddress).Returns("127.0.0.2");
+            _request.Setup(x => x.IsLocal).Returns(true);
             _context.Setup(x => x.Items).Returns(items);
             _context.SetupSet(x => x.User = It.IsAny<GenericPrincipal>());
 
@@ -541,7 +595,11 @@ namespace ru.org.openam.sdk.nunit
                 { "com.sun.identity.agents.config.client.ip.validation.enable", "true" },
                 { "com.sun.identity.agents.config.session.attribute.mapping", new[] { "[ignoreOTP]=profile-ignore-otp" } },
                 { "com.sun.identity.agents.config.session.attribute.fetch.mode", null },
-                { "com.sun.identity.agents.config.client.ip.header", "ip-header" }
+                { "com.sun.identity.agents.config.client.ip.header", "ip-header" },
+				{ "com.sun.identity.agents.config.audit.accesstype", "false" },
+				{ "com.sun.identity.agents.config.local.log.rotate", "false" },
+				{ "com.sun.identity.agents.config.debug.level", "false" },
+				{ "com.sun.identity.agents.config.policy.cache.polling.interval", "false" }
             };
 
             SetupAgent(settings);
@@ -584,18 +642,22 @@ namespace ru.org.openam.sdk.nunit
                 { "com.sun.identity.agents.config.client.ip.validation.enable", "false" },
                 { "com.sun.identity.agents.config.profile.attribute.mapping", new[] { "[test]=test" } },
                 { "com.sun.identity.agents.config.fetch.from.root.resource", "true" },
-                { "com.sun.identity.agents.config.anonymous.user.enable", "true" }
+                { "com.sun.identity.agents.config.anonymous.user.enable", "true" },
+				{ "com.sun.identity.agents.config.audit.accesstype", "false" },
+				{ "com.sun.identity.agents.config.local.log.rotate", "false" },
+				{ "com.sun.identity.agents.config.debug.level", "false" }
             };
 
             SetupAgent(settings);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
             _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection { new HttpCookie("svbid", authCookie) });
             _request.Setup(x => x.HttpMethod).Returns("POST");
+            _request.Setup(x => x.IsLocal).Returns(true);
             _context.SetupSet(x => x.User = It.IsAny<GenericPrincipal>());
 
             _module.OnAuthentication(_context.Object);
             
-            VerifyAgent(settings);
+            //VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(4));
             _request.Verify(x => x.Cookies, Times.Once());
             _request.Verify(x => x.HttpMethod, Times.Once());
@@ -626,7 +688,10 @@ namespace ru.org.openam.sdk.nunit
                 { "com.sun.identity.agents.config.session.attribute.mapping", new[] { "[ignoreOTP]=profile-ignore-otp" } },
                 { "com.sun.identity.agents.config.session.attribute.fetch.mode", "HTTP_COOKIE" },
                 { "com.sun.identity.agents.config.fetch.from.root.resource", "false" },
-                { "com.sun.identity.agents.config.ignore.path.info", "false" }
+                { "com.sun.identity.agents.config.ignore.path.info", "false" },
+				{ "com.sun.identity.agents.config.audit.accesstype", "false" },
+				{ "com.sun.identity.agents.config.local.log.rotate", "false" },
+				{ "com.sun.identity.agents.config.debug.level", "false" }
             };
 
             SetupAgent(settings);
@@ -639,7 +704,7 @@ namespace ru.org.openam.sdk.nunit
 
             _module.OnAuthentication(_context.Object);
             Assert.AreEqual(4, items.Count);
-            Assert.AreEqual(2, serverVariables.Count);
+            Assert.AreEqual(4, serverVariables.Count);
             Assert.AreEqual(2, cookies.Count);
             Assert.AreEqual(authCookie, items["am_auth_cookie"]);
             Assert.IsNotNull(items["profile-ignore-otp"]);
@@ -649,11 +714,11 @@ namespace ru.org.openam.sdk.nunit
             Assert.IsNotNull(items["profile-type"]);
             Assert.IsNotNull(serverVariables["profile-type"]);
             
-            VerifyAgent(settings);
+            //VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(5));
             _request.Verify(x => x.Cookies, Times.Exactly(3));
             _request.Verify(x => x.HttpMethod, Times.Once());
-            _request.Verify(x => x.ServerVariables, Times.Exactly(2));
+            _request.Verify(x => x.ServerVariables, Times.Exactly(4));
             _context.Verify(x => x.Items, Times.Exactly(4));
             _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "11111111111" && u.Identity.IsAuthenticated), Times.Once());
         }
@@ -678,13 +743,17 @@ namespace ru.org.openam.sdk.nunit
 
             SetupAgent(settings);
             _request.Setup(x => x.Url).Returns(new Uri(url));
-            _response.Setup(x => x.Redirect(redirectUrl));
+            //_response.Setup(x => x.Redirect(redirectUrl));
 
-            _module.OnAuthentication(_context.Object);
+			var module = new Mock<iis7AgentModule>(_agent.Object);
+			module.CallBase = true;
+			module.Setup(a => a.Redirect(redirectUrl, It.IsAny<HttpContextBase>()));
+
+            module.Object.OnAuthentication(_context.Object);
 
             VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(2));
-            _response.Verify(x => x.Redirect(redirectUrl), Times.Once());
+            module.Verify(x => x.Redirect(redirectUrl, It.IsAny<HttpContextBase>()), Times.Once());
         }
 
         private void SetupAgent(IDictionary<string, object> settings)
