@@ -50,11 +50,11 @@ namespace ru.org.openam.sdk
 			string url;
 			if (agent.GetSingle("com.sun.identity.agents.config.fetch.from.root.resource") == "true")
 			{
-				url = uri.Scheme + "://" + uri.Host;
+				url = uri.Scheme + "://" + uri.Host + ":" + uri.Port;
 			}
 			else if (agent.GetSingle("com.sun.identity.agents.config.ignore.path.info") == "true")
 			{
-				url = uri.Scheme + "://" + uri.Host + uri.AbsolutePath;
+				url = uri.Scheme + "://" + uri.Host + ":" + uri.Port + uri.AbsolutePath;
 			}
 			else
 			{
