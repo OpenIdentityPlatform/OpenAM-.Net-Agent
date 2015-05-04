@@ -507,6 +507,5 @@ namespace ru.org.openam.iis7Agent
 			}
 		}
 
-		public void Dispose() { }
 	}
 }

@@ -70,7 +70,7 @@ namespace ru.org.openam.sdk.policy
 //</PolicyResponse>
 //</PolicyService>
 
-		Uri url=null;
+		protected Uri url=null;
 		Dictionary<string, object> ResponseAttributes=new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 		Dictionary<string, object> ActionDecision=new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 		Dictionary<string, object> Advices=new Dictionary<string,object>(StringComparer.OrdinalIgnoreCase);

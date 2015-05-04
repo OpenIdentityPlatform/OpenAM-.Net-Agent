@@ -61,16 +61,20 @@ namespace ru.org.openam.sdk
 				   ).DocumentElement);
 			throw new Exception("unknown type=" + request.svcid);
 		}
-
-		public static pll.ResponseSet GetXML(naming.Response naming, pll.RequestSet requests)
+		public static pll.ResponseSet GetXML(Uri uri, pll.RequestSet requests)
 		{
 			return new pll.ResponseSet(
 				GetXML(
-					getUrl(naming, requests.svcid),
+					uri,
 					"POST",
 					"text/xml; encoding='utf-8'",
 					requests.ToString()
 				).DocumentElement);
+		}
+
+		public static pll.ResponseSet GetXML(naming.Response naming, pll.RequestSet requests)
+		{
+			return GetXML(getUrl((naming.Response)naming, requests.svcid),requests);
 		}
 
 		public static XmlDocument GetXML(Uri uri, String method, String ContentType, String body)
@@ -82,7 +86,7 @@ namespace ru.org.openam.sdk
 			Log.Info(string.Format
 			(
 				"Message sent (uuid: {1}) {2} {3}{0}User-Agent: {4}{0}Content-Type: {5}{0}{6}{0}",
-				Environment.NewLine,
+				"\n",
 				uuid,
 				http.Method,
 				http.RequestUri,

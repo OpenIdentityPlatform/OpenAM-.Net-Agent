@@ -6,7 +6,7 @@ using System.Net;
 
 namespace ru.org.openam.sdk
 {
-    public static class Bootstrap
+    public class Bootstrap
     {
         public static Uri getUrl()
         {
@@ -58,10 +58,10 @@ namespace ru.org.openam.sdk
         //<Attribute name="iplanet-am-naming-logging-class" value="com.sun.identity.log.service.LogService"></Attribute>
         //<Attribute name="iplanet-am-naming-policy-url" value="%protocol://%host:%port%uri/policyservice"></Attribute>
         //<Attribute name="05" value="http://sso.rapidsoft.ru:8080/auth"></Attribute>
-        static naming.Response global = Naming.Get(new naming.Request());
+        static naming.Response globalNaming = Naming.Get(new naming.Request());
         public static naming.Response GetNaming()
         {
-            return global;
+			return globalNaming;
         }
     }
 }
