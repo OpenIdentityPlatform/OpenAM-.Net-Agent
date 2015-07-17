@@ -13,20 +13,21 @@ namespace ru.org.openam.sdk
 			request.KeepAlive = true;
 			request.UserAgent = "openam.org.ru/1.0 (.Net)";
 
-			if (Agent.Instance.HasConfig())
-			{
-				var sla = Agent.Instance.GetSingle("com.sun.identity.agents.config.auth.connection.timeout");
-				int slaInt;
-				if (int.TryParse(sla, out slaInt))
-				{
-					request.Timeout = slaInt * 60 * 1000;
-				}
+			//<add key="com.sun.identity.agents.config.receive.timeout" value="0"/>
+			//<add key="com.sun.identity.agents.config.connect.timeout" value="0"/>
+			int connect_timeout=7000;
+			int receive_timeout=15000;
+			if (Agent.Instance.HasConfig ()) {
+				int.TryParse (Agent.Instance.GetSingle ("com.sun.identity.agents.config.connect.timeout"), out connect_timeout);
+				int.TryParse (Agent.Instance.GetSingle ("com.sun.identity.agents.config.receive.timeout"), out receive_timeout);
+			} else {
+				int.TryParse (ConfigurationManager.AppSettings["com.sun.identity.agents.config.connect.timeout"], out connect_timeout);
+				int.TryParse (ConfigurationManager.AppSettings["com.sun.identity.agents.config.receive.timeout"], out receive_timeout);
 			}
-			else
-			{
-				request.Timeout = 5 * 60 * 1000;
-			}
-
+			if (connect_timeout>0)
+				request.Timeout = Math.Max(connect_timeout,1000);
+			if (receive_timeout>0)
+				request.ReadWriteTimeout = Math.Max(receive_timeout,5000);
 			return request;
 		}
 

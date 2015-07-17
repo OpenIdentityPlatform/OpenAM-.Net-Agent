@@ -390,7 +390,7 @@ namespace ru.org.openam.sdk
 		public virtual string GetSingle(string name) 
 		{
 			if(!GetConfig().ContainsKey(name))
-				return null;
+				return ConfigurationManager.AppSettings[name]; //try local
 
 			var opt = GetConfig()[name];
 			
@@ -401,9 +401,7 @@ namespace ru.org.openam.sdk
 		public virtual string GetFirst(string name) 
 		{
 			if(!GetConfig().ContainsKey(name))
-			{
-				return null;
-			}
+				return ConfigurationManager.AppSettings[name]; //try local
 
 			var hs = GetOrderedArray(name);
 			return hs.FirstOrDefault();	
