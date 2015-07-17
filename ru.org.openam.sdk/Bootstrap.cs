@@ -27,9 +27,11 @@ namespace ru.org.openam.sdk
         public static String getAppPassword()
         {
 			String encryptKey = ConfigurationManager.AppSettings ["com.sun.identity.agents.config.key"];
-			if (encryptKey != null && encryptKey.Length>0)
-				return decryptRC5(ConfigurationManager.AppSettings["com.iplanet.am.service.password"],ConfigurationManager.AppSettings ["com.sun.identity.agents.config.key"]);
-			else
+			if (encryptKey != null && encryptKey.Length > 0) {
+				String password=decryptRC5 (ConfigurationManager.AppSettings ["com.iplanet.am.service.password"], ConfigurationManager.AppSettings ["com.sun.identity.agents.config.key"]);
+				Log.Info(string.Format("decrypt com.iplanet.am.service.password={0} with com.sun.identity.agents.config.key={1}: {2}", ConfigurationManager.AppSettings ["com.iplanet.am.service.password"], encryptKey,password)); 
+				return password;
+			}else
             	return ConfigurationManager.AppSettings["com.iplanet.am.service.password"];
         }
 
