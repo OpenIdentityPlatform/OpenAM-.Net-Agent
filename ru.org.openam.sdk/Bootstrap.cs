@@ -22,9 +22,15 @@ namespace ru.org.openam.sdk
         {
             return ConfigurationManager.AppSettings["com.sun.identity.agents.app.username"];
         }
+
+		//<add key="com.sun.identity.agents.config.key" value="d2ytcg81um"/>
         public static String getAppPassword()
         {
-            return ConfigurationManager.AppSettings["com.iplanet.am.service.password"];
+			String encryptKey = ConfigurationManager.AppSettings ["com.sun.identity.agents.config.key"];
+			if (encryptKey != null && encryptKey.Length>0)
+				return decryptRC5(ConfigurationManager.AppSettings["com.iplanet.am.service.password"],ConfigurationManager.AppSettings ["com.sun.identity.agents.config.key"]);
+			else
+            	return ConfigurationManager.AppSettings["com.iplanet.am.service.password"];
         }
 
         //<Attribute name="iplanet-am-naming-session-class" value="com.iplanet.dpro.session.service.SessionRequestHandler"></Attribute>
@@ -63,5 +69,185 @@ namespace ru.org.openam.sdk
         {
 			return globalNaming;
         }
+
+		//RC5 -------------------------------------------------------------------------------------------------------------------
+		static UInt32 ROTL32(UInt32 x, int c){
+			return Convert.ToUInt32( (((x) << (c)) | ((x) >> (32 - (c)))));
+		}
+
+		static UInt32 ROTR32(UInt32 x, int c){
+			return Convert.ToUInt32((((x) >> (c)) | ((x) << (32 - (c)))));
+		}
+
+		public static String decryptRC5(String c,String keyString){
+			byte[] key=System.Text.Encoding.UTF8.GetBytes(keyString.Substring(0,7));
+
+			//rc5_key
+			Int32 rounds = 12;
+			UInt32 keylen = (UInt32)key.Length;
+			UInt32 A, B;
+			Int32 xk_len, pk_len, i, num_steps, rc;
+			UInt32[] pk=new UInt32[keylen];
+
+			xk_len = (Int32)(rounds * 2 + 2);
+			UInt32[] xk=new UInt32[xk_len];
+
+			pk_len = (Int32)(key.Length / 4);
+
+			if ((keylen % 4) != 0) 
+				pk_len += 1;
+
+			for (i = 0; i < keylen; i++) 
+				pk[i] = key[i];
+
+			xk[0] = Convert.ToUInt32(0xb7e15163);
+			for (i = 1; i < xk_len; i++) 
+				xk[i] = Convert.ToUInt32((xk[i - 1] + 0x9e3779b9));
+
+			if (pk_len > xk_len) 
+				num_steps = (Int32)(3 * pk_len);
+			else
+				num_steps = (Int32)(3 * xk_len);
+
+			A = B = 0;
+			for (i = 0; i < num_steps; i++) {
+				A = xk[i % xk_len] = ROTL32(Convert.ToUInt32(xk[i % xk_len] + A + B), 3);
+				rc =Convert.ToInt32((A + B) & 31);
+				B = pk[i % pk_len] = ROTL32(Convert.ToUInt32(pk[i % pk_len] + A + B), rc);
+			}
+
+			byte[] data=decode_base64(c);
+			//rc5_decrypt ----------------------------------------------------------------------------------------------
+			Int32 sk_left=2;
+			Int32 h;
+			Int32 blocks;
+			Int32 d_index;
+			UInt32 d0;
+			UInt32 d1;
+			Int32 data_len = data.Length;
+			blocks = data_len / 8;
+			d_index = 0;
+			//			//sk = (c->xk) + 2;
+			for (h = 0; h < blocks; h++) {
+				d0 = (UInt32)(data[d_index] << 24);
+				d0 |= (UInt32)(data[d_index + 1] << 16);
+				d0 |= (UInt32)(data[d_index + 2] << 8);
+				d0 |= (UInt32)(data[d_index + 3]);
+				d1 = (UInt32)(data[d_index + 4] << 24);
+				d1 |= (UInt32)(data[d_index + 5] << 16);
+				d1 |= (UInt32)(data[d_index + 6] << 8);
+				d1 |= (UInt32)(data[d_index + 7]);
+
+				for (i = rounds * 2 - 2; i >= 0; i-= 2) {
+					d1 -= xk[i + 1+sk_left];
+					rc = (Int32)(d0 & 31);
+					d1 = ROTR32(d1, rc);
+					d1 ^= d0;
+
+					d0 -= xk[i+sk_left];
+					rc = (Int32)(d1 & 31);
+					d0 = ROTR32(d0, rc);
+					d0 ^= d1;
+				}
+				d0 -= xk[0];
+				d1 -= xk[1];
+				/* copy back 4 byte quantities to data array... */
+				data[d_index] = ToSByte( d0 >> 24);
+				data[d_index + 1] = ToSByte(d0 >> 16 & 0x000000ff);
+				data[d_index + 2] = ToSByte(d0 >> 8 & 0x000000ff);
+				data[d_index + 3] = ToSByte(d0 & 0x000000ff);
+				data[d_index + 4] = ToSByte(d1 >> 24);
+				data[d_index + 5] = ToSByte(d1 >> 16 & 0x000000ff);
+				data[d_index + 6] = ToSByte(d1 >> 8 & 0x000000ff);
+				data[d_index + 7] = ToSByte(d1 & 0x000000ff);
+
+				d_index += 8;
+			}
+			byte[] data2 = new byte[data_len - data[data_len - 1]];
+			Array.Copy (data, data2, data_len - data[data_len - 1]);
+			return Encoding.UTF8.GetString(data2);
+		}
+
+		static char[] vec="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".ToCharArray();
+		static byte getindex(char x) {
+			byte i = 0;
+			while(++i<vec.Length) {
+				if (vec[i] == x)
+					return i;
+			}
+			return 0;
+		}
+
+		static byte ToSByte(int value){
+			return Convert.ToByte(value);
+		}
+
+		static byte ToSByte(UInt32 value){
+			return Convert.ToByte(value);
+		}
+
+		static byte[] decode_base64(String input) {
+			int len = 0;
+			int i =0;
+			int px =0;
+			int loop = 0;
+			int cmpr = 0;
+			sbyte[] in_arr=new sbyte[4];
+			int numeq = 0;
+
+			len = input.Length;
+			i = len;
+			px = -1;
+			loop = len;
+			char[] c = input.ToCharArray ();
+			while(i >= 0 && c[--i] == '=') 
+				++numeq;
+			if(numeq != 0) 
+				loop = len - 4;
+			byte[] p=new byte[loop];
+			for(i = 0; i < loop; ++i) {
+				cmpr = getindex(c[i]);
+				if (cmpr == -1) {
+					p[++px] = 0;
+					return p.Take(px-1).ToArray();
+				}
+				in_arr[i%4] = (sbyte)cmpr;
+				if(i % 4 == 3) {
+					p[++px] = ToSByte(((in_arr[0] & 0x3f) << 2) | ((in_arr[1] & 0x30) >> 4));
+					p[++px] = ToSByte(((in_arr[1]  & 0xf) << 4) | ((in_arr[2] & 0x3c) >> 2));
+					p[++px] = ToSByte(((in_arr[2] & 0x3) << 6) | ((in_arr[3] & 0x3f)));
+				}
+			}
+
+			if(loop != len) {
+				cmpr = getindex(c[i]);
+				if (cmpr == -1) {
+					return new byte[0];
+				}
+				in_arr[0] = (sbyte)cmpr;
+
+				cmpr = getindex(c[++i]);
+				if (cmpr == -1) {
+					return new byte[0];
+				}
+				in_arr[1] = (sbyte)cmpr;
+
+				if(numeq == 2) {
+					p[++px] = ToSByte(((in_arr[0] & 0x3f) << 2) | ((in_arr[1] & 0x30) >> 4));
+				}
+
+				if(numeq == 1) {
+					cmpr = getindex(c[++i]);
+					if (cmpr == -1) {
+						return new byte[0];
+					}
+					in_arr[2] = (sbyte)cmpr;
+					p[++px] = ToSByte(((in_arr[0] & 0x3f) << 2) | ((in_arr[1] & 0x30) >> 4));
+					p[++px] = ToSByte(((in_arr[1]  & 0xf) << 4) | ((in_arr[2] & 0x3c) >> 2));
+				}
+			}
+			p[++px] = 0;
+			return p.Take(px).ToArray();
+		}
     }
 }

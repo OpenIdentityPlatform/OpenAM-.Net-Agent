@@ -167,6 +167,17 @@ namespace ru.org.openam.sdk.nunit
 				new String[]{"uid","inetuserStatus","unknown","cn"});
 			Assert.IsTrue(policy.result.isAllow("post"));
 		}
+
+		[Test ()]
+		public void RC5()
+		{
+			Console.WriteLine(
+				Bootstrap.decryptRC5(
+					"8nVfLPLjVtYuNgL/RlUg89gErBg7Se6/hNBc8jXMYr9AeWIUTEU0oyx3u8u6DaNXolEbVObORTWyZ0H+DDYH+8B8u1uRAsyPnTpQIL3w4r2QNvePWFQSoSR2c/3reK/9"
+					,"d2ytcg8"
+				)
+			);
+		}
 	}
 }
 
