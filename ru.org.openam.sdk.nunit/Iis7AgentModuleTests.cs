@@ -250,7 +250,8 @@ namespace ru.org.openam.sdk.nunit
         {
             var settings = new Dictionary<string, object>
             {
-                { "com.sun.identity.agents.config.auth.connection.timeout", "1" },
+				{ "com.sun.identity.agents.config.receive.timeout", "0" },
+				{ "com.sun.identity.agents.config.connect.timeout", "0" },
                 { "com.sun.identity.agents.config.override.host", "false" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
@@ -452,7 +453,8 @@ namespace ru.org.openam.sdk.nunit
         {
             var settings = new Dictionary<string, object>
             {
-                { "com.sun.identity.agents.config.auth.connection.timeout", "1" },
+				{ "com.sun.identity.agents.config.receive.timeout", "0" },
+				{ "com.sun.identity.agents.config.connect.timeout", "0" },
                 { "com.sun.identity.agents.config.override.host", "false" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
@@ -488,7 +490,8 @@ namespace ru.org.openam.sdk.nunit
             var authCookie = GetAuthCookie();
             var settings = new Dictionary<string, object>
             {
-                { "com.sun.identity.agents.config.auth.connection.timeout", "1" },
+				{ "com.sun.identity.agents.config.receive.timeout", "0" },
+				{ "com.sun.identity.agents.config.connect.timeout", "0" },
                 { "com.sun.identity.agents.config.override.host", "false" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
@@ -538,7 +541,8 @@ namespace ru.org.openam.sdk.nunit
             var cookies = new HttpCookieCollection { new HttpCookie("svbid", authCookie) };
             var settings = new Dictionary<string, object>
             {
-                { "com.sun.identity.agents.config.auth.connection.timeout", "1" },
+				{ "com.sun.identity.agents.config.receive.timeout", "0" },
+				{ "com.sun.identity.agents.config.connect.timeout", "0" },
                 { "com.sun.identity.agents.config.override.host", "false" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
@@ -585,7 +589,8 @@ namespace ru.org.openam.sdk.nunit
             var authCookie = GetAuthCookie();
             var settings = new Dictionary<string, object>
             {
-                { "com.sun.identity.agents.config.auth.connection.timeout", "1" },
+				{ "com.sun.identity.agents.config.receive.timeout", "0" },
+				{ "com.sun.identity.agents.config.connect.timeout", "0" },
                 { "com.sun.identity.agents.config.override.host", "false" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
@@ -631,7 +636,8 @@ namespace ru.org.openam.sdk.nunit
             var authCookie = GetAuthCookie();
             var settings = new Dictionary<string, object>
             {
-                { "com.sun.identity.agents.config.auth.connection.timeout", "1" },
+				{ "com.sun.identity.agents.config.receive.timeout", "0" },
+				{ "com.sun.identity.agents.config.connect.timeout", "0" },
                 { "com.sun.identity.agents.config.policy.cache.polling.interval", null },
                 { "com.sun.identity.agents.config.override.host", "false" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
@@ -674,7 +680,8 @@ namespace ru.org.openam.sdk.nunit
             var cookies = new HttpCookieCollection { new HttpCookie("svbid", authCookie) };
             var settings = new Dictionary<string, object>
             {
-                { "com.sun.identity.agents.config.auth.connection.timeout", "1" },
+				{ "com.sun.identity.agents.config.receive.timeout", "0" },
+				{ "com.sun.identity.agents.config.connect.timeout", "0" },
                 { "com.sun.identity.agents.config.policy.cache.polling.interval", null },
                 { "com.sun.identity.agents.config.override.host", "false" },
                 { "com.sun.identity.agents.config.fqdn.default", null },

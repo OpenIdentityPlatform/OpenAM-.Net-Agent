@@ -25,7 +25,7 @@ namespace ru.org.openam.sdk
 				int.TryParse (ConfigurationManager.AppSettings["com.sun.identity.agents.config.receive.timeout"], out receive_timeout);
 			}
 			if (connect_timeout>0)
-				request.Timeout = Math.Max(connect_timeout,1000);
+				request.Timeout = Math.Max(connect_timeout,3000);
 			if (receive_timeout>0)
 				request.ReadWriteTimeout = Math.Max(receive_timeout,5000);
 			return request;
