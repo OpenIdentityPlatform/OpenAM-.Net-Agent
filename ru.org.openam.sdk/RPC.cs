@@ -7,6 +7,10 @@ namespace ru.org.openam.sdk
 {
 	public class RPC
 	{
+		static RPC(){
+			ServicePointManager.DefaultConnectionLimit = 1024;
+		}
+
 		public static HttpWebRequest getHttpWebRequest(Uri uri)
 		{
 			var request = (HttpWebRequest)WebRequest.Create(uri);
