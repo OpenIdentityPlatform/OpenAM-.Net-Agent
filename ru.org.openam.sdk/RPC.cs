@@ -84,20 +84,21 @@ namespace ru.org.openam.sdk
 
 		public static XmlDocument GetXML(Uri uri, String method, String ContentType, String body)
 		{
-			var http = getHttpWebRequest(uri);
+			HttpWebRequest http = getHttpWebRequest(uri);
 			http.Method = "POST";
 			http.ContentType = ContentType;
 			var uuid = Guid.NewGuid();
 			Log.Info(string.Format
 			(
-				"Message sent (uuid: {1}) {2} {3}{0}User-Agent: {4}{0}Content-Type: {5}{0}{6}{0}",
+				"Message sent (uuid: {1}) {2} {3}{0}Cookie: {7}{0}{6}{0}",
 				"\n",
 				uuid,
 				http.Method,
 				http.RequestUri,
 				http.UserAgent,
 				http.ContentType,
-				body
+				body,
+				http.Headers["Cookie"]
 			));
 			byte[] postBytes = (new UTF8Encoding()).GetBytes(body);
 			http.ContentLength = postBytes.Length;
