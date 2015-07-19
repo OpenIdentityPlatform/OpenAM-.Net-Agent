@@ -461,7 +461,19 @@ namespace ru.org.openam.sdk
 		{
 			return (string)GetConfig()["com.sun.identity.agents.config.cookie.name"];
 		}
-		
+
+		const string AM_LB_COOKIE_NAME="com.iplanet.am.lbcookie.name";
+
+		public string GetLBCookieName()
+		{
+			String res = null;
+			if (HasConfig())
+				res=(string)config[AM_LB_COOKIE_NAME];
+			if (res==null)
+				res=ConfigurationManager.AppSettings[AM_LB_COOKIE_NAME];
+			return (res==null)?"amlbcookie":res;
+		}
+
 		public string GetAuthCookie(HttpCookieCollection cookies)
 		{
 			var cookie = cookies[GetCookieName()];

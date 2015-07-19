@@ -2,6 +2,7 @@
 using System.Text;
 using System.Net;
 using System.Xml;
+using System.IO;
 
 namespace ru.org.openam.sdk
 {
@@ -9,6 +10,7 @@ namespace ru.org.openam.sdk
 	{
 		static RPC(){
 			ServicePointManager.DefaultConnectionLimit = 1024;
+			ServicePointManager.Expect100Continue = false;
 		}
 
 		public static HttpWebRequest getHttpWebRequest(Uri uri)
@@ -84,26 +86,27 @@ namespace ru.org.openam.sdk
 
 		public static XmlDocument GetXML(Uri uri, String method, String ContentType, String body)
 		{
+			Guid uuid = Guid.NewGuid();
 			HttpWebRequest http = getHttpWebRequest(uri);
 			http.Method = "POST";
 			http.ContentType = ContentType;
-			var uuid = Guid.NewGuid();
-			Log.Info(string.Format
-			(
-				"Message sent (uuid: {1}) {2} {3}{0}Cookie: {7}{0}{6}{0}",
-				"\n",
-				uuid,
-				http.Method,
-				http.RequestUri,
-				http.UserAgent,
-				http.ContentType,
-				body,
-				http.Headers["Cookie"]
-			));
+			http.CookieContainer.Add(new Cookie("track", uuid.ToString()) { Domain = uri.Host });
 			byte[] postBytes = (new UTF8Encoding()).GetBytes(body);
 			http.ContentLength = postBytes.Length;
 
-			var postStream = http.GetRequestStream();
+			Stream postStream = http.GetRequestStream();
+			Log.Info(string.Format
+				(
+					"Message sent (uuid: {1}) {2} {3}{0}{7}{6}{0}",
+					"\n",
+					uuid,
+					http.Method,
+					http.RequestUri,
+					http.UserAgent,
+					http.ContentType,
+					body,
+					http.Headers
+				));
 			postStream.Write(postBytes, 0, postBytes.Length);
 			postStream.Close();
 
@@ -113,7 +116,7 @@ namespace ru.org.openam.sdk
 				var myXMLReader = new XmlTextReader(response.GetResponseStream());
 				XMLDocument.Load(myXMLReader);
 				myXMLReader.Close();
-				Log.Info(string.Format("Message received (uuid: {1}){0}Set-Cookie:{3}{0}{2}{0}", Environment.NewLine, uuid, XMLDocument.InnerXml,response.Headers["Set-Cookie"]));
+				Log.Info(string.Format("Message received (uuid: {1}){0}{3}{2}{0}", Environment.NewLine, uuid, XMLDocument.InnerXml,response.Headers));
 				response.Close();
 			}
 			return XMLDocument;
