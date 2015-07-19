@@ -16,7 +16,7 @@ namespace ru.org.openam.sdk
 			var request = (HttpWebRequest)WebRequest.Create(uri);
 			request.KeepAlive = true;
 			request.UserAgent = "openam.org.ru/1.0 (.Net)";
-
+			request.CookieContainer = new CookieContainer ();
 			//<add key="com.sun.identity.agents.config.receive.timeout" value="0"/>
 			//<add key="com.sun.identity.agents.config.connect.timeout" value="0"/>
 			int connect_timeout=7000;
@@ -112,12 +112,18 @@ namespace ru.org.openam.sdk
 				var myXMLReader = new XmlTextReader(response.GetResponseStream());
 				XMLDocument.Load(myXMLReader);
 				myXMLReader.Close();
+				Log.Info(string.Format("Message received (uuid: {1}){0}Set-Cookie:{3}{0}{2}{0}", Environment.NewLine, uuid, XMLDocument.InnerXml,response.Headers["Set-Cookie"]));
 				response.Close();
 			}
-
-			Log.Info(string.Format("Message received (uuid: {1}) {2}{0}", Environment.NewLine, uuid, XMLDocument.InnerXml));
-
 			return XMLDocument;
+		}
+
+		public static String CookieToString(CookieCollection cookies){
+			String res = "";
+			if (cookies != null)
+				foreach(Cookie cookie in cookies)
+					res += string.Format ("{0}={1};", cookie.Name, cookie.Value);
+			return res;
 		}
 	}
 }
