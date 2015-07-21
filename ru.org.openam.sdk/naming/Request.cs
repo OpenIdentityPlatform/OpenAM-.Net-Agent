@@ -30,6 +30,11 @@ namespace ru.org.openam.sdk.naming
             this.session = session;
         }
 
+		override public Uri getUrl()
+		{
+			return Bootstrap.getUrl();
+		}
+
         override public String ToString()
         {
             StringBuilder sb = new StringBuilder();

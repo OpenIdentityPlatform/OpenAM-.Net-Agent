@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.Net;
 
 namespace ru.org.openam.sdk.policy
 {
@@ -90,8 +91,8 @@ namespace ru.org.openam.sdk.policy
 			get { return ResponseAttributes; }
 		}
 
-        public Response(XmlNode element)
-            : base()
+		public Response(CookieContainer cookieContainer,XmlNode element)
+			: base(cookieContainer,element)
         {
             //authIdentifier = element.Attributes["authIdentifier"].Value;
             foreach (XmlNode node in element.ChildNodes)

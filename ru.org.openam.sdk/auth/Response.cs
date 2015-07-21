@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.Net;
 
 namespace ru.org.openam.sdk.auth
 {
@@ -34,8 +35,8 @@ namespace ru.org.openam.sdk.auth
         //<GetRequirements><Callbacks length="3">
         //<PagePropertiesCallback isErrorState="false"><ModuleName>LDAP</ModuleName><HeaderValue>This server uses LDAP Authentication</HeaderValue><ImageName></ImageName><PageTimeOutValue>1200</PageTimeOutValue><TemplateName>Login.jsp</TemplateName><PageState>1</PageState></PagePropertiesCallback>
         //<NameCallback><Prompt> User Name: </Prompt></NameCallback><PasswordCallback echoPassword="false"><Prompt> Password: </Prompt></PasswordCallback></Callbacks></GetRequirements></Response></AuthContext>]]></Response></ResponseSet>
-        public Response(XmlNode element)
-            : base()
+		public Response(CookieContainer cookieContainer,XmlNode element)
+			: base(cookieContainer,element)
         {
             authIdentifier = ("null".Equals(element.Attributes["authIdentifier"].Value)) ? null : element.Attributes["authIdentifier"].Value;
             foreach (XmlNode node in element.ChildNodes)

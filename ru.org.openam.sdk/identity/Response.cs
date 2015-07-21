@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Xml;
+using System.Net;
 
 namespace ru.org.openam.sdk.identity
 {
@@ -23,10 +24,11 @@ namespace ru.org.openam.sdk.identity
         public String realm;
         public Dictionary<string, object> property = new Dictionary<string, object>();
 
-        public Response(XmlElement element)
-            : base(element)
+
+		public Response(CookieContainer cookieContainer,XmlElement element)
+			: base(cookieContainer,element)
         {
-            foreach (XmlNode node in element.ChildNodes)
+			foreach (XmlNode node in element.ChildNodes)
             {
                 if (node.LocalName.Equals("name"))
                 {

@@ -32,9 +32,29 @@ namespace ru.org.openam.sdk.identity
                 query = query + String.Format("attributes_values_{0}={1}&", HttpUtility.UrlEncode(value_from_attribute_names.Key),HttpUtility.UrlEncode(value_from_attribute_names.Value));
         }
 
+		override public Uri getUrl()
+		{
+			return new Uri(GetNaming().property["sun-naming-idsvcs-rest-url"].Replace("%protocol://%host:%port%uri", Bootstrap.getUrl().ToString().Replace("/namingservice", ""))+ "xml/read");
+		}
+
+		override protected String getContentType(){
+			return "application/x-www-form-urlencoded";
+		}
+
         override public String ToString()
         {
             return query;
         }
+
+		override protected String getRequestString(){
+			return ToString();
+		}
+
+		override protected pll.Response getResponse(String data){
+			XmlDocument xml = new XmlDocument ();
+			xml.LoadXml(data);
+			XmlElement element = xml.DocumentElement;
+			return new Response(getCookieContainer(),element);
+		}
     }
 }

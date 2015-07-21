@@ -85,10 +85,7 @@ namespace ru.org.openam.sdk
 
         public session.Response Get(session.Request request)
         {
-            pll.ResponseSet responses = RPC.GetXML(GetNaming(), new pll.RequestSet(new [] { request }));
-            if (responses.Count > 0)
-                return (session.Response)responses[0];
-            return new session.Response();
+			return (session.Response)request.getResponse();
         }
 
         override public String ToString()

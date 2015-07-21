@@ -21,10 +21,7 @@ namespace ru.org.openam.sdk
 
 		policy.Response Get(policy.Request request)
 		{
-			pll.ResponseSet responses = RPC.GetXML(agent.GetNaming(), new pll.RequestSet(new[] { request }));
-			if (responses.Count > 0)
-				return (policy.Response)responses[0];
-			return new policy.Response();
+			return (policy.Response)request.getResponse ();
 		}
 
 		public static Policy Get(Agent agent, Session session, Uri uri, Dictionary<string, ISet<string>> extra, ICollection<string> attributes)
@@ -50,7 +47,7 @@ namespace ru.org.openam.sdk
 			string url;
 			if (agent.GetSingle("com.sun.identity.agents.config.fetch.from.root.resource") == "true")
 			{
-				url = uri.Scheme + "://" + uri.Host + ":" + uri.Port;
+				url = uri.Scheme + "://" + uri.Host + ":" + uri.Port+"/";
 			}
 			else if (agent.GetSingle("com.sun.identity.agents.config.ignore.path.info") == "true")
 			{

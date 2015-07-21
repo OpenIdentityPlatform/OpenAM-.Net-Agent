@@ -366,21 +366,18 @@ namespace ru.org.openam.sdk
 		{
 			if (config == null){
 				config =
-					((identity.Response)RPC.GetXML(
-						GetNaming(),
-						new identity.Request(
-							getSession().GetProperty("UserId"),
-							new String[] {
-                                "realm",
-                                "objecttype"
-                            },
-							new KeyValuePair<string, string>[]{
-                                new KeyValuePair<string,string>("realm",Bootstrap.getAppRealm()),
-                                new KeyValuePair<string,string>("objecttype","Agent")
-                            },
-							getSession()
-						)
-					 )).property;
+					((identity.Response)new identity.Request(
+						getSession().GetProperty("UserId"),
+						new String[] {
+							"realm",
+							"objecttype"
+						},
+						new KeyValuePair<string, string>[]{
+							new KeyValuePair<string,string>("realm",Bootstrap.getAppRealm()),
+							new KeyValuePair<string,string>("objecttype","Agent")
+						},
+						getSession()
+					).getResponse()).property;
 				Log.Init();
 			}
 			return config;

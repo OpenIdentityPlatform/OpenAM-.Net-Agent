@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.Net;
 
 namespace ru.org.openam.sdk.naming
 {
@@ -24,8 +25,8 @@ namespace ru.org.openam.sdk.naming
         }
         public Dictionary<string, string> property=new Dictionary<string,string>();
 
-        public Response(XmlNode element)
-            : base()
+		public Response(CookieContainer cookieContainer,XmlNode element)
+			: base(cookieContainer,element)
         {
             foreach (XmlNode node in element.ChildNodes)
             {

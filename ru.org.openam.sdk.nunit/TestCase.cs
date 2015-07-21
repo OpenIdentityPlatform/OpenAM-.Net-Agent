@@ -64,9 +64,7 @@ namespace ru.org.openam.sdk.nunit
 		[Test ()]
 		public void pll_GetTest()
 		{
-			ResponseSet actual = RPC.GetXML(
-				Bootstrap.GetNaming(), 
-				new RequestSet(new ru.org.openam.sdk.pll.Request[]{new auth.Request("/",auth.indexType.moduleInstance,"Application")}));
+			ru.org.openam.sdk.pll.Response actual = new auth.Request ("/", auth.indexType.moduleInstance, "Application").getResponse ();
 			Assert.IsNotNull(actual);
 		}
 

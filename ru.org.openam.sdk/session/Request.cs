@@ -40,6 +40,11 @@ namespace ru.org.openam.sdk.session
             //need cookie
         }
 
+		override public Uri getUrl()
+		{
+			return new Uri(GetNaming().property["iplanet-am-naming-session-url"].Replace("%protocol://%host:%port%uri", Bootstrap.getUrl().ToString().Replace("/namingservice", "")));
+		}
+
         override public String ToString()
         {
             StringBuilder sb = new StringBuilder();

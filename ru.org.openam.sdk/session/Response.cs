@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.Net;
 
 namespace ru.org.openam.sdk.session
 {
@@ -55,8 +56,8 @@ namespace ru.org.openam.sdk.session
         public state state;
         public Dictionary<string, string> property=new Dictionary<string,string>();
 
-        public Response(XmlNode element)
-            : base()
+		public Response(CookieContainer cookieContainer,XmlNode element)
+			: base(cookieContainer,element)
         {
             //authIdentifier = element.Attributes["authIdentifier"].Value;
             foreach (XmlNode node in element.ChildNodes)

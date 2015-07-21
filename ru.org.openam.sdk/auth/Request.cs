@@ -12,7 +12,7 @@ namespace ru.org.openam.sdk.auth
         Unknown,
         moduleInstance,
         service
-    };
+	};
 
     public class Request: pll.Request
     {
@@ -42,6 +42,11 @@ namespace ru.org.openam.sdk.auth
             authIdentifier = response.authIdentifier;
             callbacks = response.callbacks;
         }
+
+		override public Uri getUrl()
+		{
+			return new Uri(GetNaming().property["iplanet-am-naming-auth-url"].Replace("%protocol://%host:%port%uri", Bootstrap.getUrl().ToString().Replace("/namingservice", "")));
+		}
 
         override public String ToString()
         {
