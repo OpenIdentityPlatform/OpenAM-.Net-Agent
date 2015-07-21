@@ -5,6 +5,7 @@ using System.Text;
 using System.Net;
 using System.IO;
 using System.Xml;
+using System.Net.Sockets;
 
 namespace ru.org.openam.sdk.pll
 {
@@ -31,7 +32,7 @@ namespace ru.org.openam.sdk.pll
 
 		abstract public Uri getUrl();
 		
-		CookieContainer cookieContainer=null;
+		public  CookieContainer cookieContainer=null;
 		public CookieContainer getCookieContainer(){
 			if (cookieContainer==null)
 				cookieContainer=new CookieContainer();
@@ -42,11 +43,19 @@ namespace ru.org.openam.sdk.pll
 			return Bootstrap.GetNaming ();
 		}
 
+		static string UserAgent = string.Format(
+			"openam.org.ru/{0} (.Net) {1}/{2}","1.0"
+				,System.Environment.MachineName
+				,String.Join(",",((from ip in Dns.GetHostAddresses(System.Environment.MachineName) where ip.AddressFamily == AddressFamily.InterNetwork select ip.ToString()).ToList() )
+			)
+		);
+
 		HttpWebRequest getHttpWebRequest()
 		{
 			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(getUrl());
 			request.KeepAlive = true;
-			request.UserAgent = "openam.org.ru/1.0 (.Net)";
+			request.AutomaticDecompression = DecompressionMethods.None; //TODO configure
+			request.UserAgent = UserAgent;
 			request.CookieContainer = getCookieContainer();
 			int connect_timeout=7000,receive_timeout=15000;
 			if (Agent.Instance.HasConfig()) {

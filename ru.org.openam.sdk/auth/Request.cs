@@ -41,6 +41,7 @@ namespace ru.org.openam.sdk.auth
         {
             authIdentifier = response.authIdentifier;
             callbacks = response.callbacks;
+			cookieContainer = response.cookieContainer;
         }
 
 		override public Uri getUrl()

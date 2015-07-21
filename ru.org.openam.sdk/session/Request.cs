@@ -37,6 +37,7 @@ namespace ru.org.openam.sdk.session
         public Request(Session session)
             : this(session.sessionId)
         {
+			cookieContainer = session.token.cookieContainer;
             //need cookie
         }
 

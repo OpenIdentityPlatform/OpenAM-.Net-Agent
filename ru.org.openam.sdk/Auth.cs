@@ -18,7 +18,7 @@ namespace ru.org.openam.sdk
             Response response=Auth.Get(request);
             if (response.exception != null)
                 throw response.exception;
-            return new Session(response.ssoToken);
+			return new Session(response);
         }
 
         public static auth.Response Get(auth.Request request)

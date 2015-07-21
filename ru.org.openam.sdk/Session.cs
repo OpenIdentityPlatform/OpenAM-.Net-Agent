@@ -8,7 +8,7 @@ namespace ru.org.openam.sdk
 
 		private static readonly Cache _cache = new Cache();
 
-		internal Cache PolicyCache {get; private set;}
+		internal Cache PolicyCache {get; private set;}=new Cache();
 
         public String sessionId;
 
@@ -16,11 +16,18 @@ namespace ru.org.openam.sdk
 		
         public Session(string sessionId)
         {
-			PolicyCache = new Cache();
             token = Get(new session.Request(sessionId));
             this.sessionId = sessionId;
-        }	 
-        
+        }
+
+		public Session(auth.Response authResponse)
+		{
+			session.Request request = new session.Request(authResponse.ssoToken);
+			request.cookieContainer = authResponse.cookieContainer;
+			token = Get(request);
+			this.sessionId = token.sid;
+		}
+
         private Session(Agent agent, string authCookie)
             : this(authCookie)
         {
