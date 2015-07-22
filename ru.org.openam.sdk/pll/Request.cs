@@ -6,6 +6,7 @@ using System.Net;
 using System.IO;
 using System.Xml;
 using System.Net.Sockets;
+using System.Reflection;
 
 namespace ru.org.openam.sdk.pll
 {
@@ -44,7 +45,8 @@ namespace ru.org.openam.sdk.pll
 		}
 
 		static string UserAgent = string.Format(
-			"openam.org.ru/{0} (.Net) {1}/{2}","1.0"
+			"openam.org.ru/{0} (.Net) {1}/{2}"
+				,Assembly.GetCallingAssembly().GetName().Version
 				,System.Environment.MachineName
 				,String.Join(",",((from ip in Dns.GetHostAddresses(System.Environment.MachineName) where ip.AddressFamily == AddressFamily.InterNetwork select ip.ToString()).ToList() )
 			)

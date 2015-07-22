@@ -9,11 +9,11 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ru.org.openam.iis7Agent</RootNamespace>
     <AssemblyName>ru.org.openam.iis7Agent</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -47,12 +47,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ru.org.openam.sdk\ru.org.openam.sdk.csproj">
-      <Project>{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}</Project>
-      <Name>ru.org.openam.sdk</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="_ConfigDoc.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -72,5 +66,11 @@
   -->
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ru.org.openam.sdk\ru.org.openam.sdk.csproj">
+      <Project>{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}</Project>
+      <Name>ru.org.openam.sdk</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

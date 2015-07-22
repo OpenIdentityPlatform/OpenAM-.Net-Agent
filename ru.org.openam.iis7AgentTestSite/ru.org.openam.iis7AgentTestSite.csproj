@@ -10,7 +10,6 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ru.org.openam.iis7AgentTestSite</RootNamespace>
     <AssemblyName>ru.org.openam.iis7AgentTestSite</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
@@ -106,10 +105,6 @@
     <ProjectReference Include="..\ru.org.openam.iis7Agent\ru.org.openam.iis7Agent.csproj">
       <Project>{AF367FB4-2E40-4682-8496-D0C9732BC8DF}</Project>
       <Name>ru.org.openam.iis7Agent</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ru.org.openam.sdk\ru.org.openam.sdk.csproj">
-      <Project>{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}</Project>
-      <Name>ru.org.openam.sdk</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("openam.org.ru")]
 [assembly: AssemblyProduct("ru.org.openam.sdk")]
-[assembly: AssemblyCopyright("Copyright © Valera V.Harseko 2012")]
+[assembly: AssemblyCopyright("Copyright © support@openam.org.ru")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

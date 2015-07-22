@@ -10,7 +10,6 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ru.org.openam.loginSite</RootNamespace>
     <AssemblyName>ru.org.openam.loginSite</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>false</UseIISExpress>
     <IISExpressSSLPort />
@@ -101,12 +100,6 @@
   <ItemGroup>
     <Content Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ru.org.openam.sdk\ru.org.openam.sdk.csproj">
-      <Project>{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}</Project>
-      <Name>ru.org.openam.sdk</Name>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
@@ -144,4 +137,14 @@
   </Target>
   <Target Name="AfterBuild">
   </Target> -->
+  <ItemGroup>
+    <ProjectReference Include="..\ru.org.openam.iis7Agent\ru.org.openam.iis7Agent.csproj">
+      <Project>{AF367FB4-2E40-4682-8496-D0C9732BC8DF}</Project>
+      <Name>ru.org.openam.iis7Agent</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ru.org.openam.sdk\ru.org.openam.sdk.csproj">
+      <Project>{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}</Project>
+      <Name>ru.org.openam.sdk</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

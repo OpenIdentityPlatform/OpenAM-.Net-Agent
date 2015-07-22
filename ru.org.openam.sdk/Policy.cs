@@ -5,10 +5,10 @@ namespace ru.org.openam.sdk
 {
 	public class Policy
 	{
-		readonly Agent agent;
+//		readonly Agent agent;
 		Policy(Agent agent)
 		{
-			this.agent = agent;
+//			this.agent = agent;
 		}
 
 		public policy.Response result;
