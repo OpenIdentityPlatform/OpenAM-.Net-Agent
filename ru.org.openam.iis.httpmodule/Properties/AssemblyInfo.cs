@@ -10,8 +10,8 @@
 
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
 [assembly: System.CLSCompliant(true)]
-[assembly: System.Reflection.AssemblyTitle("ru.org.openam.sdk")]
-[assembly: System.Reflection.AssemblyDescription("OpenAM client SDK (.Net)")]
+[assembly: System.Reflection.AssemblyTitle("ru.org.openam.iis.httpmodule")]
+[assembly: System.Reflection.AssemblyDescription("OpenAM Web Agent for IIS (.Net)")]
 [assembly: System.Reflection.AssemblyCompany("3A Systems, LLC")]
 [assembly: System.Reflection.AssemblyProduct("OpenAM")]
 [assembly: System.Reflection.AssemblyCopyright("support@openam.org.ru")]

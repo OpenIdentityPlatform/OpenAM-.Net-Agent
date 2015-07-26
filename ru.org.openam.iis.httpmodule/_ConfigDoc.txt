@@ -1,0 +1,206 @@
+﻿  //   <attribute name="com.sun.identity.agents.config.fqdn.check.enable">
+        //      <value>true</value>
+        //   </attribute>
+         //   <attribute name="com.sun.identity.agents.config.fqdn.default">
+        //      <value>ibank.staging.rapidsoft.ru</value>
+        //   </attribute>
+ отвечают за контроль имени сайта - поддержал 
+         //   <attribute name="com.sun.identity.agents.config.notenforced.url">
+        //      <value>[4]=https://ibank.staging.rapidsoft.ru:443/favicon.ico?*</value>
+        //      <value>[5]=https://ibank.staging.rapidsoft.ru/favicon.ico</value>
+        //      <value>[3]=https://ibank.staging.rapidsoft.ru:443/favicon.ico</value>
+        //      <value>[0]=https://ibank.staging.rapidsoft.ru:443/Scripts/*</value>
+        //      <value>[6]=https://ibank.staging.rapidsoft.ru/favicon.ico?*</value>
+        //      <value>[1]=https://ibank.staging.rapidsoft.ru:443/Content/*</value>
+        //      <value>[7]=/favicon.ico?*</value>
+        //      <value>[2]=https://ibank.stagind.rapidsoft.ru:443/Static/*</value>
+        //   </attribute>
+ отвечают за пропуск без аутентификации	- поддержал	 
+         //   <attribute name="com.sun.identity.agents.config.notenforced.url.attributes.enable">
+        //      <value>true</value>
+        //   </attribute>
+ заполнять ли имя пользователя если задан пропуск без аутентификации - поддержал
+         //   <attribute name="com.sun.identity.agents.config.session.attribute.mapping">
+        //      <value>[MaxIdleTime]=profile-maxidletime</value>
+        //      <value>[password.expired]=profile-password-expire-notify</value>
+        //      <value>[ignoreOTP]=profile-ignore-otp-login</value>
+        //   </attribute>
+ маппинг свойств сессии на заголовки HTTP - поддержал
+         //   <attribute name="com.sun.identity.agents.config.proxy.override.host.port">
+        //      <value>false</value>
+        //   </attribute>
+ переопредялть порт при вычислении политики	- поддержал	 
+         //   <attribute name="com.sun.identity.agents.config.cookie.reset">
+        //      <value>[0]=SvyaznoyBank.InternetBank.Site</value>
+        //      <value>[2]=SvyaznoyBank.InternetBank.Site=;Domain=.ibank.staging.rapidsoft.ru</value>
+        //      <value>[1]=SvyaznoyBank.InternetBank.Site=;Domain=.staging.rapidsoft.ru</value>
+        //   </attribute>
+ скидывать куки сайта при отсутствии аутентификации	- поддержал	
+         //   <attribute name="sunIdentityServerDeviceKeyValue">
+        //      <value>agentRootURL=https://login.staging.rapidsoft.ru:443/</value>
+        //   </attribute>
+ внешний урл сайта со схемой портом и именем - интересен в контексте вычисления политики см com.sun.identity.agents.config.proxy.override.*     
+		 //   <attribute name="com.sun.identity.agents.config.userid.param.type">
+        //      <value>session</value>
+        //   </attribute>
+ определяет где искать имя пользователя (в сессии) - LDAP не поддержал, всегда ищет в сессии 
+         
+   //   <attribute name="com.sun.identity.agents.config.audit.accesstype">
+        //      <value>LOG_DENY</value>
+        //   </attribute>
+ подробность аудита	- поддержал
+         //   <attribute name="com.sun.identity.agents.config.debug.level">
+        //      <value>All</value>
+        //   </attribute>
+        //   <attribute name="com.sun.identity.agents.config.local.log.rotate">
+        //      <value>true</value>
+        //   </attribute>
+ логирование - поддержал
+         //   <attribute name="com.sun.identity.agents.config.local.log.size">
+        //      <value>52428800</value>
+        //   </attribute>
+ размер лога при ротации - поддержал
+         //   <attribute name="com.sun.identity.agents.config.debug.file.size">
+        //      <value>10000000</value>
+        //   </attribute>
+ размер лога при ротации - не поддержал беру из com.sun.identity.agents.config.local.log.size
+
+         //   <attribute name="com.sun.identity.agents.config.override.protocol">
+        //      <value>true</value>
+        //   </attribute>
+ переопредялть схему при вычислении политики - поддержал
+         //   <attribute name="com.sun.identity.agents.config.session.attribute.fetch.mode">
+        //      <value>HTTP_HEADER</value>
+        //   </attribute>
+ куда писать свойства сессии (заголовки сесссия куки request attributes) - поддеждал
+         //   <attribute name="com.sun.identity.agents.config.cookie.name">
+        //      <value>svbid</value>
+        //   </attribute>
+ в какой куке живет токен - поддержал
+         //   <attribute name="com.sun.identity.agents.config.notenforced.url.invert">
+        //      <value>false</value>
+        //   </attribute>
+ инверсия config.notenforced.url
+         //   <attribute name="com.sun.identity.agents.config.userid.param">
+        //      <value>UserToken</value>
+        //   </attribute>
+ в каком свойстве лежит имя пользователя (см com.sun.identity.agents.config.userid.param.type) - поддержал 
+         //   <attribute name="com.sun.identity.agents.config.agenturi.prefix">
+        //      <value>https://ibank.staging.rapidsoft.ru:443/amagent</value>
+        //   </attribute>
+ имя сайта - поддержал, используется чтоб вычислить протокол и порт при редиректе 
+        //   <attribute name="com.sun.identity.agents.config.override.host">
+        //      <value>true</value>
+        //   </attribute>
+ переопределять имя сайта - поддержал 
+         //   <attribute name="com.sun.identity.agents.config.anonymous.user.enable">
+        //      <value>false</value>
+        //   </attribute>
+ заполнять имя пользователя при отсутствии аутентификации  - поддержал
+
+         //   <attribute name="com.sun.identity.agents.config.redirect.param">
+        //      <value>goto</value>
+        //   </attribute>
+ в каком параметре передается возвратный урл - поддержал 
+         //   <attribute name="com.sun.identity.agents.config.anonymous.user.id">
+        //      <value>anonymous</value>
+        //   </attribute>
+ см ="com.sun.identity.agents.config.anonymous.user.enable">  - не поддержал, в дотнете име анонимуса обязательно должно быть пустым
+
+           //   <attribute name="com.sun.identity.agents.config.agent.logout.url">
+        //      <value>[0]=https://ibank.staging.rapidsoft.ru:443/LogOn/LogOff</value>
+        //   </attribute>
+ локальный урл которые вызывают логофф  - поддержал 
+         //   <attribute name="com.sun.identity.agents.config.logout.redirect.url" />
+ куда направлять пользователя при Logout
+ //   <attribute name="com.sun.identity.agents.config.logout.cookie.reset">
+        //      <value>[0]=SvyaznoyBank.InternetBank.Site</value>
+        //      <value>[2]=SvyaznoyBank.InternetBank.Site=;Domain=.ibank.staging.rapidsoft.ru</value>
+        //      <value>[1]=SvyaznoyBank.InternetBank.Site=;Domain=.staging.rapidsoft.ru</value>
+        //   </attribute>
+ какие куки ресетить при выходе - поддержал 
+  //   <attribute name="com.sun.identity.agents.config.auth.connection.timeout">
+        //      <value>5</value>
+        //   </attribute>
+ SLA с сервером авторизации	- поддержал
+        //   <attribute name="com.sun.identity.agents.config.fetch.from.root.resource">
+        //      <value>false</value>
+        //   </attribute>
+ откидывать PATH при вычислении политики - поддержал  
+   //   <attribute name="com.sun.identity.agents.config.ignore.path.info">
+        //      <value>false</value>
+        //   </attribute>
+ игнорировать query string при вычислении политики - поддержал
+  //   <attribute name="com.sun.identity.agents.config.policy.cache.polling.interval">
+        //      <value>1</value>
+        //   </attribute>
+минуты кэша для полиси - поддержал
+
+ todo разделить когда будет getPolicy
+          //   <attribute name="com.sun.identity.agents.config.login.url">
+        //      <value>[0]=http://localhost.rapidsoft.ru:8080/auth/UI/Login?service=qbank</value>
+        //   </attribute>
+ на какой урл отправлять не аутентифицированных	 - поддержал
+     //   <attribute name="com.sun.identity.agents.config.access.denied.url" />
+ куда направить пользователя при отказе в авториазции  - поддержал
+  todo жду getPolicy
+         //   <attribute name="com.sun.identity.agents.config.profile.attribute.mapping">
+        //      <value>[employeeNumber]=profile-clientid</value>
+        //      <value>[telephoneNumber]=profile-phone</value>
+        //      <value>[sn]=profile-type</value>
+        //      <value>[sunIdentityServerPPLegalIdentityDOB]=profile-birthday</value>
+        //      <value>[sunIdentityServerPPLegalIdentityGender]=profile-gender</value>
+        //      <value>[inetUserStatus]=profile-status</value>
+        //      <value>[uid]=profile-pkn</value>
+        //      <value>[sunIdentityServerPPCommonNameFN]=profile-name-first</value>
+        //      <value>[sunIdentityServerPPCommonNameSN]=profile-name-last</value>
+        //      <value>[sunIdentityServerPPCommonNameMN]=profile-name-middle</value>
+        //      <value>[mail]=profile-mail</value>
+        //   </attribute>
+ как мапить профайл учетки клиента - поддержал
+   //   <attribute name="com.sun.identity.agents.config.sso.only">
+        //      <value>false</value>
+        //   </attribute>
+ только аутентификация без авторизации - поддержал
+    //   <attribute name="com.sun.identity.agents.config.policy.clock.skew">
+        //      <value>600</value>
+        //   </attribute>
+ хз надо ли обрабатывать - не надо
+
+
+   //   <attribute name="com.sun.identity.agents.config.client.ip.validation.enable">
+        //      <value>false</value>
+        //   </attribute>
+ контролировать смену ИП на клиенте	- поддержал
+ com.sun.identity.agents.config.client.ip.validation.enable  значение из сессии  //<Property name="Host" value="192.168.1.206"></Property>
+ сравнивается со значением текущего ИП который определяется как первое до запятой значение из заголовка определенного в свойстве агента  <attribute name="com.sun.identity.agents.config.client.ip.header" /> или реального ИП, если ИП поменялся, то 403
+[16:39:41] Харсеко Валерий: выведи в модуле все дествия в 401 (нет аутентификации) 403 (нет авторизации или смена ИП)
+HTTP_X_FORWARDED_FOR
+[16:41:34] Харсеко Валерий: имя заголовка для получения занчения из ServerVariables
+[16:41:59] Харсеко Валерий: 192.168.1.206, 1.2.3.4
+[16:42:46] Харсеко Валерий: если префикс HTTP_ отсуттвует, то имя заголовка из request.headers
+тогда com.sun.identity.agents.config.client.ip.header=x-forwarded-for
+и ИП в аудите должен логироваться тоже реальный
+
+==============================================
+
+ непонятные
+
+ //   <attribute name="com.sun.identity.agents.config.logout.url">
+        //      <value>[0]=https://login.staging.rapidsoft.ru:444/auth/UI/Logout</value>
+        //   </attribute>
+ на каком урле производится выход - зачем он мне?
+ 
+
+      
+ =====================================
+ 
+ 
+
+https://login.staging.rapidsoft.ru:444/auth/UI/Login?org=/
+amadmin testtest
+Access Control
+/ (Top Level Realm)
+Agents
+ test.domain.com
+Agent Configuration Export: test.domain.com

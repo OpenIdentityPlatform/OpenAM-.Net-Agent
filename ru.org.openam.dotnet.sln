@@ -5,13 +5,13 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ru.org.openam.sdk", "ru.org.openam.sdk\ru.org.openam.sdk.csproj", "{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ru.org.openam.iis7Agent", "ru.org.openam.iis7Agent\ru.org.openam.iis7Agent.csproj", "{AF367FB4-2E40-4682-8496-D0C9732BC8DF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ru.org.openam.build.tasks", "ru.org.openam.build.tasks\ru.org.openam.build.tasks.csproj", "{564FAE6B-9D57-4EEF-BB17-C17C44589B5A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ru.org.openam.iis7AgentTestSite", "ru.org.openam.iis7AgentTestSite\ru.org.openam.iis7AgentTestSite.csproj", "{B00B0209-83DF-43D4-822D-751467380007}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ru.org.openam.iis.httpmodule", "ru.org.openam.iis.httpmodule\ru.org.openam.iis.httpmodule.csproj", "{AF367FB4-2E40-4682-8496-D0C9732BC8DF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ru.org.openam.loginSite", "ru.org.openam.loginSite\ru.org.openam.loginSite.csproj", "{69B04FAF-CA4E-4D4B-AB43-D4BC21D48944}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ru.org.openam.nunit", "ru.org.openam.nunit\ru.org.openam.nunit.csproj", "{4410A14E-391A-41C3-8694-3813613D2B6A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ru.org.openam.sdk.nunit", "ru.org.openam.sdk.nunit\ru.org.openam.sdk.nunit.csproj", "{4410A14E-391A-41C3-8694-3813613D2B6A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ru.org.openam.iis.site.sample", "ru.org.openam.iis.site.sample\ru.org.openam.iis.site.sample.csproj", "{F89BE14C-A11E-45E1-89A2-F77E72786886}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,22 +23,22 @@ Global
 		{4410A14E-391A-41C3-8694-3813613D2B6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4410A14E-391A-41C3-8694-3813613D2B6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4410A14E-391A-41C3-8694-3813613D2B6A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{69B04FAF-CA4E-4D4B-AB43-D4BC21D48944}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{69B04FAF-CA4E-4D4B-AB43-D4BC21D48944}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{69B04FAF-CA4E-4D4B-AB43-D4BC21D48944}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{69B04FAF-CA4E-4D4B-AB43-D4BC21D48944}.Release|Any CPU.Build.0 = Release|Any CPU
+		{564FAE6B-9D57-4EEF-BB17-C17C44589B5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{564FAE6B-9D57-4EEF-BB17-C17C44589B5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{564FAE6B-9D57-4EEF-BB17-C17C44589B5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{564FAE6B-9D57-4EEF-BB17-C17C44589B5A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AF367FB4-2E40-4682-8496-D0C9732BC8DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AF367FB4-2E40-4682-8496-D0C9732BC8DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF367FB4-2E40-4682-8496-D0C9732BC8DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF367FB4-2E40-4682-8496-D0C9732BC8DF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B00B0209-83DF-43D4-822D-751467380007}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B00B0209-83DF-43D4-822D-751467380007}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B00B0209-83DF-43D4-822D-751467380007}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B00B0209-83DF-43D4-822D-751467380007}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F89BE14C-A11E-45E1-89A2-F77E72786886}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F89BE14C-A11E-45E1-89A2-F77E72786886}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F89BE14C-A11E-45E1-89A2-F77E72786886}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F89BE14C-A11E-45E1-89A2-F77E72786886}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		Policies = $0

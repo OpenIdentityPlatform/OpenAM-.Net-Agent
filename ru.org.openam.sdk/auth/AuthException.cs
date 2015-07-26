@@ -8,7 +8,7 @@ namespace ru.org.openam.sdk.auth
 {
     public class AuthException:Exception
     {
-        public String message;
+        public String messageException;
         public String errorCode;
         public String templateName;
 
@@ -18,7 +18,7 @@ namespace ru.org.openam.sdk.auth
         {
             foreach (XmlAttribute attr in element.Attributes)
                 if (attr.LocalName.Equals("message"))
-                    message = attr.Value;
+                    messageException = attr.Value;
                 else if (attr.LocalName.Equals("errorCode"))
                     errorCode = attr.Value;
                 else if (attr.LocalName.Equals("templateName"))

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
 using ru.org.openam.sdk.auth.callback;
+using System.Reflection;
 
 namespace ru.org.openam.sdk
 {
@@ -480,6 +481,11 @@ namespace ru.org.openam.sdk
 			}
 
 			return cookie.Value;
-		}					 
+		}	
+
+		static String Version=((AssemblyInformationalVersionAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false).FirstOrDefault()).InformationalVersion;
+		public static String getVersion(){
+			return Version;
+		}
 	}
 }
