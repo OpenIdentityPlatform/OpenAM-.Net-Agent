@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.Net;
 
 namespace ru.org.openam.sdk.policy
 {
@@ -53,6 +54,10 @@ namespace ru.org.openam.sdk.policy
 		override public Uri getUrl()
 		{
 			return new Uri(GetNaming().property["iplanet-am-naming-policy-url"].Replace("%protocol://%host:%port%uri", Bootstrap.getUrl().ToString().Replace("/namingservice", "")));
+		}
+
+		override public CookieContainer getCookieContainer(){
+			return new session.Request(session).getCookieContainer();
 		}
 
         override public String ToString()

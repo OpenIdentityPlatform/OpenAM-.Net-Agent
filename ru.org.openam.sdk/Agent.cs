@@ -455,10 +455,14 @@ namespace ru.org.openam.sdk
 			return new string[0];
 		}
 
-		public string GetCookieName()
+		public static string GetCookieName()
 		{
-			return (string)GetConfig()["com.sun.identity.agents.config.cookie.name"];
+			String res=null;
+			if (_instance!=null && _instance.HasConfig())
+				res=(String)Instance.config["com.sun.identity.agents.config.cookie.name"];
+			return res == null?"null":res;
 		}
+
 
 		const string AM_LB_COOKIE_NAME="com.iplanet.am.lbcookie.name";
 
@@ -474,6 +478,8 @@ namespace ru.org.openam.sdk
 
 		public string GetAuthCookie(HttpCookieCollection cookies)
 		{
+			if (!HasConfig ())
+				GetConfig ();
 			var cookie = cookies[GetCookieName()];
 			if (cookie == null || string.IsNullOrWhiteSpace(cookie.Value))
 			{

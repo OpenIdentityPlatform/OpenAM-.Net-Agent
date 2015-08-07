@@ -34,9 +34,11 @@ namespace ru.org.openam.sdk.pll
 		abstract public Uri getUrl();
 		
 		public  CookieContainer cookieContainer=null;
-		public CookieContainer getCookieContainer(){
-			if (cookieContainer==null)
-				cookieContainer=new CookieContainer();
+		virtual public CookieContainer getCookieContainer(){
+			if (cookieContainer == null) {
+				cookieContainer = new CookieContainer ();
+				cookieContainer.Add(new Cookie("track", uuid.ToString()) { Domain = getUrl().Host });
+			}
 			return cookieContainer;
 		}
 
@@ -45,7 +47,7 @@ namespace ru.org.openam.sdk.pll
 		}
 
 		static string UserAgent = string.Format(
-			"openam.org.ru/{0} (.Net) {1}/{2}"
+			"openam.org.ru (.Net {0} {1}/{2})"
 				,Agent.getVersion()
 				,System.Environment.MachineName
 				,String.Join(",",((from ip in Dns.GetHostAddresses(System.Environment.MachineName) where ip.AddressFamily == AddressFamily.InterNetwork select ip.ToString()).ToList() )
@@ -57,6 +59,8 @@ namespace ru.org.openam.sdk.pll
 			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(getUrl());
 			request.KeepAlive = true;
 			request.AutomaticDecompression = DecompressionMethods.None; //TODO configure
+			request.Method = getMethod();
+			request.ContentType = getContentType();
 			request.UserAgent = UserAgent;
 			request.CookieContainer = getCookieContainer();
 			int connect_timeout=7000,receive_timeout=15000;
@@ -98,9 +102,6 @@ namespace ru.org.openam.sdk.pll
 		public Response getResponse()
 		{
 			HttpWebRequest request = getHttpWebRequest();
-			request.Method = getMethod();
-			request.ContentType = getContentType();
-			request.CookieContainer.Add(new Cookie("track", uuid.ToString()) { Domain = getUrl().Host });
 
 			String body = getRequestString();
 			byte[] postBytes = (new UTF8Encoding()).GetBytes(body);

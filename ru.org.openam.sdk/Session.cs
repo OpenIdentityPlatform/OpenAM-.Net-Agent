@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 
 namespace ru.org.openam.sdk
 {
@@ -24,6 +25,11 @@ namespace ru.org.openam.sdk
 		{
 			session.Request request = new session.Request(authResponse.ssoToken);
 			request.cookieContainer = authResponse.cookieContainer;
+			//remove AMAuthCookie after auth
+			CookieCollection cc = request.cookieContainer.GetCookies (request.getUrl());
+			foreach (Cookie co in cc)
+				if (co.Name.Equals ("AMAuthCookie"))
+					co.Expired = true;
 			token = Get(request);
 			this.sessionId = token.sid;
 		}

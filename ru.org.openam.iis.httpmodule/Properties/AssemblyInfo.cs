@@ -15,8 +15,8 @@
 [assembly: System.Reflection.AssemblyCompany("3A Systems, LLC")]
 [assembly: System.Reflection.AssemblyProduct("OpenAM")]
 [assembly: System.Reflection.AssemblyCopyright("support@openam.org.ru")]
-[assembly: System.Reflection.AssemblyVersion("1.0.0")]
-[assembly: System.Reflection.AssemblyFileVersion("1.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersion("1.0.0/master-d4753a6")]
+[assembly: System.Reflection.AssemblyVersion("1.0.2")]
+[assembly: System.Reflection.AssemblyFileVersion("1.0.2")]
+[assembly: System.Reflection.AssemblyInformationalVersion("1.0.2/master-43f6bce")]
 
 

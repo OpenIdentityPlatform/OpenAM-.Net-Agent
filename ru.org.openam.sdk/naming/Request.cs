@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.Net;
 
 namespace ru.org.openam.sdk.naming
 {
@@ -33,6 +34,12 @@ namespace ru.org.openam.sdk.naming
 		override public Uri getUrl()
 		{
 			return Bootstrap.getUrl();
+		}
+
+		override public CookieContainer getCookieContainer(){
+			if (session != null)
+				return new session.Request(session).getCookieContainer();
+			return base.getCookieContainer();
 		}
 
         override public String ToString()

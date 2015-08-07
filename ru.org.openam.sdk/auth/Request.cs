@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using ru.org.openam.sdk.auth.callback;
+using System.Net;
 
 namespace ru.org.openam.sdk.auth
 {
@@ -87,5 +88,10 @@ namespace ru.org.openam.sdk.auth
             return sb.ToString();
         }
 
+		override public CookieContainer getCookieContainer(){
+			CookieContainer cookieContainer= base.getCookieContainer();
+			cookieContainer.Add(new Cookie("AMAuthCookie", authIdentifier) { Domain = getUrl().Host });
+			return cookieContainer;
+		}
     }
 }

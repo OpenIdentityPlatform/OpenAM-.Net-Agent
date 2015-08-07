@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Web;
+using System.Net;
 
 namespace ru.org.openam.sdk.identity
 {
@@ -19,9 +20,11 @@ namespace ru.org.openam.sdk.identity
         //attributes_values_<value_from_attribute_names> - Values for LDAP attributes
         //admin - tokenid for a user with permissions to perform search
         String query = "";
+		Session session;
         public Request(String name, String[] attributes_names, KeyValuePair<String,String>[] values_from_attribute_names, Session admin)
             : this()
         {
+			session = admin;
             query = query+String.Format("admin={0}&",  HttpUtility.UrlEncode(admin.sessionId));
             if (!String.IsNullOrEmpty(name))
                 query = query + String.Format("name={0}&", HttpUtility.UrlEncode(name));
@@ -39,6 +42,10 @@ namespace ru.org.openam.sdk.identity
 
 		override protected String getContentType(){
 			return "application/x-www-form-urlencoded";
+		}
+
+		override public CookieContainer getCookieContainer(){
+			return new session.Request(session).getCookieContainer();
 		}
 
         override public String ToString()

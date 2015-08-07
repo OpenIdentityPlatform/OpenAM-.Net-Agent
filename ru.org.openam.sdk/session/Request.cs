@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.Net;
 
 namespace ru.org.openam.sdk.session
 {
@@ -26,6 +27,7 @@ namespace ru.org.openam.sdk.session
             : base()
         {
             svcid = pll.type.session;
+			uri=getUrl();
         }
 
         public Request(String SessionID)
@@ -34,11 +36,20 @@ namespace ru.org.openam.sdk.session
             this.SessionID = SessionID;
         }
 
+		Uri uri=null;
+
         public Request(Session session)
             : this(session.sessionId)
         {
 			cookieContainer = session.token.cookieContainer;
-            //need cookie
+            //save LB cookie
+			if (session.token.property ["amlbcookie"] != null) {
+				CookieCollection cc = cookieContainer.GetCookies (uri);
+				foreach (Cookie co in cc)
+					if (co.Name.Equals("amlbcookie"))
+						co.Expired = true;
+				cookieContainer.Add (new Cookie ("amlbcookie", session.token.property ["amlbcookie"]) { Domain = uri.Host });
+			}
         }
 
 		override public Uri getUrl()
@@ -65,5 +76,18 @@ namespace ru.org.openam.sdk.session
             writer.Close();
             return sb.ToString();
         }
+
+		override public CookieContainer getCookieContainer(){
+			CookieContainer cookieContainer= base.getCookieContainer();
+			String cn = Agent.GetCookieName ();
+			if (!cn.Equals ("null")) {
+				CookieCollection cc = cookieContainer.GetCookies (uri);
+				foreach (Cookie co in cc)
+					if (co.Name.Equals ("null")||co.Name.Equals ("AMAuthCookie"))
+						co.Expired = true;
+			}
+			cookieContainer.Add(new Cookie(cn, SessionID) { Domain = getUrl().Host });
+			return cookieContainer;
+		}
     }
 }

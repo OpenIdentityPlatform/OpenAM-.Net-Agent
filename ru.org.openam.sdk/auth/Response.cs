@@ -54,9 +54,9 @@ namespace ru.org.openam.sdk.auth
                 else if (node.LocalName.Equals("LoginStatus"))
                 {
                     status = (status)Enum.Parse(typeof(status), node.Attributes["status"].Value);
-                    if (node.Attributes["ssoToken"] != null)
-                        ssoToken = node.Attributes["ssoToken"].Value;
-                    if (node.Attributes["ssoToken"] != null)
+					if (node.Attributes ["ssoToken"] != null) 
+						ssoToken = node.Attributes ["ssoToken"].Value;
+					if (node.Attributes["successURL"] != null)
                         successURL = node.Attributes["successURL"].Value;
                     foreach (XmlNode node2 in node.ChildNodes)
                         if (node2.LocalName.Equals("Subject"))
