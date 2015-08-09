@@ -36,5 +36,5 @@ Test
 /Tools/MSBuildTasks/
 /Tools/NUnit.Runners/
 *.userprefs
-ru.org.openam.sdk/Properies/AssemblyInfo.cs
-ru.org.openam.iis.httpmodule/Properies/AssemblyInfo.cs
+ru.org.openam.iis.httpmodule/Properties/AssemblyInfo.cs
+ru.org.openam.sdk/Properties/AssemblyInfo.cs
