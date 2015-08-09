@@ -108,7 +108,7 @@ namespace ru.org.openam.sdk.pll
 			request.ContentLength = postBytes.Length;
 			using (Stream requestStream = request.GetRequestStream()){ 
 				try{
-					Log.Info (string.Format("{1} {2}{0}{3}{4}",Environment.NewLine,request.Method,request.RequestUri,request.Headers,body));
+					Log.Info (string.Format("{1} {2}{0}{3}{4}{0}",Environment.NewLine,request.Method,request.RequestUri,request.Headers,body));
 					requestStream.Write(postBytes, 0, postBytes.Length);
 				}finally{
 					requestStream.Close();

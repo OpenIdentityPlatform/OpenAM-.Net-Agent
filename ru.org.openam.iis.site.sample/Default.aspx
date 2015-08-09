@@ -5,9 +5,11 @@
 	<title>Default</title>
 </head>
 <body>
-	<form id="form1" runat="server">
-		<asp:Button id="button1" runat="server" Text="Click me!" OnClick="button1Clicked" />
-	</form>
+	<%
+		NameValueCollection headers = base.Request.Headers;
+		for (int i = 0; i < headers.Count; i++)
+		    Response.Write(headers.GetKey(i) + " = " + headers.Get(i) + "<br/>");
+    %>
 </body>
 </html>
 
