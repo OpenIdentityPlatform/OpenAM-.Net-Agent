@@ -64,19 +64,45 @@ namespace ru.org.openam.iis
 			try
 			{
 				if(context == null || context.Request == null || context.Request.Url == null)
-				{
 					throw new ArgumentException("context or context.Request or context.Request.Url is null");
+
+				HttpRequestBase request = context.Request;
+				HttpResponseBase response= context.Response;
+
+				Uri url = context.Request.Url;
+				String Host=url.Host; //save original Host
+
+				//com.sun.identity.agents.config.override.*
+				//com.sun.identity.agents.config.agenturi.prefix
+				Uri agentURI=null;
+				try{
+					agentURI=new Uri(_agent.GetSingle("com.sun.identity.agents.config.agenturi.prefix"));
+				}catch(Exception){}
+
+				if (agentURI!=null){
+					if (_agent.GetSingle("com.sun.identity.agents.config.override.protocol") == "true")
+						url=new Uri(url.ToString().Replace(url.Scheme+"://",agentURI.Scheme+"://"));
+					
+					if (_agent.GetSingle("com.sun.identity.agents.config.override.host") == "true")
+						url=new Uri(url.ToString().Replace("://"+url.Host,"://"+agentURI.Host));
+
+					if (_agent.GetSingle("com.sun.identity.agents.config.override.port") == "true"){
+						url=new Uri(url.ToString().Replace(url.Host+"/",				url.Host+":"+agentURI.Port+"/"));
+						url=new Uri(url.ToString().Replace(url.Host+":"+url.Port+"/",	url.Host+":"+agentURI.Port+"/"));
+					}
 				}
 
-				var request = context.Request;
-				var url = context.Request.Url;
-				var response = context.Response;
-
-				var nUrl = CheckUrl(url);
-				if(nUrl != null)
+				//com.sun.identity.agents.config.fqdn.check.enable
+				//com.sun.identity.agents.config.fqdn.default
+				String fqdnDefault=_agent.GetSingle("com.sun.identity.agents.config.fqdn.default");
+				if(	!string.IsNullOrWhiteSpace(fqdnDefault)
+					&& !Host.Equals(fqdnDefault)
+					&& _agent.GetSingle("com.sun.identity.agents.config.fqdn.check.enable") == "true" 
+				)
 				{
+					Uri nUrl=new Uri(url.ToString().Replace("://"+url.Host,"://"+fqdnDefault));
 					Log.AuditTrace(string.Format("Request {0} was redirected to {1}",  url.AbsoluteUri, nUrl));
-					Redirect(nUrl, context);
+					Redirect(nUrl.AbsoluteUri, context);
 					return;
 				}
 
@@ -114,7 +140,7 @@ namespace ru.org.openam.iis
 						context.User = GetAnonymous();
 					}
 
-					Log.AuditTrace(string.Format("Free access allowed to {0}", context.Request.Url.AbsoluteUri));
+					Log.AuditTrace(string.Format("Free access allowed to {0}", url.AbsoluteUri));
 					return;
 				}	 
 				
@@ -125,17 +151,17 @@ namespace ru.org.openam.iis
 				{
 					if(_agent.GetSingle("com.sun.identity.agents.config.sso.only") != "true")
 					{
-						var policy = Policy.Get(_agent, session, context.Request.Url, null, GetAttrsNames());
+						var policy = Policy.Get(_agent, session, url, null, GetAttrsNames());
 						if(policy != null && policy.result != null && policy.result.isAllow(context.Request.HttpMethod))
 						{
 							MapPolicyProps(policy.result.attributes, context);
 							autorized = true;
-							Log.AuditTrace(string.Format("User {0} was autorized to {1}", user.Identity.Name, context.Request.Url.AbsoluteUri));
+							Log.AuditTrace(string.Format("User {0} was autorized to {1}", user.Identity.Name, url.AbsoluteUri));
 						}
 					}
 					else
 					{
-						Log.AuditTrace(string.Format("User {0} was not autorized to {1}", user.Identity.Name, context.Request.Url.AbsoluteUri));
+						Log.AuditTrace(string.Format("User {0} was not autorized to {1}", user.Identity.Name, url.AbsoluteUri));
 						autorized = true;
 					}
 				}
@@ -149,12 +175,12 @@ namespace ru.org.openam.iis
 				{	
 					context.User = user;
 					MapArrtsProps(session, context);
-					Log.Audit(string.Format("User {0} was allowed access to {1}", user.Identity.Name, context.Request.Url.AbsoluteUri));
+					Log.Audit(string.Format("User {0} was allowed access to {1}", user.Identity.Name, url.AbsoluteUri));
 				}
 				else if(_agent.GetSingle("com.sun.identity.agents.config.anonymous.user.enable") == "true")
 				{
 					context.User = GetAnonymous();
-					Log.AuditTrace(string.Format("Anonymous access allowed to {0}", context.Request.Url.AbsoluteUri));
+					Log.AuditTrace(string.Format("Anonymous access allowed to {0}", url.AbsoluteUri));
 				}
 				else
 				{
@@ -166,7 +192,7 @@ namespace ru.org.openam.iis
 						userId = user.Identity.Name;
 					}
 					var status = user == null ? 401 : 403;
-					Log.Audit(string.Format("User {0} was denied access to {1} ({2})", userId, context.Request.Url.AbsoluteUri, status));
+					Log.Audit(string.Format("User {0} was denied access to {1} ({2})", userId, url.AbsoluteUri, status));
 					LogOff(user == null, url, context);
 				}
 			}
@@ -339,6 +365,7 @@ namespace ru.org.openam.iis
 			var freeUrls = _agent.GetOrderedArray("com.sun.identity.agents.config.notenforced.url");
 			foreach (var u in freeUrls)
 			{
+				//TODO regexp !!!!!
 				if(u.EndsWith("*") && url.OriginalString.StartsWith(u.Substring(0, u.Length-1), StringComparison.InvariantCultureIgnoreCase))
 				{
 					return true;
@@ -426,55 +453,6 @@ namespace ru.org.openam.iis
 					}
 				}
 			} 
-		}
-
-		private string CheckUrl(Uri url)
-		{
-			var enabled = _agent.GetSingle("com.sun.identity.agents.config.override.host") == "true";
-			var redirectUrl = _agent.GetSingle("com.sun.identity.agents.config.fqdn.default");
-			if(enabled && !string.IsNullOrWhiteSpace(redirectUrl) 
-				&& !url.Host.Equals(redirectUrl, StringComparison.InvariantCultureIgnoreCase))
-			{
-				var agentUrlStr = _agent.GetSingle("com.sun.identity.agents.config.agenturi.prefix"); 
-				var rewriteProtocol = _agent.GetSingle("com.sun.identity.agents.config.override.protocol") == "true";
-				var rewritePort = _agent.GetSingle("com.sun.identity.agents.config.override.port") == "true";
-				var res = "";
-
-				int? port = null;
-				string protocol = null;
-				if((rewriteProtocol || rewritePort) && !string.IsNullOrWhiteSpace(agentUrlStr))
-				{
-					var uri = new Uri(agentUrlStr);
-					port = uri.Port;
-					protocol = uri.Scheme;
-				}
-
-				if(!string.IsNullOrWhiteSpace(protocol))
-				{
-					res += protocol +"://";
-				}
-				else
-				{
-					res += url.Scheme + "://";
-				}
-
-				res += redirectUrl;
-
-				if(port.HasValue)
-				{
-					res += ":" + port;
-				}
-				else
-				{
-					res += ":" + url.Port;
-				}
-
-				res += url.PathAndQuery;
-
-				return res;
-			}
-
-			return null;
 		}
 
 		private string GetUserId(Session session)

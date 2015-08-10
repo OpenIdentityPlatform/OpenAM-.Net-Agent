@@ -79,56 +79,56 @@ namespace ru.org.openam.sdk.nunit
         [Description("Редиректим, если урлы не совпадают без переопределения протокола и порта")]
         public void OnAuthentication_CheckUrlTest()
         {
-            CheckUrlTest(DefaultUrl + "path/?id=1", "http://redirect.url:80/path/?id=1", "true", "redirect.url", null, "false", "false");
+			CheckUrlTest(DefaultUrl + "path/?id=1", "http://redirect.url/path/?id=1", "true", "redirect.url", "http://redirect.url/agent", "false", "false");
         }
 
         [Test]
         [Description("Редиректим, если урлы не совпадают без переопределения протокола и порта")]
         public void OnAuthentication_CheckUrlWithRewriteProtocolTrueTest()
         {
-            CheckUrlTest(DefaultUrl + "path/?id=1", "http://redirect.url:80/path/?id=1", "true", "redirect.url", null, "true", "false");
+			CheckUrlTest(DefaultUrl + "path/?id=1", "http://redirect.url/path/?id=1", "true", "redirect.url", "http://redirect.url/agent", "true", "false");
         }
 
         [Test]
         [Description("Редиректим, если урлы не совпадают без переопределения протокола и порта")]
         public void OnAuthentication_CheckUrlWithRewritePortTrueTest()
         {
-            CheckUrlTest(DefaultUrl + "path/?id=1", "http://redirect.url:80/path/?id=1", "true", "redirect.url", null, "false", "true");
+			CheckUrlTest(DefaultUrl + "path/?id=1", "http://redirect.url/path/?id=1", "true", "redirect.url", "http://redirect.url/agent", "false", "true");
         }
 
         [Test]
         [Description("Редиректим, если урлы не совпадают без переопределения протокола и порта")]
         public void OnAuthentication_CheckUrlWithRewriteProtocolTrueAndRewritePortTrueTest()
         {
-            CheckUrlTest(DefaultUrl + "path/?id=1", "http://redirect.url:80/path/?id=1", "true", "redirect.url", null, "true", "true");
+			CheckUrlTest(DefaultUrl + "path/?id=1", "http://redirect.url/path/?id=1", "true", "redirect.url", "http://redirect.url/agent", "true", "true");
         }
 
         [Test]
         [Description("Редиректим, если урлы не совпадают без переопределения протокола и порта, но определенным com.sun.identity.agents.config.agenturi.prefix")]
         public void OnAuthentication_CheckUrlWithSetRedirectUriTest()
         {
-            CheckUrlTest(DefaultUrl + "path/?id=1", "http://redirect.url:80/path/?id=1", "true", "redirect.url", "ftp://a.b:21", "false", "false");
+            CheckUrlTest(DefaultUrl + "path/?id=1", "http://redirect.url/path/?id=1", "true", "redirect.url", "ftp://a.b:21", "false", "false");
         }
 
         [Test]
         [Description("Редиректим, если урлы не совпадают c переопределением протокола и порта")]
         public void OnAuthentication_CheckUrlWithRewritingProtocolTest()
         {
-            CheckUrlTest(DefaultUrl + "path/?id=1", "ftp://redirect.url:22/path/?id=1", "true", "redirect.url", "ftp://a.b:22", "true", "false");
+            CheckUrlTest(DefaultUrl + "path/?id=1", "ftp://redirect.url/path/%3Fid=1", "true", "redirect.url", "ftp://a.b:22", "true", "false");
         }
 
         [Test]
         [Description("Редиректим, если урлы не совпадают c переопределением протокола и порта")]
         public void OnAuthentication_CheckUrlWithRewritingPortTest()
         {
-            CheckUrlTest(DefaultUrl + "path/?id=1", "ftp://redirect.url:23/path/?id=1", "true", "redirect.url", "ftp://a.b:23", "false", "true");
+			CheckUrlTest(DefaultUrl + "path/?id=1", "http://redirect.url:23/path/?id=1", "true", "redirect.url", "ftp://a.b:23", "false", "true");
         }
 
         [Test]
         [Description("Редиректим, если урлы не совпадают c переопределением протокола и порта")]
         public void OnAuthentication_CheckUrlWithRewritingProtocolAndPortTest()
         {
-            CheckUrlTest(DefaultUrl + "path/?id=1", "ftp://redirect.url:24/path/?id=1", "true", "redirect.url", "ftp://a.b:24", "true", "true");
+            CheckUrlTest(DefaultUrl + "path/?id=1", "ftp://redirect.url:24/path/%3Fid=1", "true", "redirect.url", "ftp://a.b:24", "true", "true");
         }
 
         [Test]
@@ -137,7 +137,7 @@ namespace ru.org.openam.sdk.nunit
         {
             var settings = new Dictionary<string, object>
             {
-                { "com.sun.identity.agents.config.override.host", "false" },
+                //{ "com.sun.identity.agents.config.override.host", "false" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new[] { TestUrl, DefaultUrl } },
                 { "com.sun.identity.agents.config.logout.cookie.reset", new[] { "cookie1", "cookie2" } },
@@ -168,7 +168,7 @@ namespace ru.org.openam.sdk.nunit
         {
             var settings = new Dictionary<string, object>
             {
-                { "com.sun.identity.agents.config.override.host", "false" },
+                //{ "com.sun.identity.agents.config.override.host", "false" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new[] { TestUrl, DefaultUrl } },
                 { "com.sun.identity.agents.config.logout.cookie.reset", new string[0] },
@@ -218,7 +218,7 @@ namespace ru.org.openam.sdk.nunit
         {
             var settings = new Dictionary<string, object>
             {
-                { "com.sun.identity.agents.config.override.host", "false" },
+                //{ "com.sun.identity.agents.config.override.host", "false" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
                 { "com.sun.identity.agents.config.notenforced.url", new[] { TestUrl, DefaultUrl + "*" } },
@@ -239,7 +239,7 @@ namespace ru.org.openam.sdk.nunit
             module.Object.OnAuthentication(_context.Object);
 
             VerifyAgent(settings);
-            _request.Verify(x => x.Url, Times.Exactly(3));
+            _request.Verify(x => x.Url, Times.Exactly(2));
             _request.Verify(x => x.Cookies, Times.Once());
             _context.VerifySet(x => x.User = null, Times.Once());
         }
@@ -252,7 +252,7 @@ namespace ru.org.openam.sdk.nunit
             {
 				{ "com.sun.identity.agents.config.receive.timeout", "0" },
 				{ "com.sun.identity.agents.config.connect.timeout", "0" },
-                { "com.sun.identity.agents.config.override.host", "false" },
+                //{ "com.sun.identity.agents.config.override.host", "false" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
                 { "com.sun.identity.agents.config.notenforced.url", new[] { TestUrl, DefaultUrl } },
@@ -275,7 +275,7 @@ namespace ru.org.openam.sdk.nunit
             module.Object.OnAuthentication(_context.Object);
 
             VerifyAgent(settings);
-            _request.Verify(x => x.Url, Times.Exactly(3));
+            _request.Verify(x => x.Url, Times.Exactly(2));
             _request.Verify(x => x.Cookies, Times.Once());
             _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "11111111111" && u.Identity.IsAuthenticated), Times.Once());
         }
@@ -286,7 +286,7 @@ namespace ru.org.openam.sdk.nunit
         {
             var settings = new Dictionary<string, object>
             {
-                { "com.sun.identity.agents.config.override.host", "false" },
+                //{ "com.sun.identity.agents.config.override.host", "false" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
                 { "com.sun.identity.agents.config.notenforced.url", new[] { TestUrl, DefaultUrl } },
@@ -300,7 +300,7 @@ namespace ru.org.openam.sdk.nunit
             _module.OnAuthentication(_context.Object);
 
             VerifyAgent(settings);
-            _request.Verify(x => x.Url, Times.Exactly(3));
+            _request.Verify(x => x.Url, Times.Exactly(2));
             _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "" && !u.Identity.IsAuthenticated), Times.Once());
         }
 
@@ -310,7 +310,7 @@ namespace ru.org.openam.sdk.nunit
         {
             var settings = new Dictionary<string, object>
             {
-                { "com.sun.identity.agents.config.override.host", "false" },
+                //{ "com.sun.identity.agents.config.override.host", "false" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
                 { "com.sun.identity.agents.config.notenforced.url", new string[0] },
@@ -328,7 +328,7 @@ namespace ru.org.openam.sdk.nunit
             _module.OnAuthentication(_context.Object);
 
             VerifyAgent(settings);
-            _request.Verify(x => x.Url, Times.Exactly(3));
+            _request.Verify(x => x.Url, Times.Exactly(2));
             _request.Verify(x => x.Cookies, Times.Once());
             _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "" && !u.Identity.IsAuthenticated), Times.Once());
         }
@@ -340,7 +340,7 @@ namespace ru.org.openam.sdk.nunit
         {
             var settings = new Dictionary<string, object>
             {
-                { "com.sun.identity.agents.config.override.host", "false" },
+                //{ "com.sun.identity.agents.config.override.host", "false" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
                 { "com.sun.identity.agents.config.notenforced.url", new string[0] },
@@ -368,7 +368,7 @@ namespace ru.org.openam.sdk.nunit
             module.Object.OnAuthentication(_context.Object);
 
             VerifyAgent(settings);
-            _request.Verify(x => x.Url, Times.Exactly(3));
+            _request.Verify(x => x.Url, Times.Exactly(2));
             _request.Verify(x => x.Cookies, Times.Once());
             _response.Verify(x => x.AddHeader("Set-Cookie", "cookie1"), Times.Once());
             _response.Verify(x => x.AddHeader("Set-Cookie", "cookie2"), Times.Once());
@@ -382,7 +382,7 @@ namespace ru.org.openam.sdk.nunit
         {
             var settings = new Dictionary<string, object>
             {
-                { "com.sun.identity.agents.config.override.host", "false" },
+                //{ "com.sun.identity.agents.config.override.host", "false" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
                 { "com.sun.identity.agents.config.notenforced.url", new string[0] },
@@ -406,7 +406,7 @@ namespace ru.org.openam.sdk.nunit
             module.Object.OnAuthentication(_context.Object);
 
             VerifyAgent(settings);
-            _request.Verify(x => x.Url, Times.Exactly(3));
+            _request.Verify(x => x.Url, Times.Exactly(2));
             _request.Verify(x => x.Cookies, Times.Once());
 			module.Verify(m => m.Redirect((string)settings["com.sun.identity.agents.config.login.url"], _context.Object), Times.Once());
         }
@@ -417,7 +417,7 @@ namespace ru.org.openam.sdk.nunit
         {
             var settings = new Dictionary<string, object>
             {
-                { "com.sun.identity.agents.config.override.host", "false" },
+                //{ "com.sun.identity.agents.config.override.host", "false" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
                 { "com.sun.identity.agents.config.notenforced.url", new string[0] },
@@ -441,7 +441,7 @@ namespace ru.org.openam.sdk.nunit
             module.Object.OnAuthentication(_context.Object);
 
             VerifyAgent(settings, _agent);
-            _request.Verify(x => x.Url, Times.Exactly(3));
+            _request.Verify(x => x.Url, Times.Exactly(2));
             _request.Verify(x => x.Cookies, Times.Once());
             _response.VerifySet(x => x.StatusCode = 401, Times.Once());
             module.Verify(x => x.CompleteRequest(It.IsAny<HttpContextBase>()), Times.Once());
@@ -455,7 +455,7 @@ namespace ru.org.openam.sdk.nunit
             {
 				{ "com.sun.identity.agents.config.receive.timeout", "0" },
 				{ "com.sun.identity.agents.config.connect.timeout", "0" },
-                { "com.sun.identity.agents.config.override.host", "false" },
+                //{ "com.sun.identity.agents.config.override.host", "false" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
                 { "com.sun.identity.agents.config.notenforced.url", new string[0] },
@@ -476,7 +476,7 @@ namespace ru.org.openam.sdk.nunit
             _module.OnAuthentication(_context.Object);
 
             VerifyAgent(settings);
-            _request.Verify(x => x.Url, Times.Exactly(3));
+            _request.Verify(x => x.Url, Times.Exactly(2));
             _request.Verify(x => x.Cookies, Times.Once());
             _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "" && !u.Identity.IsAuthenticated), Times.Once());
         }
@@ -492,7 +492,7 @@ namespace ru.org.openam.sdk.nunit
             {
 				{ "com.sun.identity.agents.config.receive.timeout", "0" },
 				{ "com.sun.identity.agents.config.connect.timeout", "0" },
-                { "com.sun.identity.agents.config.override.host", "false" },
+                //{ "com.sun.identity.agents.config.override.host", "false" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
                 { "com.sun.identity.agents.config.notenforced.url", new string[0] },
@@ -525,7 +525,7 @@ namespace ru.org.openam.sdk.nunit
             Assert.IsNotNull(serverVariables["profile-ignore-otp"]);
 
             VerifyAgent(settings);
-            _request.Verify(x => x.Url, Times.Exactly(4));
+            _request.Verify(x => x.Url, Times.Exactly(2));
             _request.Verify(x => x.Cookies, Times.Exactly(2));
             _request.Verify(x => x.ServerVariables, Times.Exactly(4));
             _context.Verify(x => x.Items, Times.Exactly(3));
@@ -543,7 +543,7 @@ namespace ru.org.openam.sdk.nunit
             {
 				{ "com.sun.identity.agents.config.receive.timeout", "0" },
 				{ "com.sun.identity.agents.config.connect.timeout", "0" },
-                { "com.sun.identity.agents.config.override.host", "false" },
+                //{ "com.sun.identity.agents.config.override.host", "false" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
                 { "com.sun.identity.agents.config.notenforced.url", new string[0] },
@@ -574,7 +574,7 @@ namespace ru.org.openam.sdk.nunit
             Assert.IsNotNull(items["profile-ignore-otp"]);
 
             VerifyAgent(settings);
-            _request.Verify(x => x.Url, Times.Exactly(4));
+            _request.Verify(x => x.Url, Times.Exactly(2));
             _request.Verify(x => x.Cookies, Times.Exactly(3));
             _request.Verify(x => x.UserHostAddress, Times.Once());
             _context.Verify(x => x.Items, Times.Exactly(2));
@@ -591,7 +591,7 @@ namespace ru.org.openam.sdk.nunit
             {
 				{ "com.sun.identity.agents.config.receive.timeout", "0" },
 				{ "com.sun.identity.agents.config.connect.timeout", "0" },
-                { "com.sun.identity.agents.config.override.host", "false" },
+                //{ "com.sun.identity.agents.config.override.host", "false" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
                 { "com.sun.identity.agents.config.notenforced.url", new string[0] },
@@ -621,7 +621,7 @@ namespace ru.org.openam.sdk.nunit
             Assert.IsNotNull(items["profile-ignore-otp"]);
 
             VerifyAgent(settings);
-            _request.Verify(x => x.Url, Times.Exactly(4));
+            _request.Verify(x => x.Url, Times.Exactly(2));
             _request.Verify(x => x.Cookies, Times.Exactly(2));
             _request.Verify(x => x.UserHostAddress, Times.Once());
             _request.Verify(x => x.Headers, Times.Once());
@@ -664,7 +664,7 @@ namespace ru.org.openam.sdk.nunit
             _module.OnAuthentication(_context.Object);
             
             //VerifyAgent(settings);
-            _request.Verify(x => x.Url, Times.Exactly(4));
+            _request.Verify(x => x.Url, Times.Exactly(2));
             _request.Verify(x => x.Cookies, Times.Once());
             _request.Verify(x => x.HttpMethod, Times.Once());
             _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "" && !u.Identity.IsAuthenticated), Times.Once());
@@ -722,7 +722,7 @@ namespace ru.org.openam.sdk.nunit
             Assert.IsNotNull(serverVariables["profile-type"]);
             
             //VerifyAgent(settings);
-            _request.Verify(x => x.Url, Times.Exactly(5));
+            _request.Verify(x => x.Url, Times.Exactly(2));
             _request.Verify(x => x.Cookies, Times.Exactly(3));
             _request.Verify(x => x.HttpMethod, Times.Once());
             _request.Verify(x => x.ServerVariables, Times.Exactly(4));
@@ -741,6 +741,7 @@ namespace ru.org.openam.sdk.nunit
         {
             var settings = new Dictionary<string, object>
             {
+				{ "com.sun.identity.agents.config.fqdn.check.enable", "true" },
                 { "com.sun.identity.agents.config.override.host", enableRedirect },
                 { "com.sun.identity.agents.config.fqdn.default", redirectHost },
                 { "com.sun.identity.agents.config.agenturi.prefix", redirectPrefix },

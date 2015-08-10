@@ -30,12 +30,14 @@ namespace ru.org.openam.iis
 		public virtual void CompleteRequest(HttpContextBase context){
 			context.Response.Clear();
 			context.Response.Write(context.Response.Status);
-			context.ApplicationInstance.CompleteRequest();
+			if (context.ApplicationInstance!=null)
+				context.ApplicationInstance.CompleteRequest();
 		}
 		
 		public virtual void Redirect(string url, HttpContextBase context){
 			context.Response.Redirect(url, false);
-			context.ApplicationInstance.CompleteRequest();
+			if (context.ApplicationInstance!=null)
+				context.ApplicationInstance.CompleteRequest();
 		}
 	}
 }
