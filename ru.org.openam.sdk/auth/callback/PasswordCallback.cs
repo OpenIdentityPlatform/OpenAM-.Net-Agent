@@ -46,10 +46,10 @@ namespace ru.org.openam.sdk.auth.callback
             writer.WriteStartElement("PasswordCallback");
             writer.WriteAttributeString("echoPassword", echoPassword.ToString());
                 writer.WriteStartElement("Prompt");
-                writer.WriteValue(Prompt);
+				writer.WriteString(Prompt);
                 writer.WriteEndElement();
                 writer.WriteStartElement("Value");
-                writer.WriteValue(Value);
+                writer.WriteString(Value);
                 writer.WriteEndElement();
             writer.WriteEndElement();
             writer.Close();

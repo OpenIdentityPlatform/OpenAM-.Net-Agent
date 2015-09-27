@@ -43,10 +43,10 @@ namespace ru.org.openam.sdk.auth.callback
             XmlWriter writer = XmlWriter.Create(sb, settings);
             writer.WriteStartElement("NameCallback");
                 writer.WriteStartElement("Prompt");
-                writer.WriteValue(Prompt);
+				writer.WriteString(Prompt);
                 writer.WriteEndElement();
                 writer.WriteStartElement("Value");
-                writer.WriteValue(Value);
+				writer.WriteString(Value);
                 writer.WriteEndElement();
             writer.WriteEndElement();
             writer.Close();

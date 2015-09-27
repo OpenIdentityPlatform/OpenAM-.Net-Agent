@@ -165,8 +165,8 @@ namespace ru.org.openam.sdk
 
 				d_index += 8;
 			}
-			byte[] data2 = new byte[data_len - data[data_len - 1]];
-			Array.Copy (data, data2, data_len - data[data_len - 1]);
+			byte[] data2 = new byte[data_len - data[data_len - 1]-1];
+			Array.Copy (data, data2, data_len - data[data_len - 1]-1);
 			return Encoding.UTF8.GetString(data2);
 		}
 

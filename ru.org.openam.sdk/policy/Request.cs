@@ -78,7 +78,7 @@ namespace ru.org.openam.sdk.policy
                 writer.WriteAttributeString("serviceName", type.iPlanetAMWebAgentService.ToString());
                 writer.WriteAttributeString("resourceName", resourceName);
                 writer.WriteAttributeString("resourceScope", "self");
-                writer.WriteValue("");
+				writer.WriteString("");
                 if (extra != null && extra.Count > 0)
                 {
                     writer.WriteStartElement("EnvParameters");
@@ -90,7 +90,7 @@ namespace ru.org.openam.sdk.policy
                         foreach (String value in extra[paramName])
                         {
                             writer.WriteStartElement("Value");
-                                writer.WriteValue(value);
+								writer.WriteString(value);
                             writer.WriteEndElement();
                         }
                         writer.WriteEndElement();

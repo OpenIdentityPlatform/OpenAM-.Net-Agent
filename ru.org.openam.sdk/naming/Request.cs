@@ -56,7 +56,7 @@ namespace ru.org.openam.sdk.naming
             if (session != null)
                 writer.WriteAttributeString("sessid", session.sessionId);
             writer.WriteStartElement("GetNamingProfile");
-            writer.WriteValue("");
+            writer.WriteString("");
             writer.WriteEndElement();
             writer.Close();
             return sb.ToString();

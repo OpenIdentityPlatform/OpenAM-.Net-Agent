@@ -11,17 +11,22 @@ using ru.org.openam.sdk.session;
 // todo проверить sla timeout
 // todo потестить новый кэш в сессии и в полиси
 // todo брать сессию 1 раз
+using System.Reflection;
+using System.Collections.Specialized;
+using System.Collections;
+
+
 namespace ru.org.openam.iis
 {
-	public class iis7AgentModule : BaseHttpModule
+	public class OpenAMHttpModule : BaseHttpModule
 	{
-		public iis7AgentModule()
+		public OpenAMHttpModule()
 		{
 			_agent = new Agent();
 		}
 
 		// конструктор для тестов
-		public iis7AgentModule(Agent agent)
+		public OpenAMHttpModule(Agent agent)
 		{
 			_agent = agent;
 		}
@@ -42,7 +47,7 @@ namespace ru.org.openam.iis
 				Log.Trace(string.Format("Begin request url: {0} ip: {1}", context.Request.Url.AbsoluteUri, GetUserIp(context.Request)));
 			}
 			catch (Exception ex)
-			{
+			{ 
 				Log.Fatal(ex);
 				if(context == null || context.Request == null || context.Request.IsLocal)
 					throw;
@@ -158,7 +163,7 @@ namespace ru.org.openam.iis
 			    if (user != null && autorized)
 				{	
 					context.User = user;
-					MapArrtsProps(session, context);
+					MapAttrsProps(session, context);
 					Log.Audit(string.Format("User {0} was allowed access to {1}", user.Identity.Name, url.AbsoluteUri));
 				}
 				else if(_agent.GetSingle("com.sun.identity.agents.config.anonymous.user.enable") == "true")
@@ -268,10 +273,13 @@ namespace ru.org.openam.iis
 
 		private bool IsLogOff(Uri url)
 		{
-			var logOffUrls = _agent.GetOrderedArray("com.sun.identity.agents.config.agent.logout.url");
+			string[] logOffUrls = _agent.GetOrderedArray("com.sun.identity.agents.config.agent.logout.url");
 			foreach (var u in logOffUrls)
-				if(new Uri(u).AbsoluteUri == url.AbsoluteUri)
-					return true;
+				try{
+					if(new Uri(u).AbsoluteUri == url.AbsoluteUri)
+						return true;
+				}catch{
+				}
 			return false;
 		}	
 
@@ -328,7 +336,7 @@ namespace ru.org.openam.iis
 			return false;
 		}
 		
-		private void MapArrtsProps(Session session, HttpContextBase context)
+		private void MapAttrsProps(Session session, HttpContextBase context)
 		{
 			var props = session.token.property;
 			var mapStrs = _agent.GetArray("com.sun.identity.agents.config.session.attribute.mapping");
@@ -349,9 +357,9 @@ namespace ru.org.openam.iis
 					context.Items[vals[1]] = props[key];
 					if(fetchMode == "HTTP_HEADER")
 					{
-						context.Request.ServerVariables[vals[1]] = props[key];
-						var compName = "HTTP_" + vals[1].ToUpper().Replace("-", "_");
-						context.Request.ServerVariables[compName] = Convert.ToString(props[key]);
+						setHeader(context,vals[1],props[key]);
+						//var compName = "HTTP_" + vals[1].ToUpper().Replace("-", "_");
+						//setHeader(context,compName,Convert.ToString(props[key]));
 					}
 					else if(fetchMode == "HTTP_COOKIE")
 						context.Request.Cookies.Set(new HttpCookie(vals[1], props[key]));
@@ -382,9 +390,9 @@ namespace ru.org.openam.iis
 					context.Items[vals[1]] = props[key];
 					if(fetchMode == "HTTP_HEADER")
 					{
-						context.Request.ServerVariables[vals[1]] = Convert.ToString(props[key]);
-						var compName = "HTTP_" + vals[1].ToUpper().Replace("-", "_");
-						context.Request.ServerVariables[compName] = Convert.ToString(props[key]);
+						setHeader(context,vals[1],Convert.ToString(props[key]));
+						//var compName = "HTTP_" + vals[1].ToUpper().Replace("-", "_");
+						//setHeader(context,compName,Convert.ToString(props[key]));
 					}
 					else if(fetchMode == "HTTP_COOKIE")
 						context.Request.Cookies.Set(new HttpCookie(vals[1], Convert.ToString(props[key])));
@@ -418,5 +426,26 @@ namespace ru.org.openam.iis
 			}
 		}
 
+		void setHeader(HttpContextBase context,String name,String value){
+			var headers =context.Request.Headers;
+			Type hdr = headers.GetType();
+			PropertyInfo ro = hdr.GetProperty("IsReadOnly",BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase | BindingFlags.FlattenHierarchy);
+			// Remove the ReadOnly property
+			ro.SetValue(headers, false, null);
+			// Invoke the protected InvalidateCachedArrays method 
+			hdr.InvokeMember("InvalidateCachedArrays", 
+				BindingFlags.InvokeMethod | BindingFlags.NonPublic | BindingFlags.Instance, 
+				null, headers, null);
+			// Now invoke the protected "BaseAdd" method of the base class to add the
+			// headers you need. The header content needs to be an ArrayList or the
+			// the web application will choke on it.
+			hdr.InvokeMember("BaseAdd", 
+				BindingFlags.InvokeMethod | BindingFlags.NonPublic | BindingFlags.Instance, 
+				null, headers, 
+				new object[] { name, new ArrayList {value}} );
+			// repeat BaseAdd invocation for any other headers to be added
+			// Then set the collection back to ReadOnly
+			ro.SetValue(headers, true, null);
+		}
 	}
 }

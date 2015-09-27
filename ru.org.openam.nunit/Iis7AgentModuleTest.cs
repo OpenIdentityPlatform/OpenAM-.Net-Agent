@@ -40,7 +40,7 @@ namespace ru.org.openam.sdk.nunit
 
 			//_httpResponse.Setup(response => response.Redirect("http://ibank.staging.rapidsoft.ru:80/"));
 
-			var module = new Mock<iis7AgentModule>();
+			var module = new Mock<OpenAMHttpModule>();
 			module.CallBase = true;
 			module.Setup(a => a.Redirect("http://ibank.staging.rapidsoft.ru:80/", It.IsAny<HttpContextBase>()));
 
@@ -57,7 +57,7 @@ namespace ru.org.openam.sdk.nunit
 			agent.Setup(a => a.GetSingle("com.sun.identity.agents.config.fqdn.default")).Returns("ibank.staging.rapidsoft.ru");
 			agent.Setup(a => a.GetSingle("com.sun.identity.agents.config.agenturi.prefix"))
 				.Returns("http://ibank.staging.rapidsoft.ru:80/");
-			var module = new Mock<iis7AgentModule>(agent.Object);
+			var module = new Mock<OpenAMHttpModule>(agent.Object);
 			module.CallBase = true;
 			module.Setup(a => a.Redirect("https://ibank.staging.rapidsoft.ru:444/", It.IsAny<HttpContextBase>()));
 			
@@ -80,7 +80,7 @@ namespace ru.org.openam.sdk.nunit
 			//var module = new iis7AgentModule(agent.Object);
 			//module.OnAuthentication(_httpContext.Object);
 
-			var module = new Mock<iis7AgentModule>(agent.Object);
+			var module = new Mock<OpenAMHttpModule>(agent.Object);
 			module.CallBase = true;
 			module.Setup(m => m.CompleteRequest(_httpContext.Object));
 			module.Object.OnAuthentication(_httpContext.Object);
@@ -99,7 +99,7 @@ namespace ru.org.openam.sdk.nunit
 			var agent = new Mock<Agent>();
 			agent.Setup(a => a.GetSingle("com.sun.identity.agents.config.override.host")).Returns("true");
 			agent.Setup(a => a.GetSingle("com.sun.identity.agents.config.userid.param")).Returns("UserId");
-			var module = new Mock<iis7AgentModule>(agent.Object);
+			var module = new Mock<OpenAMHttpModule>(agent.Object);
 			module.CallBase = true;
 			module.Setup(m => m.CompleteRequest(_httpContext.Object));
 			module.Object.OnAuthentication(_httpContext.Object);
@@ -115,7 +115,7 @@ namespace ru.org.openam.sdk.nunit
 
 			Login();
 
-			var module = new Mock<iis7AgentModule>();
+			var module = new Mock<OpenAMHttpModule>();
 			module.CallBase = true;
 			module.Setup(m => m.CompleteRequest(_httpContext.Object));
 			module.Object.OnAuthentication(_httpContext.Object);
@@ -139,7 +139,7 @@ namespace ru.org.openam.sdk.nunit
 			agent.Setup(a => a.GetFirst("com.sun.identity.agents.config.logout.redirect.url"))
 				.Returns("https://www.mysite.com:444/logoff");
 			
-			var module = new Mock<iis7AgentModule>(agent.Object);
+			var module = new Mock<OpenAMHttpModule>(agent.Object);
 			module.CallBase = true;
 			module.Setup(m => m.Redirect("https://www.mysite.com:444/logoff", _httpContext.Object));
 			module.Object.OnAuthentication(_httpContext.Object);
@@ -159,7 +159,7 @@ namespace ru.org.openam.sdk.nunit
 				.Returns(new[] {"https://www.mysite.com:444/"});
 			agent.Setup(a => a.GetFirst("com.sun.identity.agents.config.login.url")).Returns("https://www.mysite.com:444/login");
 			
-			var module = new Mock<iis7AgentModule>(agent.Object);
+			var module = new Mock<OpenAMHttpModule>(agent.Object);
 			module.CallBase = true;
 			module.Setup(m => m.Redirect("https://www.mysite.com:444/login", _httpContext.Object));
 			module.Object.OnAuthentication(_httpContext.Object);
@@ -183,7 +183,7 @@ namespace ru.org.openam.sdk.nunit
 				.Returns("https://www.mysite.com:444/logoff");
 			agent.Setup(a => a.GetSingle("com.sun.identity.agents.config.userid.param")).Returns("UserId");
 
-			var module = new Mock<iis7AgentModule>(agent.Object);
+			var module = new Mock<OpenAMHttpModule>(agent.Object);
 			module.CallBase = true;
 			module.Setup(m => m.CompleteRequest(_httpContext.Object));
 			module.Object.OnAuthentication(_httpContext.Object);
@@ -207,7 +207,7 @@ namespace ru.org.openam.sdk.nunit
 			agent.Setup(a => a.GetSingle("com.sun.identity.agents.config.agenturi.prefix"))
 				.Returns("http://ibank.staging.rapidsoft.ru:80/");
 			
-			var module = new Mock<iis7AgentModule>(agent.Object);
+			var module = new Mock<OpenAMHttpModule>(agent.Object);
 			module.CallBase = true;
 			module.Setup(m => m.Redirect("https://www.mysite.com:444/logoff", _httpContext.Object));
 			module.Object.OnAuthentication(_httpContext.Object);
@@ -231,7 +231,7 @@ namespace ru.org.openam.sdk.nunit
 
 			_httpContext.SetupSet(c => c.User = It.Is<GenericPrincipal>(p => p.Identity.Name == "")).Verifiable();
 
-			var module = new iis7AgentModule(agent.Object);
+			var module = new OpenAMHttpModule(agent.Object);
 			module.OnAuthentication(_httpContext.Object);
 
 			_httpContext.Verify();
@@ -249,7 +249,7 @@ namespace ru.org.openam.sdk.nunit
 
 			_httpResponse.SetupSet(c => c.StatusCode = 401).Verifiable();
 			
-			var module = new Mock<iis7AgentModule>(agent.Object);
+			var module = new Mock<OpenAMHttpModule>(agent.Object);
 			module.CallBase = true;
 			module.Setup(m => m.CompleteRequest(_httpContext.Object));
 			module.Object.OnAuthentication(_httpContext.Object);
@@ -269,7 +269,7 @@ namespace ru.org.openam.sdk.nunit
 
 			_httpContext.SetupSet(c => c.User = It.Is<GenericPrincipal>(p => p.Identity.Name == "")).Verifiable();
 
-			var module = new iis7AgentModule(agent.Object);
+			var module = new OpenAMHttpModule(agent.Object);
 			module.OnAuthentication(_httpContext.Object);
 
 			_httpContext.Verify();
@@ -287,7 +287,7 @@ namespace ru.org.openam.sdk.nunit
 
 			_httpResponse.SetupSet(c => c.StatusCode = 401).Verifiable();
 
-			var module = new Mock<iis7AgentModule>(agent.Object);
+			var module = new Mock<OpenAMHttpModule>(agent.Object);
 			module.CallBase = true;
 			module.Setup(m => m.CompleteRequest(_httpContext.Object));
 			module.Object.OnAuthentication(_httpContext.Object);
@@ -310,7 +310,7 @@ namespace ru.org.openam.sdk.nunit
 
 			_httpContext.SetupSet(c => c.User = It.Is<GenericPrincipal>(p => p.Identity.Name != "")).Verifiable();
 
-			var module = new iis7AgentModule(agent.Object);
+			var module = new OpenAMHttpModule(agent.Object);
 			module.OnAuthentication(_httpContext.Object);
 
 			_httpContext.Verify();
@@ -332,7 +332,7 @@ namespace ru.org.openam.sdk.nunit
 
 			_httpContext.SetupSet(c => c.User = It.Is<GenericPrincipal>(p => p.Identity.Name != "")).Verifiable();
 
-			var module = new iis7AgentModule(agent.Object);
+			var module = new OpenAMHttpModule(agent.Object);
 			module.OnAuthentication(_httpContext.Object);
 
 			_httpContext.VerifyAll();
@@ -349,7 +349,7 @@ namespace ru.org.openam.sdk.nunit
 			agent.Setup(a => a.GetSingle("com.sun.identity.agents.config.userid.param")).Returns("UserId");
 
 			_httpResponse.SetupSet(c => c.StatusCode = 401).Verifiable();
-			var module = new Mock<iis7AgentModule>(agent.Object);
+			var module = new Mock<OpenAMHttpModule>(agent.Object);
 			module.CallBase = true;
 			module.Setup(m => m.CompleteRequest(_httpContext.Object));
 			module.Object.OnAuthentication(_httpContext.Object);
@@ -372,7 +372,7 @@ namespace ru.org.openam.sdk.nunit
 
 			_httpContext.SetupSet(c => c.User = It.Is<GenericPrincipal>(p => p.Identity.Name != "")).Verifiable();
 
-			var module = new iis7AgentModule(agent.Object);
+			var module = new OpenAMHttpModule(agent.Object);
 			module.OnAuthentication(_httpContext.Object);
 
 			_httpContext.VerifyAll();
@@ -393,7 +393,7 @@ namespace ru.org.openam.sdk.nunit
 
 			_httpRequest.SetupGet(c => c.ServerVariables).Returns(new NameValueCollection());
 
-			var module = new iis7AgentModule(agent.Object);
+			var module = new OpenAMHttpModule(agent.Object);
 			module.OnAuthentication(_httpContext.Object);
 
 			Assert.IsNotNull(_httpContext.Object.Items["profile-pkn"]);
@@ -415,7 +415,7 @@ namespace ru.org.openam.sdk.nunit
 
 			_httpRequest.SetupGet(c => c.ServerVariables).Returns(new NameValueCollection());
 
-			var module = new iis7AgentModule(agent.Object);
+			var module = new OpenAMHttpModule(agent.Object);
 			module.OnAuthentication(_httpContext.Object);
 
 			Assert.IsNotNull(_httpContext.Object.Items["profile-pkn"]);
@@ -440,7 +440,7 @@ namespace ru.org.openam.sdk.nunit
 			_httpRequest.SetupGet(c => c.UserHostAddress).Returns("127.0.0.2");
 			_httpContext.SetupSet(c => c.User = It.Is<GenericPrincipal>(p => p.Identity.Name != "")).Verifiable();
 
-			var module = new iis7AgentModule(agent.Object);
+			var module = new OpenAMHttpModule(agent.Object);
 			module.OnAuthentication(_httpContext.Object);
 
 			_httpContext.VerifyAll();
@@ -459,7 +459,7 @@ namespace ru.org.openam.sdk.nunit
 
 			_httpRequest.SetupGet(c => c.UserHostAddress).Returns("127.0.0.3");
 			_httpResponse.SetupSet(c => c.StatusCode = 401).Verifiable();
-			var module = new Mock<iis7AgentModule>(agent.Object);
+			var module = new Mock<OpenAMHttpModule>(agent.Object);
 			module.CallBase = true;
 			module.Setup(m => m.CompleteRequest(_httpContext.Object));
 			module.Object.OnAuthentication(_httpContext.Object);
@@ -486,7 +486,7 @@ namespace ru.org.openam.sdk.nunit
 			_httpRequest.SetupGet(c => c.Headers).Returns(col);
 			_httpContext.SetupSet(c => c.User = It.Is<GenericPrincipal>(p => p.Identity.Name != "")).Verifiable();
 
-			var module = new iis7AgentModule(agent.Object);
+			var module = new OpenAMHttpModule(agent.Object);
 			module.OnAuthentication(_httpContext.Object);
 
 			_httpContext.Verify();
@@ -509,7 +509,7 @@ namespace ru.org.openam.sdk.nunit
 			_httpRequest.SetupGet(c => c.ServerVariables).Returns(col);
 			_httpContext.SetupSet(c => c.User = It.Is<GenericPrincipal>(p => p.Identity.Name != "")).Verifiable();
 
-			var module = new iis7AgentModule(agent.Object);
+			var module = new OpenAMHttpModule(agent.Object);
 			module.OnAuthentication(_httpContext.Object);
 
 			_httpContext.Verify();
@@ -529,7 +529,7 @@ namespace ru.org.openam.sdk.nunit
 
 			_httpContext.SetupSet(c => c.User = It.Is<GenericPrincipal>(p => p.Identity.Name != "")).Verifiable();
 
-			var module = new iis7AgentModule(agent.Object);
+			var module = new OpenAMHttpModule(agent.Object);
 			module.OnAuthentication(_httpContext.Object);
 
 			_httpContext.VerifyAll();
@@ -543,7 +543,7 @@ namespace ru.org.openam.sdk.nunit
 			var agent = new Mock<Agent>();
 
 			_httpResponse.SetupSet(c => c.StatusCode = 403).Verifiable();
-			var module = new Mock<iis7AgentModule>(agent.Object);
+			var module = new Mock<OpenAMHttpModule>(agent.Object);
 			module.CallBase = true;
 			module.Setup(m => m.CompleteRequest(_httpContext.Object));
 			module.Object.OnAuthentication(_httpContext.Object);
@@ -568,7 +568,7 @@ namespace ru.org.openam.sdk.nunit
 
 			_httpRequest.SetupGet(c => c.ServerVariables).Returns(new NameValueCollection());
 
-			var module = new iis7AgentModule(agent.Object);
+			var module = new OpenAMHttpModule(agent.Object);
 			module.OnAuthentication(_httpContext.Object);
 
 			Assert.IsNotNull(_httpContext.Object.Items["profile-maxidletime"]);
@@ -592,7 +592,7 @@ namespace ru.org.openam.sdk.nunit
 
 			_httpRequest.SetupGet(c => c.ServerVariables).Returns(new NameValueCollection());
 
-			var module = new iis7AgentModule(agent.Object);
+			var module = new OpenAMHttpModule(agent.Object);
 			module.OnAuthentication(_httpContext.Object);
 
 			Assert.IsNotNull(_httpContext.Object.Items["profile-maxidletime"]);
@@ -611,7 +611,7 @@ namespace ru.org.openam.sdk.nunit
 
 			_httpContext.SetupSet(c => c.User = It.Is<GenericPrincipal>(p => p.Identity.Name == "")).Verifiable();
 
-			var module = new iis7AgentModule(agent.Object);
+			var module = new OpenAMHttpModule(agent.Object);
 			module.OnAuthentication(_httpContext.Object);
 
 			_httpContext.Verify();

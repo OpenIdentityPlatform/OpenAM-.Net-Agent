@@ -43,8 +43,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseHttpModule.cs" />
-    <Compile Include="iis7AgentModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="OpenAMHttpModule.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="_ConfigDoc.txt" />

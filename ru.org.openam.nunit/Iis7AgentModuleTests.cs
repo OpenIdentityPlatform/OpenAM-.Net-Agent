@@ -19,7 +19,7 @@ namespace ru.org.openam.sdk.nunit
         private const string TestUrl = "http://test.com/";
         private Mock<Agent> _agent;
         private Mock<HttpContextBase> _context;
-        private iis7AgentModule _module;
+        private OpenAMHttpModule _module;
         private Mock<HttpRequestBase> _request;
         private Mock<HttpResponseBase> _response;
 
@@ -34,7 +34,7 @@ namespace ru.org.openam.sdk.nunit
 
             _agent = new Mock<Agent>(MockBehavior.Strict);
 
-            _module = new iis7AgentModule(_agent.Object);
+            _module = new OpenAMHttpModule(_agent.Object);
 
             //_context.Setup(x => x.ApplicationInstance).Returns(_applicationInstance.Object);
             _context.Setup(x => x.Request).Returns(_request.Object);
@@ -149,7 +149,7 @@ namespace ru.org.openam.sdk.nunit
             _response.Setup(x => x.AddHeader("Set-Cookie", "cookie1"));
             _response.Setup(x => x.AddHeader("Set-Cookie", "cookie2"));
 
-            var module = new Mock<iis7AgentModule>(_agent.Object);
+            var module = new Mock<OpenAMHttpModule>(_agent.Object);
 			module.Setup(m => m.CompleteRequest(_context.Object));
 			module.CallBase = true;
 			module.Setup(x => x.Redirect((string)settings["com.sun.identity.agents.config.logout.redirect.url"], It.IsAny<HttpContextBase>()));
@@ -179,7 +179,7 @@ namespace ru.org.openam.sdk.nunit
             SetupAgent(settings);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
 
-            var module = new Mock<iis7AgentModule>(_agent.Object);
+            var module = new Mock<OpenAMHttpModule>(_agent.Object);
 			module.Setup(m => m.CompleteRequest(_context.Object));
 			module.CallBase = true;
 			module.Setup(x => x.Redirect((string)settings["com.sun.identity.agents.config.login.url"], It.IsAny<HttpContextBase>()));
@@ -233,7 +233,7 @@ namespace ru.org.openam.sdk.nunit
             _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection());
             _context.SetupSet(x => x.User = null);
 
-			var module = new Mock<iis7AgentModule>(_agent.Object);
+			var module = new Mock<OpenAMHttpModule>(_agent.Object);
 			module.Setup(m => m.CompleteRequest(_context.Object));
 			module.CallBase = true;
             module.Object.OnAuthentication(_context.Object);
@@ -269,7 +269,7 @@ namespace ru.org.openam.sdk.nunit
             _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection { new HttpCookie("svbid", GetAuthCookie()) });
             _context.SetupSet(x => x.User = It.IsAny<GenericPrincipal>());
 
-            var module = new Mock<iis7AgentModule>(_agent.Object);
+            var module = new Mock<OpenAMHttpModule>(_agent.Object);
 			module.Setup(m => m.CompleteRequest(_context.Object));
 			module.CallBase = true;
             module.Object.OnAuthentication(_context.Object);
@@ -362,7 +362,7 @@ namespace ru.org.openam.sdk.nunit
             _response.Setup(x => x.AddHeader("Set-Cookie", "cookie1"));
             _response.Setup(x => x.AddHeader("Set-Cookie", "cookie2"));
             
-             var module = new Mock<iis7AgentModule>(_agent.Object);
+             var module = new Mock<OpenAMHttpModule>(_agent.Object);
 			module.Setup(m => m.Redirect(redirectUrl, _context.Object));
 			module.CallBase = true;
             module.Object.OnAuthentication(_context.Object);
@@ -400,7 +400,7 @@ namespace ru.org.openam.sdk.nunit
             _request.Setup(x => x.IsLocal).Returns(true);
             _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection());
 
-             var module = new Mock<iis7AgentModule>(_agent.Object);
+             var module = new Mock<OpenAMHttpModule>(_agent.Object);
 			module.Setup(m => m.Redirect((string)settings["com.sun.identity.agents.config.login.url"], _context.Object));
 			module.CallBase = true;
             module.Object.OnAuthentication(_context.Object);
@@ -435,7 +435,7 @@ namespace ru.org.openam.sdk.nunit
             _request.Setup(x => x.Cookies).Returns(new HttpCookieCollection());
             _response.SetupSet(x => x.StatusCode = 401);
 
-			var module = new Mock<iis7AgentModule>(_agent.Object);
+			var module = new Mock<OpenAMHttpModule>(_agent.Object);
 			module.Setup(m => m.CompleteRequest(_context.Object));
 			module.CallBase = true;
             module.Object.OnAuthentication(_context.Object);
@@ -753,7 +753,7 @@ namespace ru.org.openam.sdk.nunit
             _request.Setup(x => x.Url).Returns(new Uri(url));
             //_response.Setup(x => x.Redirect(redirectUrl));
 
-			var module = new Mock<iis7AgentModule>(_agent.Object);
+			var module = new Mock<OpenAMHttpModule>(_agent.Object);
 			module.CallBase = true;
 			module.Setup(a => a.Redirect(redirectUrl, It.IsAny<HttpContextBase>()));
 
