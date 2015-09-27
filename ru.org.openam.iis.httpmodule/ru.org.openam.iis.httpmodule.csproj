@@ -38,7 +38,7 @@
     <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Web" />
     <Reference Include="NLog">
-      <HintPath>..\packages\NLog.4.0.1\lib\net40\NLog.dll</HintPath>
+      <HintPath>..\packages\NLog.4.1.2\lib\net40\NLog.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -61,9 +61,6 @@
   </Target>
   <Target Name="AfterBuild">
   </Target>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ru.org.openam.sdk\ru.org.openam.sdk.csproj">
       <Project>{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}</Project>
@@ -93,4 +90,7 @@
     </GitBranch>
     <AssemblyInfo CodeLanguage="CS" OutputFile="Properties\AssemblyInfo.cs" AssemblyTitle="ru.org.openam.iis.httpmodule" AssemblyDescription="OpenAM Web Agent for IIS (.Net)" AssemblyCompany="3A Systems, LLC" AssemblyProduct="OpenAM" AssemblyCopyright="support@openam.org.ru" ComVisible="false" CLSCompliant="true" AssemblyInformationalVersion="$(Tag).$(CommitCount)/$(GitBranch)-$(Revision)" AssemblyVersion="$(Tag).$(CommitCount)" AssemblyFileVersion="$(Tag).$(CommitCount)" />
   </Target>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
 </Project>

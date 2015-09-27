@@ -47,7 +47,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="NLog">
-      <HintPath>..\packages\NLog.4.0.1\lib\net40\NLog.dll</HintPath>
+      <HintPath>..\packages\NLog.4.1.2\lib\net40\NLog.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -100,9 +100,6 @@
     <Error Condition="!Exists('$(SolutionDir).nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir).nuget\NuGet.targets'))" />
   </Target>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\ru.org.openam.build.tasks\ru.org.openam.build.tasks.csproj">
       <Project>{564FAE6B-9D57-4EEF-BB17-C17C44589B5A}</Project>
       <Name>ru.org.openam.build.tasks</Name>
@@ -127,4 +124,7 @@
     </GitBranch>
     <AssemblyInfo CodeLanguage="CS" OutputFile="Properties\AssemblyInfo.cs" AssemblyTitle="ru.org.openam.sdk" AssemblyDescription="OpenAM client SDK (.Net)" AssemblyCompany="3A Systems, LLC" AssemblyProduct="OpenAM" AssemblyCopyright="support@openam.org.ru" ComVisible="false" CLSCompliant="true" AssemblyInformationalVersion="$(Tag).$(CommitCount)/$(GitBranch)-$(Revision)" AssemblyVersion="$(Tag).$(CommitCount)" AssemblyFileVersion="$(Tag).$(CommitCount)" />
   </Target>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
 </Project>
