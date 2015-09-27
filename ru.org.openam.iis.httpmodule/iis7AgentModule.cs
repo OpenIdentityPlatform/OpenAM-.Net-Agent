@@ -38,19 +38,14 @@ namespace ru.org.openam.iis
 			try
 			{
 				if(context == null || context.Request == null || context.Request.Url == null)
-				{
 					throw new ArgumentException("context or context.Request or context.Request.Url is null");
-				}
-
 				Log.Trace(string.Format("Begin request url: {0} ip: {1}", context.Request.Url.AbsoluteUri, GetUserIp(context.Request)));
 			}
 			catch (Exception ex)
 			{
 				Log.Fatal(ex);
 				if(context == null || context.Request == null || context.Request.IsLocal)
-				{	
 					throw;
-				}
 				else
 				{
 					context.Response.StatusCode = 500;
@@ -114,17 +109,11 @@ namespace ru.org.openam.iis
 
 					var logoutUrl = _agent.GetFirst("com.sun.identity.agents.config.logout.redirect.url");
 					if(logoutUrl == null)
-					{
 						logoutUrl = _agent.GetFirst("com.sun.identity.agents.config.login.url");
-					}
 					if(!string.IsNullOrWhiteSpace(logoutUrl))
-					{
 						Redirect(logoutUrl, context);
-					}
 					else
-					{
 						throw new InvalidOperationException("com.sun.identity.agents.config.logout.redirect.url and com.sun.identity.agents.config.login.url cannot be empty");
-					}
 					return;
 				}
 
@@ -136,10 +125,7 @@ namespace ru.org.openam.iis
 						context.User = GetUser(us);
 					}
 					else
-					{
 						context.User = GetAnonymous();
-					}
-
 					Log.AuditTrace(string.Format("Free access allowed to {0}", url.AbsoluteUri));
 					return;
 				}	 
@@ -167,9 +153,7 @@ namespace ru.org.openam.iis
 				}
 
 			    if (session != null && IsInvalidIp(session, request))
-			    {
 			        autorized = false;
-			    }
 
 			    if (user != null && autorized)
 				{	
@@ -188,9 +172,7 @@ namespace ru.org.openam.iis
 
 					string userId = null;
 					if(user != null)
-					{
 						userId = user.Identity.Name;
-					}
 					var status = user == null ? 401 : 403;
 					Log.Audit(string.Format("User {0} was denied access to {1} ({2})", userId, url.AbsoluteUri, status));
 					LogOff(user == null, url, context);
@@ -200,9 +182,7 @@ namespace ru.org.openam.iis
 			{
 				Log.Fatal(ex);
 				if(context == null || context.Request == null || context.Request.IsLocal)
-				{	
 					throw;
-				}
 				else
 				{
 					context.Response.StatusCode = 500;
@@ -215,9 +195,7 @@ namespace ru.org.openam.iis
 		{
 			var logoffUrl = GetLogoffUrl(isNotAuth ? "com.sun.identity.agents.config.login.url" : "com.sun.identity.agents.config.access.denied.url", url);
 			if(logoffUrl != null)
-			{
 				Redirect(logoffUrl, context);
-			}
 			else
 			{
 				context.Response.StatusCode = isNotAuth ? 401 : 403;
@@ -228,21 +206,15 @@ namespace ru.org.openam.iis
 		private bool IsInvalidIp(Session session, HttpRequestBase request)
 		{
 			if(_agent.GetSingle("com.sun.identity.agents.config.client.ip.validation.enable") != "true")
-			{
 				return false;
-			}
 
 			var props = session.token.property;
 			if(!props.ContainsKey("Host"))
-			{
 				return false;
-			}
 			var host = props["Host"];
 			var userIp = GetUserIp(request);
 			if(host == userIp)
-			{
 				return false;
-			}
 									   
 			Log.AuditTrace(string.Format("User {0} ip change detected, last: {1} current: {2}", GetUserId(session), host, userIp));
 			return true;
@@ -260,15 +232,11 @@ namespace ru.org.openam.iis
 					userIp = request.ServerVariables[headerName];
 				}
 				else
-				{
 					userIp = request.Headers[headerName];
-				}
 			}
 
 			if(userIp != null && userIp.Contains(","))
-			{
 				userIp = userIp.Substring(0, userIp.IndexOf(",", StringComparison.Ordinal));
-			}
 
 			return userIp;
 		}
@@ -281,9 +249,7 @@ namespace ru.org.openam.iis
 			{
 				var vals = attr.Split('=');
 				if(vals.Length != 2)
-				{
 					continue;
-				}
 
 				var key = vals[0].Substring(1);
 				key = key.Substring(0, key.Length-1);
@@ -297,22 +263,15 @@ namespace ru.org.openam.iis
 		{
 			var resetCookie = _agent.GetOrderedArray(cfg);
 			foreach (var cookie in resetCookie)
-			{
 				response.AddHeader("Set-Cookie", cookie);
-			}
 		}
 
 		private bool IsLogOff(Uri url)
 		{
 			var logOffUrls = _agent.GetOrderedArray("com.sun.identity.agents.config.agent.logout.url");
 			foreach (var u in logOffUrls)
-			{
 				if(new Uri(u).AbsoluteUri == url.AbsoluteUri)
-				{
 					return true;
-				}
-			}
-			
 			return false;
 		}	
 
@@ -325,13 +284,9 @@ namespace ru.org.openam.iis
 				if(!string.IsNullOrWhiteSpace(gotoName))
 				{
 					if(u.Contains("?"))
-					{
 						u += "&";
-					}
 					else
-					{
 						u += "?";
-					}
 					u += gotoName + "=" + HttpUtility.UrlPathEncode(url.AbsoluteUri);
 				}
 
@@ -344,9 +299,7 @@ namespace ru.org.openam.iis
 		{
 			var userId = GetUserId(session);
 			if(session == null || userId == null)
-			{
 				return null;
-			}
 
 			var identity = new GenericIdentity(userId);
 			var principal = new GenericPrincipal(identity, new string[0]);
@@ -367,13 +320,9 @@ namespace ru.org.openam.iis
 			{
 				//TODO regexp !!!!!
 				if(u.EndsWith("*") && url.OriginalString.StartsWith(u.Substring(0, u.Length-1), StringComparison.InvariantCultureIgnoreCase))
-				{
 					return true;
-				}
 				else if(url.OriginalString.Equals(u, StringComparison.InvariantCultureIgnoreCase))
-				{
 					return true;
-				}
 			}
 
 			return false;
@@ -385,17 +334,13 @@ namespace ru.org.openam.iis
 			var mapStrs = _agent.GetArray("com.sun.identity.agents.config.session.attribute.mapping");
 			var fetchMode = _agent.GetSingle("com.sun.identity.agents.config.session.attribute.fetch.mode");
 			if(mapStrs == null)
-			{
 				return;
-			}
 
 			foreach (var mapStr in mapStrs)
 			{
 				var vals = mapStr.Split('=');
 				if(vals.Length != 2)
-				{
 					continue;
-				}
 
 				var key = vals[0].Substring(1);
 				key = key.Substring(0, key.Length-1);
@@ -409,9 +354,7 @@ namespace ru.org.openam.iis
 						context.Request.ServerVariables[compName] = Convert.ToString(props[key]);
 					}
 					else if(fetchMode == "HTTP_COOKIE")
-					{
 						context.Request.Cookies.Set(new HttpCookie(vals[1], props[key]));
-					}
 				}
 			}
 
@@ -424,17 +367,13 @@ namespace ru.org.openam.iis
 			var fetchMode = _agent.GetSingle("com.sun.identity.agents.config.profile.attribute.fetch.mode");
 			var mapStrs = _agent.GetArray("com.sun.identity.agents.config.profile.attribute.mapping");
 			if(mapStrs == null)
-			{
 				return;
-			}
 
 			foreach (var mapStr in mapStrs)
 			{
 				var vals = mapStr.Split('=');
 				if(vals.Length != 2)
-				{
 					continue;
-				}
 
 				var key = vals[0].Substring(1);
 				key = key.Substring(0, key.Length-1);
@@ -448,9 +387,7 @@ namespace ru.org.openam.iis
 						context.Request.ServerVariables[compName] = Convert.ToString(props[key]);
 					}
 					else if(fetchMode == "HTTP_COOKIE")
-					{
 						context.Request.Cookies.Set(new HttpCookie(vals[1], Convert.ToString(props[key])));
-					}
 				}
 			} 
 		}
@@ -458,15 +395,11 @@ namespace ru.org.openam.iis
 		private string GetUserId(Session session)
 		{
 			if (session == null || session.token == null)
-			{
 				return null;
-			}
 
 			var userIdParam = _agent.GetSingle("com.sun.identity.agents.config.userid.param");
 			if(string.IsNullOrWhiteSpace(userIdParam))
-			{
 				return null;
-			}
 
 			var uid = session.token.property[userIdParam];
 			return uid;
