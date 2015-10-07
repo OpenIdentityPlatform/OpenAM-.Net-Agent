@@ -358,8 +358,8 @@ namespace ru.org.openam.iis
 					if(fetchMode == "HTTP_HEADER")
 					{
 						setHeader(context,vals[1],props[key]);
-						//var compName = "HTTP_" + vals[1].ToUpper().Replace("-", "_");
-						//setHeader(context,compName,Convert.ToString(props[key]));
+						setServerVariable(context,vals[1],props[key]);
+						setServerVariable(context,"HTTP_" + vals[1].ToUpper().Replace("-", "_"),props[key]);
 					}
 					else if(fetchMode == "HTTP_COOKIE")
 						context.Request.Cookies.Set(new HttpCookie(vals[1], props[key]));
@@ -391,8 +391,8 @@ namespace ru.org.openam.iis
 					if(fetchMode == "HTTP_HEADER")
 					{
 						setHeader(context,vals[1],Convert.ToString(props[key]));
-						//var compName = "HTTP_" + vals[1].ToUpper().Replace("-", "_");
-						//setHeader(context,compName,Convert.ToString(props[key]));
+						setServerVariable(context,vals[1],Convert.ToString(props[key]));
+						setServerVariable(context,"HTTP_" + vals[1].ToUpper().Replace("-", "_"),Convert.ToString(props[key]));
 					}
 					else if(fetchMode == "HTTP_COOKIE")
 						context.Request.Cookies.Set(new HttpCookie(vals[1], Convert.ToString(props[key])));
@@ -427,22 +427,34 @@ namespace ru.org.openam.iis
 		}
 
 		void setHeader(HttpContextBase context,String name,String value){
-			var headers =context.Request.Headers;
+			NameValueCollection headers =context.Request.Headers;
 			Type hdr = headers.GetType();
 			PropertyInfo ro = hdr.GetProperty("IsReadOnly",BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase | BindingFlags.FlattenHierarchy);
 			// Remove the ReadOnly property
 			ro.SetValue(headers, false, null);
 			// Invoke the protected InvalidateCachedArrays method 
-			hdr.InvokeMember("InvalidateCachedArrays", 
-				BindingFlags.InvokeMethod | BindingFlags.NonPublic | BindingFlags.Instance, 
-				null, headers, null);
+			hdr.InvokeMember("InvalidateCachedArrays",BindingFlags.InvokeMethod | BindingFlags.NonPublic | BindingFlags.Instance,null, headers, null);
 			// Now invoke the protected "BaseAdd" method of the base class to add the
 			// headers you need. The header content needs to be an ArrayList or the
 			// the web application will choke on it.
-			hdr.InvokeMember("BaseAdd", 
-				BindingFlags.InvokeMethod | BindingFlags.NonPublic | BindingFlags.Instance, 
-				null, headers, 
-				new object[] { name, new ArrayList {value}} );
+			hdr.InvokeMember("BaseAdd",BindingFlags.InvokeMethod | BindingFlags.NonPublic | BindingFlags.Instance,null, headers, new object[] { name, new ArrayList {value}} );
+			// repeat BaseAdd invocation for any other headers to be added
+			// Then set the collection back to ReadOnly
+			ro.SetValue(headers, true, null);
+		}
+
+		void setServerVariable(HttpContextBase context,String name,String value){
+			NameValueCollection headers =context.Request.ServerVariables;
+			Type hdr = headers.GetType();
+			PropertyInfo ro = hdr.GetProperty("IsReadOnly",BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase | BindingFlags.FlattenHierarchy);
+			// Remove the ReadOnly property
+			ro.SetValue(headers, false, null);
+			// Invoke the protected InvalidateCachedArrays method 
+			hdr.InvokeMember("InvalidateCachedArrays",BindingFlags.InvokeMethod | BindingFlags.NonPublic | BindingFlags.Instance,null, headers, null);
+			// Now invoke the protected "BaseAdd" method of the base class to add the
+			// headers you need. The header content needs to be an ArrayList or the
+			// the web application will choke on it.
+			hdr.InvokeMember("BaseAdd",BindingFlags.InvokeMethod | BindingFlags.NonPublic | BindingFlags.Instance,null, headers, new object[] { name, new ArrayList {value}} );
 			// repeat BaseAdd invocation for any other headers to be added
 			// Then set the collection back to ReadOnly
 			ro.SetValue(headers, true, null);
