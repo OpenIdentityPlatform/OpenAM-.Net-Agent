@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using ru.org.openam.sdk.session;
 
 namespace ru.org.openam.sdk
 {
@@ -13,11 +14,26 @@ namespace ru.org.openam.sdk
 
         public String sessionId;
 
-        public session.Response token;
-		
+        session.Response _token;
+		public session.Response token
+		{
+			get { return _token; }
+			set { 
+				this._token = value; 
+				//allow cache token maxcaching 1..3 minutes
+				_cache.Set (value.sid,this,Math.Max(1,Math.Min((int)value.maxcaching,3)));
+			}
+		}
+
         public Session(string sessionId)
         {
-            token = Get(new session.Request(sessionId));
+			try{
+            	token = Get(new session.Request(sessionId));
+			}catch(SessionException){
+				//cache session not found 1 min
+				_token=null;
+				_cache.Set(sessionId,this,1);
+			}
             this.sessionId = sessionId;
         }
 
@@ -43,52 +59,21 @@ namespace ru.org.openam.sdk
         public static Session getSession(Agent agent, string authCookie)
         {
 			if (authCookie == null)
-			{
 				return null;
-			}
 
-			var minsStr = agent.GetSingle("com.sun.identity.agents.config.policy.cache.polling.interval");
-			int mins;
-			if (!int.TryParse(minsStr, out mins))
-			{
-				mins = 1;
-			}
-
-			var userSession = _cache.GetOrDefault
-			(
-				"am_" + authCookie,
-				() => new Session(agent,authCookie),
-				mins
-				// всегда приходит 0
-				//, r =>
-				//{
-				//	if (r != null && r.token != null)
-				//	{
-				//		return r.token.maxcaching;
-				//	}
-
-				//	return 3;
-				//}
-			);
+			Session userSession=_cache.Get<Session>(authCookie);
+			if (userSession == null) 
+				lock (authCookie){
+					userSession=_cache.Get<Session>(authCookie);
+					if (userSession == null) 
+						userSession = new Session (agent, authCookie);
+				}
             return userSession;
-        }
-
-        public void Validate() 
-        {
-            token = Get(new session.Request(this));
         }
 
         public bool isValid()
         {
-            try
-            {
-                Validate();
-                return true;
-            }
-            catch (session.SessionException)
-            {
-                return false;
-            }
+			return token != null && state.valid.Equals (token.state);
         }
 
         public naming.Response GetNaming() //for personal session naming (need agent only)
@@ -113,7 +98,7 @@ namespace ru.org.openam.sdk
         }
         public String GetProperty(String key)
         {
-            Validate();
+            //Validate();
             return token.property[key];
         }
     }

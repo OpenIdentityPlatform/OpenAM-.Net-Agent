@@ -29,12 +29,14 @@ namespace ru.org.openam.sdk
 			_instance = this;
 		}
 
-		Session session;
+		String sessionId=null;
 		public Session getSession()
 		{
+			Session session=Session.getSession(this,sessionId);	
 			if (session == null || !session.isValid())
 				lock (this)
 				{
+					session=Session.getSession(this,sessionId);	
 					if (session == null || !session.isValid()) //need re-auth ?
 					{
 						session = Auth.login(
@@ -45,6 +47,7 @@ namespace ru.org.openam.sdk
                                 new PasswordCallback(Bootstrap.getAppPassword()) 
                             }
 						);
+						sessionId = session.sessionId;
 						naming = null; //clear naming
 						config = null;//clear config
 					}
