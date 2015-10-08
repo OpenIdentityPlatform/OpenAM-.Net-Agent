@@ -43,9 +43,14 @@ namespace ru.org.openam.sdk
 			}
 			
 			_noConfig = true;
-			var fileTarget = new FileTarget();
-			var retryTargetWrapper = new RetryingTargetWrapper(fileTarget, 3, 100);
-			var asyncTargetWrapper = new AsyncTargetWrapper(retryTargetWrapper);
+
+			EventLogTarget syslog=new EventLogTarget();
+			syslog.Source=Bootstrap.getAppUser();
+			syslog.Name = "EventLog";
+
+			FileTarget fileTarget = new FileTarget();
+			RetryingTargetWrapper retryTargetWrapper = new RetryingTargetWrapper(fileTarget, 3, 100);
+			AsyncTargetWrapper asyncTargetWrapper = new AsyncTargetWrapper(retryTargetWrapper);
 			config.AddTarget("async", asyncTargetWrapper);
 
 			fileTarget.Layout = @"${longdate} ${level} ${message}";
@@ -93,18 +98,21 @@ namespace ru.org.openam.sdk
 
 			lock(_sync){
 				var oldRule = config.LoggingRules.FirstOrDefault(l => l.LoggerNamePattern == DEBUG_LOGGER);
-				if(oldRule != null){
+				if(oldRule != null)
 					config.LoggingRules.Remove(oldRule);
-				}
 				var rule = new LoggingRule(DEBUG_LOGGER, nlogLevel, fileTarget);
 				config.LoggingRules.Add(rule);
 
 				oldRule = config.LoggingRules.FirstOrDefault(l => l.LoggerNamePattern == AUDIT_LOGGER);
-				if(oldRule != null){
+				if(oldRule != null)
 					config.LoggingRules.Remove(oldRule);
-				}
 				var rule2 = new LoggingRule(AUDIT_LOGGER, LogLevel.Info, fileTarget);
 				config.LoggingRules.Add(rule2);
+
+				oldRule = config.LoggingRules.FirstOrDefault(l => l.LoggerNamePattern == "*");
+				if(oldRule != null)
+					config.LoggingRules.Remove(oldRule);
+				config.LoggingRules.Add(new LoggingRule("*", LogLevel.Warn, syslog));
 
 				LogManager.Configuration = config;
 
