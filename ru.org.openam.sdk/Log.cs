@@ -28,6 +28,7 @@ namespace ru.org.openam.sdk
 
 		private static bool _noConfig;
 
+		public static String auditLevel=null;
 		public static void Init()
 		{
 			var config = LogManager.Configuration ?? new LoggingConfiguration();
@@ -42,14 +43,13 @@ namespace ru.org.openam.sdk
 			}
 			
 			_noConfig = true;
-			var logAudit = false;
 			var fileTarget = new FileTarget();
 			var retryTargetWrapper = new RetryingTargetWrapper(fileTarget, 3, 100);
 			var asyncTargetWrapper = new AsyncTargetWrapper(retryTargetWrapper);
 			config.AddTarget("async", asyncTargetWrapper);
 
 			fileTarget.Layout = @"${longdate} ${level} ${message}";
-			fileTarget.FileName = "${basedir}/App_Data/Logs/${logger}/${date:format=yyyy-MM-dd}.txt";
+			fileTarget.FileName = "${basedir}/App_Data/Logs/${logger}/${date:format=yyyy-MM-dd}.log";
 			fileTarget.Encoding = Encoding.UTF8;
 
 			LogLevel nlogLevel = LogLevel.Info; //default level 
@@ -58,14 +58,15 @@ namespace ru.org.openam.sdk
 			//TODO failover FATAL log to WINDOWS SYSTEM LOG
 			if (Agent.Instance.HasConfig())
 			{
-				logAudit = Agent.Instance.GetSingle("com.sun.identity.agents.config.audit.accesstype") == "LOG_ALLOW";
+				//logAudit = Agent.Instance.GetSingle("com.sun.identity.agents.config.audit.accesstype") == "LOG_ALLOW";
+				auditLevel=Agent.Instance.GetSingle("com.sun.identity.agents.config.audit.accesstype");
 
 				if (Agent.Instance.GetSingle("com.sun.identity.agents.config.local.log.rotate") == "true")
 				{
 					long temp;
 					fileTarget.ArchiveAboveSize = 104857600;
 					fileTarget.MaxArchiveFiles = 9999;
-					fileTarget.ArchiveFileName = "${basedir}/App_Data/Logs/${logger}/${date:format=yyyy-MM-dd}_{#}.txt";
+					fileTarget.ArchiveFileName = "${basedir}/App_Data/Logs/${logger}/${date:format=yyyy-MM-dd}_{#}.log";
 					fileTarget.ArchiveNumbering = ArchiveNumberingMode.Sequence;
 					fileTarget.ArchiveEvery = FileArchivePeriod.None;
 					if (long.TryParse(Agent.Instance.GetSingle("com.sun.identity.agents.config.local.log.size"), out temp))
@@ -108,9 +109,7 @@ namespace ru.org.openam.sdk
 				LogManager.Configuration = config;
 
 				_debugLogger = LogManager.GetLogger(DEBUG_LOGGER);
-				if (logAudit){
-					_auditLogger = LogManager.GetLogger(AUDIT_LOGGER);
-				}
+				_auditLogger = LogManager.GetLogger(AUDIT_LOGGER);
 			}
 		}
 
@@ -160,16 +159,16 @@ namespace ru.org.openam.sdk
 				_debugLogger.Trace("(web request id: {0}) {1}", GetRequestId(), message);
 		}
 
-		public static void Audit(string message)
+		public static void Audit(Boolean allow,string message)
 		{
-			if (_auditLogger != null)
+			if (_auditLogger != null && ("LOG_BOTH".Equals(auditLevel) || (allow && "LOG_ALLOW".Equals(auditLevel)) || (!allow && "LOG_DENY".Equals(auditLevel))) )
 				_auditLogger.Info("(web request id: {0}) {1}", GetRequestId(), message);
 		}
 
 		public static void AuditTrace(string message)
 		{
 			if (_auditLogger != null)
-				_auditLogger.Info("(web request id: {0}) {1}", GetRequestId(), message);
+				_auditLogger.Trace("(web request id: {0}) {1}", GetRequestId(), message);
 		}
 		 
 		private static Guid? GetRequestId()

@@ -47,8 +47,9 @@ namespace ru.org.openam.sdk.pll
 		}
 
 		static string UserAgent = string.Format(
-			"openam.org.ru (.Net {0} {1}/{2})"
+			"openam.org.ru (.Net {0} {1} {2}/{3})"
 				,Agent.getVersion()
+				,Bootstrap.getAppUser()
 				,System.Environment.MachineName
 				,String.Join(",",((from ip in Dns.GetHostAddresses(System.Environment.MachineName) where ip.AddressFamily == AddressFamily.InterNetwork select ip.ToString()).ToList() )
 			)

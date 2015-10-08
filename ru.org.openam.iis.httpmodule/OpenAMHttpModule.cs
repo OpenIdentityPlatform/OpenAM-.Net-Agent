@@ -101,14 +101,14 @@ namespace ru.org.openam.iis
 				)
 				{
 					Uri nUrl=new Uri(url.ToString().Replace("://"+url.Host,"://"+fqdnDefault));
-					Log.AuditTrace(string.Format("Request {0} was redirected to {1}",  url.AbsoluteUri, nUrl));
+					Log.Trace(string.Format("Request {0} was redirected to {1}",  url, nUrl));
 					Redirect(nUrl.AbsoluteUri, context);
 					return;
 				}
 
 				if(IsLogOff(url))
 				{
-					Log.AuditTrace(string.Format("Logoff {0}", url.AbsoluteUri));
+					Log.Trace(string.Format("Logoff {0}", url.AbsoluteUri));
 
 					ResetCookie("com.sun.identity.agents.config.logout.cookie.reset", response);
 
@@ -131,7 +131,7 @@ namespace ru.org.openam.iis
 					}
 					else
 						context.User = GetAnonymous();
-					Log.AuditTrace(string.Format("Free access allowed to {0}", url.AbsoluteUri));
+					Log.Audit(true,string.Format("ALLOW UNTRUSTED {0} {1} {2}",GetUserIp(request),context.User ,url));
 					return;
 				}	 
 				
@@ -147,12 +147,12 @@ namespace ru.org.openam.iis
 						{
 							MapPolicyProps(policy.result.attributes, context);
 							autorized = true;
-							Log.AuditTrace(string.Format("User {0} was autorized to {1}", user.Identity.Name, url.AbsoluteUri));
+							Log.Trace(string.Format("User {0} was autorized to {1}", user.Identity.Name, url));
 						}
 					}
 					else
 					{
-						Log.AuditTrace(string.Format("User {0} was not autorized to {1}", user.Identity.Name, url.AbsoluteUri));
+						Log.AuditTrace(string.Format("User {0} was not autorized to {1}", user.Identity.Name, url));
 						autorized = true;
 					}
 				}
@@ -164,12 +164,13 @@ namespace ru.org.openam.iis
 				{	
 					context.User = user;
 					MapAttrsProps(session, context);
-					Log.Audit(string.Format("User {0} was allowed access to {1}", user.Identity.Name, url.AbsoluteUri));
+					Log.Audit(true,string.Format("ALLOW {0} {1} {2} ",GetUserIp(request),user.Identity.Name ,url));
+					//Log.Audit(string.Format("User {0} was allowed access to {1}", user.Identity.Name, url.AbsoluteUri));
 				}
 				else if(_agent.GetSingle("com.sun.identity.agents.config.anonymous.user.enable") == "true")
 				{
 					context.User = GetAnonymous();
-					Log.AuditTrace(string.Format("Anonymous access allowed to {0}", url.AbsoluteUri));
+					Log.Trace(string.Format("Anonymous access allowed to {0}", url.AbsoluteUri));
 				}
 				else
 				{
@@ -179,7 +180,8 @@ namespace ru.org.openam.iis
 					if(user != null)
 						userId = user.Identity.Name;
 					var status = user == null ? 401 : 403;
-					Log.Audit(string.Format("User {0} was denied access to {1} ({2})", userId, url.AbsoluteUri, status));
+					Log.Audit(false,string.Format("DENY {0} {1} {2} ({3})",GetUserIp(request), userId ,url,status));
+					//Log.Audit(string.Format("User {0} was denied access to {1} ({2})", userId, url.AbsoluteUri, status));
 					LogOff(user == null, url, context);
 				}
 			}
@@ -221,7 +223,7 @@ namespace ru.org.openam.iis
 			if(host == userIp)
 				return false;
 									   
-			Log.AuditTrace(string.Format("User {0} ip change detected, last: {1} current: {2}", GetUserId(session), host, userIp));
+			Log.Trace(string.Format("User {0} ip change detected, last: {1} current: {2}", GetUserId(session), host, userIp));
 			return true;
 		}
 
@@ -239,7 +241,9 @@ namespace ru.org.openam.iis
 				else
 					userIp = request.Headers[headerName];
 			}
-
+			if(string.IsNullOrWhiteSpace(userIp))
+				userIp = request.UserHostAddress;
+				
 			if(userIp != null && userIp.Contains(","))
 				userIp = userIp.Substring(0, userIp.IndexOf(",", StringComparison.Ordinal));
 
@@ -309,14 +313,14 @@ namespace ru.org.openam.iis
 			if(session == null || userId == null)
 				return null;
 
-			var identity = new GenericIdentity(userId);
+			var identity = new GenericIdentity(userId,"OpenAM");
 			var principal = new GenericPrincipal(identity, new string[0]);
 			return principal;
 		}
 
 		private GenericPrincipal GetAnonymous()
 		{
-			var identity = new GenericIdentity("");
+			var identity = new GenericIdentity("","OpenAM");
 			var principal = new GenericPrincipal(identity, new string[0]);
 			return principal;
 		}
@@ -357,9 +361,9 @@ namespace ru.org.openam.iis
 					context.Items[vals[1]] = props[key];
 					if(fetchMode == "HTTP_HEADER")
 					{
-						setHeader(context,vals[1],props[key]);
-						setServerVariable(context,vals[1],props[key]);
-						setServerVariable(context,"HTTP_" + vals[1].ToUpper().Replace("-", "_"),props[key]);
+						setROCollection(context.Request.Headers,vals[1],props[key]);
+						setROCollection(context.Request.ServerVariables,vals[1],props[key]);
+						setROCollection(context.Request.ServerVariables,"HTTP_" + vals[1].ToUpper().Replace("-", "_"),props[key]);
 					}
 					else if(fetchMode == "HTTP_COOKIE")
 						context.Request.Cookies.Set(new HttpCookie(vals[1], props[key]));
@@ -390,9 +394,9 @@ namespace ru.org.openam.iis
 					context.Items[vals[1]] = props[key];
 					if(fetchMode == "HTTP_HEADER")
 					{
-						setHeader(context,vals[1],Convert.ToString(props[key]));
-						setServerVariable(context,vals[1],Convert.ToString(props[key]));
-						setServerVariable(context,"HTTP_" + vals[1].ToUpper().Replace("-", "_"),Convert.ToString(props[key]));
+						setROCollection(context.Request.Headers,vals[1],Convert.ToString(props[key]));
+						setROCollection(context.Request.ServerVariables,vals[1],Convert.ToString(props[key]));
+						setROCollection(context.Request.ServerVariables,"HTTP_" + vals[1].ToUpper().Replace("-", "_"),Convert.ToString(props[key]));
 					}
 					else if(fetchMode == "HTTP_COOKIE")
 						context.Request.Cookies.Set(new HttpCookie(vals[1], Convert.ToString(props[key])));
@@ -426,38 +430,20 @@ namespace ru.org.openam.iis
 			}
 		}
 
-		void setHeader(HttpContextBase context,String name,String value){
-			NameValueCollection headers =context.Request.Headers;
-			Type hdr = headers.GetType();
+		void setROCollection(NameValueCollection collection,String name,String value){
+			Type hdr = collection.GetType();
 			PropertyInfo ro = hdr.GetProperty("IsReadOnly",BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase | BindingFlags.FlattenHierarchy);
 			// Remove the ReadOnly property
-			ro.SetValue(headers, false, null);
+			ro.SetValue(collection, false, null);
 			// Invoke the protected InvalidateCachedArrays method 
-			hdr.InvokeMember("InvalidateCachedArrays",BindingFlags.InvokeMethod | BindingFlags.NonPublic | BindingFlags.Instance,null, headers, null);
+			hdr.InvokeMember("InvalidateCachedArrays",BindingFlags.InvokeMethod | BindingFlags.NonPublic | BindingFlags.Instance,null, collection, null);
 			// Now invoke the protected "BaseAdd" method of the base class to add the
 			// headers you need. The header content needs to be an ArrayList or the
 			// the web application will choke on it.
-			hdr.InvokeMember("BaseAdd",BindingFlags.InvokeMethod | BindingFlags.NonPublic | BindingFlags.Instance,null, headers, new object[] { name, new ArrayList {value}} );
+			hdr.InvokeMember("BaseAdd",BindingFlags.InvokeMethod | BindingFlags.NonPublic | BindingFlags.Instance,null, collection, new object[] { name, new ArrayList {value}} );
 			// repeat BaseAdd invocation for any other headers to be added
 			// Then set the collection back to ReadOnly
-			ro.SetValue(headers, true, null);
-		}
-
-		void setServerVariable(HttpContextBase context,String name,String value){
-			NameValueCollection headers =context.Request.ServerVariables;
-			Type hdr = headers.GetType();
-			PropertyInfo ro = hdr.GetProperty("IsReadOnly",BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase | BindingFlags.FlattenHierarchy);
-			// Remove the ReadOnly property
-			ro.SetValue(headers, false, null);
-			// Invoke the protected InvalidateCachedArrays method 
-			hdr.InvokeMember("InvalidateCachedArrays",BindingFlags.InvokeMethod | BindingFlags.NonPublic | BindingFlags.Instance,null, headers, null);
-			// Now invoke the protected "BaseAdd" method of the base class to add the
-			// headers you need. The header content needs to be an ArrayList or the
-			// the web application will choke on it.
-			hdr.InvokeMember("BaseAdd",BindingFlags.InvokeMethod | BindingFlags.NonPublic | BindingFlags.Instance,null, headers, new object[] { name, new ArrayList {value}} );
-			// repeat BaseAdd invocation for any other headers to be added
-			// Then set the collection back to ReadOnly
-			ro.SetValue(headers, true, null);
+			//ro.SetValue(collection, true, null);
 		}
 	}
 }
