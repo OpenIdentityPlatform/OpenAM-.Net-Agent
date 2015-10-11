@@ -1,0 +1,4 @@
+language: csharp
+install:
+  - sudo apt-get install mono-devel mono-gmcs nunit-console
+solution: ru.org.openam.dotnet.sln
