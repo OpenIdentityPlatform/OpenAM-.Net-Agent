@@ -99,6 +99,10 @@
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir).nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir).nuget\NuGet.targets'))" />
   </Target>
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
   <ItemGroup>
     <ProjectReference Include="..\ru.org.openam.build.tasks\ru.org.openam.build.tasks.csproj">
       <Project>{564FAE6B-9D57-4EEF-BB17-C17C44589B5A}</Project>
