@@ -18,7 +18,7 @@
 
   <ItemGroup Condition=" '$(PackageSources)' == '' ">
     <!-- Package sources used to restore packages. By default will used the registered sources under %APPDATA%\NuGet\NuGet.Config -->
-    <PackageSource Include="https://nuget.org/api/v2/" />
+    <PackageSource Include="https://www.nuget.org/api/v2/" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(OS)' == 'Windows_NT'">
@@ -30,7 +30,7 @@
   <PropertyGroup Condition=" '$(OS)' != 'Windows_NT'">
     <!-- We need to launch nuget.exe with the mono command if we're not on windows -->
     <NuGetToolsPath>$(SolutionDir).nuget</NuGetToolsPath>
-    <PackagesConfig>packages.config</PackagesConfig>
+    <PackagesConfig>$(ProjectDir)packages.config</PackagesConfig>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -39,7 +39,7 @@
     <PackageSources Condition=" $(PackageSources) == '' ">@(PackageSource)</PackageSources>
 
     <NuGetCommand Condition=" '$(OS)' == 'Windows_NT'">"$(NuGetExePath)"</NuGetCommand>
-    <NuGetCommand Condition=" '$(OS)' != 'Windows_NT' ">$(MSBuildBinPath)/../../../bin/mono --runtime=v4.0.30319 $(NuGetExePath)</NuGetCommand>
+    <NuGetCommand Condition=" '$(OS)' != 'Windows_NT' ">mono --runtime=v4.0.30319 $(NuGetExePath)</NuGetCommand>
 
     <PackageOutputDir Condition="$(PackageOutputDir) == ''">$(TargetDir.Trim('\\'))</PackageOutputDir>
 
@@ -113,7 +113,7 @@
 
                     Log.LogMessage("Downloading latest version of NuGet.exe...");
                     WebClient webClient = new WebClient();
-                    webClient.DownloadFile("https://nuget.org/nuget.exe", OutputFilename);
+                    webClient.DownloadFile("https://www.nuget.org/nuget.exe", OutputFilename);
 
                     return true;
                 }
