@@ -47,6 +47,10 @@ namespace ru.org.openam.sdk
 			EventLogTarget syslog=new EventLogTarget();
 			syslog.Source=Bootstrap.getAppUser();
 			syslog.Name = "EventLog";
+			//syslog.Category = 0;
+			//syslog.EntryType = "";
+			//syslog.EventId = "";
+			syslog.Layout = "${message}${newline}${exception:format=ToString}";
 
 			FileTarget fileTarget = new FileTarget();
 			RetryingTargetWrapper retryTargetWrapper = new RetryingTargetWrapper(fileTarget, 3, 100);
