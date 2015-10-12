@@ -15,9 +15,7 @@ OpenAM .Net SDK and IIS policy agent
 * Предоставьте право записи для пользователя IUSER_XXX в папку ${site}/App_Data/Logs
 
 ### Настройка приложения:
-Настройки полиси агента хранятся в файле ${site}/web.config в секции \<appSettings\>.
-
-Добавьте следующие настройки:
+Настройки полиси агента хранятся в файле ${site}/web.config в секции \<appSettings\>, добавьте следующие настройки:
 *  \<add key="com.sun.identity.agents.config.naming.url" value="" /\>
 *  \<add key="com.sun.identity.agents.config.organization.name" value="/" /\>
 *  \<add key="com.sun.identity.agents.app.username" value="" /\>
@@ -27,14 +25,16 @@ OpenAM .Net SDK and IIS policy agent
 Значения настроек предоставляются администратором сервера OpenAM или могут быть найдены в файлe c:\iis7_agent\Identifier_${site_id}\config\OpenSSOAgentBootstrap.properties предыдущей установки
 
 ### Включение полиси агента:
-Включение полиси агента производится в файле ${site}/web.config в секции \<httpModules\>
+Включение полиси агента производится в файле ${site}/web.config в секции \<httpModules\> :
 * Удалите предыдущую версию полиси агента:  \<add name="iis7agent" /\>
 * Добавьте новую версию полиси агента путем добавления строки:  \<add name="OpenAM" type="ru.org.openam.iis.OpenAMHttpModule"\>
 * Проверьте работу приложения и файлы журналов в ${site}/App_Data/Logs
 
-ВАЖНО: добавление необходимо производить первой строчкой после тэга  \<httpModules\> или после тега  \<clear/\> внутри \<httpModules\> если он существует.
+ВАЖНО: добавление необходимо производить первой строчкой после тэга  \<httpModules\> или после тега  \<clear/\> внутри \<httpModules\> , если он существует.
 
 ### Выключение полиси агента:
-Включение полиси агента производится в файле ${site}/web.config в секции \<httpModules\>
+Включение полиси агента производится в файле ${site}/web.config в секции \<httpModules\> :
 * Удалите строку:  \<add name="OpenAM" type="ru.org.openam.iis.OpenAMHttpModule"\>
 
+### Примеры настройки
+Пример настройки ${site}/web.config: https://github.com/openam-org-ru/ru.org.openam.dotnet/blob/master/ru.org.openam.iis.site.sample/web.config
