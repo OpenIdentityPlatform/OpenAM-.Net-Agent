@@ -21,6 +21,7 @@ OpenAM .Net SDK and IIS policy agent
 *  \<add key="com.sun.identity.agents.app.username" value="" /\>
 *  \<add key="com.iplanet.am.service.password" value="" /\>
 *  \<add key="com.sun.identity.agents.config.key" value="" /\> (опустите настройку, если password не криптован)
+*  \<add key="com.sun.identity.agents.config.local.log.path" value="${basedir}/App_Data/Logs"/\> (переопределите путь хранения журналов)
 
 Значения настроек предоставляются администратором сервера OpenAM или могут быть найдены в файлe c:\iis7_agent\Identifier_${site_id}\config\OpenSSOAgentBootstrap.properties предыдущей установки
 
