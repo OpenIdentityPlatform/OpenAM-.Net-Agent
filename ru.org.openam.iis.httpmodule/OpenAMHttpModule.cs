@@ -131,6 +131,8 @@ namespace ru.org.openam.iis
 				//read user attr from server
 				if (!(isNotenforced && !"true".Equals(_agent.GetSingle("com.sun.identity.agents.config.notenforced.url.attributes.enable")))){
 					session=Session.getSession(_agent, _agent.GetAuthCookie(request.Cookies));
+					if (session!=null && session.token==null)
+						session=null;
 					if (session!=null)
 						MapAttrsProps(session, context);
 					if (session!=null && GetAttrsNames().Count>0){ //read policy only for attr
@@ -308,8 +310,8 @@ namespace ru.org.openam.iis
 					if(fetchMode == "HTTP_HEADER")
 					{
 						setROCollection(context.Request.Headers,vals[1],props[key]);
-						setROCollection(context.Request.ServerVariables,vals[1],props[key]);
-						setROCollection(context.Request.ServerVariables,"HTTP_" + vals[1].ToUpper().Replace("-", "_"),props[key]);
+						//setROCollection2(context.Request.ServerVariables,vals[1],props[key]);
+						//setROCollection2(context.Request.ServerVariables,"HTTP_" + vals[1].ToUpper().Replace("-", "_"),props[key]);
 					}
 					else if(fetchMode == "HTTP_COOKIE")
 						context.Request.Cookies.Set(new HttpCookie(vals[1], props[key]));
@@ -341,8 +343,8 @@ namespace ru.org.openam.iis
 					if(fetchMode == "HTTP_HEADER")
 					{
 						setROCollection(context.Request.Headers,vals[1],Convert.ToString(props[key]));
-						setROCollection(context.Request.ServerVariables,vals[1],Convert.ToString(props[key]));
-						setROCollection(context.Request.ServerVariables,"HTTP_" + vals[1].ToUpper().Replace("-", "_"),Convert.ToString(props[key]));
+						//setROCollection2(context.Request.ServerVariables,vals[1],Convert.ToString(props[key]));
+						//setROCollection2(context.Request.ServerVariables,"HTTP_" + vals[1].ToUpper().Replace("-", "_"),Convert.ToString(props[key]));
 					}
 					else if(fetchMode == "HTTP_COOKIE")
 						context.Request.Cookies.Set(new HttpCookie(vals[1], Convert.ToString(props[key])));
