@@ -14,6 +14,7 @@ using ru.org.openam.sdk.session;
 using System.Reflection;
 using System.Collections.Specialized;
 using System.Collections;
+using System.Runtime.Caching;
 
 
 namespace ru.org.openam.iis
@@ -122,68 +123,59 @@ namespace ru.org.openam.iis
 					return;
 				}
 
-				if (IsFree(url))
-				{
-					if(_agent.GetSingle("com.sun.identity.agents.config.notenforced.url.attributes.enable") == "true")
-					{
-						var us = GetUserSession(request);
-						context.User = GetUser(us);
-					}
-					else
-						context.User = GetAnonymous();
-					Log.Audit(true,string.Format("ALLOW UNTRUSTED {0} {1} {2}",GetUserIp(request),context.User ,url));
-					return;
-				}	 
-				
-				var session = GetUserSession(request);
-				var user = GetUser(session);
-				var autorized = false;
-				if(user != null)
-				{
-					if(_agent.GetSingle("com.sun.identity.agents.config.sso.only") != "true")
-					{
-						var policy = Policy.Get(_agent, session, url, null, GetAttrsNames());
-						if(policy != null && policy.result != null && policy.result.isAllow(context.Request.HttpMethod))
-						{
+				Session session=null;
+				String ip=GetUserIp(request);
+				Policy policy=null;
+				bool isNotenforced=_agent.isNotenforced(url);
+
+				//read user attr from server
+				if (!(isNotenforced && !"true".Equals(_agent.GetSingle("com.sun.identity.agents.config.notenforced.url.attributes.enable")))){
+					session=Session.getSession(_agent, _agent.GetAuthCookie(request.Cookies));
+					if (session!=null)
+						MapAttrsProps(session, context);
+					if (session!=null && GetAttrsNames().Count>0){ //read policy only for attr
+						policy = Policy.Get(_agent, session, url, null, GetAttrsNames());
+						if(policy != null && policy.result != null)
 							MapPolicyProps(policy.result.attributes, context);
-							autorized = true;
-							Log.Trace(string.Format("User {0} was autorized to {1}", user.Identity.Name, url));
-						}
-					}
-					else
-					{
-						Log.AuditTrace(string.Format("User {0} was not autorized to {1}", user.Identity.Name, url));
-						autorized = true;
 					}
 				}
 
-			    if (session != null && IsInvalidIp(session, request))
-			        autorized = false;
+				//get principal from session and policy attrs
+				GenericPrincipal user=_agent.GetPrincipal(session,policy);
 
-			    if (user != null && autorized)
-				{	
-					context.User = user;
-					MapAttrsProps(session, context);
-					Log.Audit(true,string.Format("ALLOW {0} {1} {2} ",GetUserIp(request),user.Identity.Name ,url));
-					//Log.Audit(string.Format("User {0} was allowed access to {1}", user.Identity.Name, url.AbsoluteUri));
-				}
-				else if(_agent.GetSingle("com.sun.identity.agents.config.anonymous.user.enable") == "true")
-				{
-					context.User = GetAnonymous();
-					Log.Trace(string.Format("Anonymous access allowed to {0}", url.AbsoluteUri));
-				}
-				else
-				{
-					ResetCookie("com.sun.identity.agents.config.cookie.reset", response);
+				//com.sun.identity.agents.config.client.ip.validation.enable
+				if(session!=null && !ip.Equals(session.token.property["Host"]) && "true".Equals(_agent.GetSingle("com.sun.identity.agents.config.client.ip.validation.enable"))){
+					Log.Audit(false,string.Format("DENY IP CHANGE {0}->{1} {2} {3}",session.token.property["Host"],ip, GetName(user) ,url));
+					session=null;
+					policy=null;
+					user=null;
 
-					string userId = null;
-					if(user != null)
-						userId = user.Identity.Name;
-					var status = user == null ? 401 : 403;
-					Log.Audit(false,string.Format("DENY {0} {1} {2} ({3})",GetUserIp(request), userId ,url,status));
-					//Log.Audit(string.Format("User {0} was denied access to {1} ({2})", userId, url.AbsoluteUri, status));
-					LogOff(user == null, url, context);
 				}
+
+				//set principal 
+				if (user!=null)
+					context.User=user;
+				
+				//check need read policy
+				if (session!=null && policy==null && !isNotenforced && !"true".Equals(_agent.GetSingle("com.sun.identity.agents.config.sso.only")))
+					policy = Policy.Get(_agent, session, url, null, GetAttrsNames());
+
+				//authoried ?
+				if (isNotenforced){
+					Log.Audit(true,string.Format("ALLOW NOTENFORCED {0} {1} {2}",ip,GetName(user),url));
+					return;
+				}else if (user!=null && "true".Equals(_agent.GetSingle("com.sun.identity.agents.config.sso.only"))){ 
+					Log.Audit(true,string.Format("ALLOW SSO {0} {1} {2} ",ip,GetName(user) ,url));
+					return;
+				}else if (policy != null && policy.result != null && policy.result.isAllow(context.Request.HttpMethod)){
+					Log.Audit(true,string.Format("ALLOW POLICY {0} {1} {2} ",ip,GetName(user) ,url));
+					return;
+				}
+
+				//access denied
+				Log.Audit(false,string.Format("DENY {0} {1} {2} ({3})",ip, GetName(user) ,url,user == null ? 401 : 403));
+				ResetCookie("com.sun.identity.agents.config.cookie.reset", response);
+				LogOff(user == null, url, context);
 			}
 			catch (Exception ex)
 			{
@@ -198,6 +190,10 @@ namespace ru.org.openam.iis
 			}
 		}
 
+		string GetName(IPrincipal principal){
+			return (principal == null || principal.Identity == null) ? null : principal.Identity.Name;
+		}
+
 		private void LogOff(bool isNotAuth, Uri url, HttpContextBase context)
 		{
 			var logoffUrl = GetLogoffUrl(isNotAuth ? "com.sun.identity.agents.config.login.url" : "com.sun.identity.agents.config.access.denied.url", url);
@@ -210,26 +206,9 @@ namespace ru.org.openam.iis
 			}
 		}
 
-		private bool IsInvalidIp(Session session, HttpRequestBase request)
-		{
-			if(_agent.GetSingle("com.sun.identity.agents.config.client.ip.validation.enable") != "true")
-				return false;
-
-			var props = session.token.property;
-			if(!props.ContainsKey("Host"))
-				return false;
-			var host = props["Host"];
-			var userIp = GetUserIp(request);
-			if(host == userIp)
-				return false;
-									   
-			Log.Trace(string.Format("User {0} ip change detected, last: {1} current: {2}", GetUserId(session), host, userIp));
-			return true;
-		}
-
 		private string GetUserIp(HttpRequestBase request){
-			var headerName = _agent.GetSingle("com.sun.identity.agents.config.client.ip.header");
-			var userIp = request.UserHostAddress;
+			String headerName = _agent.GetSingle("com.sun.identity.agents.config.client.ip.header");
+			String userIp = null;
 			if(!string.IsNullOrWhiteSpace(headerName))
 			{
 				if(headerName.StartsWith("HTTP_"))
@@ -245,9 +224,9 @@ namespace ru.org.openam.iis
 				userIp = request.UserHostAddress;
 				
 			if(userIp != null && userIp.Contains(","))
-				userIp = userIp.Substring(0, userIp.IndexOf(",", StringComparison.Ordinal));
+				userIp = userIp.Split(',')[0];
 
-			return userIp;
+			return (userIp==null)?"":userIp;
 		}
 
 		private ICollection<string> GetAttrsNames()
@@ -307,39 +286,6 @@ namespace ru.org.openam.iis
 			return null;
 		}
 
-		private GenericPrincipal GetUser(Session session)
-		{
-			var userId = GetUserId(session);
-			if(session == null || userId == null)
-				return null;
-
-			var identity = new GenericIdentity(userId,"OpenAM");
-			var principal = new GenericPrincipal(identity, new string[0]);
-			return principal;
-		}
-
-		private GenericPrincipal GetAnonymous()
-		{
-			var identity = new GenericIdentity("","OpenAM");
-			var principal = new GenericPrincipal(identity, new string[0]);
-			return principal;
-		}
-
-		private bool IsFree(Uri url)
-		{
-			var freeUrls = _agent.GetOrderedArray("com.sun.identity.agents.config.notenforced.url");
-			foreach (var u in freeUrls)
-			{
-				//TODO regexp !!!!!
-				if(u.EndsWith("*") && url.OriginalString.StartsWith(u.Substring(0, u.Length-1), StringComparison.InvariantCultureIgnoreCase))
-					return true;
-				else if(url.OriginalString.Equals(u, StringComparison.InvariantCultureIgnoreCase))
-					return true;
-			}
-
-			return false;
-		}
-		
 		private void MapAttrsProps(Session session, HttpContextBase context)
 		{
 			var props = session.token.property;
@@ -404,33 +350,9 @@ namespace ru.org.openam.iis
 			} 
 		}
 
-		private string GetUserId(Session session)
-		{
-			if (session == null || session.token == null)
-				return null;
-
-			var userIdParam = _agent.GetSingle("com.sun.identity.agents.config.userid.param");
-			if(string.IsNullOrWhiteSpace(userIdParam))
-				return null;
-
-			var uid = session.token.property[userIdParam];
-			return uid;
-		}
-
-		private Session GetUserSession(HttpRequestBase request)
-		{
-			try
-			{
-				return Session.getSession(_agent, _agent.GetAuthCookie(request.Cookies));
-			}
-			catch(SessionException ex)
-			{
-				Log.Warning(string.Format("SessionException was thrown {0}{1}", Environment.NewLine, ex));
-				return null;
-			}
-		}
-
 		void setROCollection(NameValueCollection collection,String name,String value){
+			if (collection == null)
+				return;
 			Type hdr = collection.GetType();
 			PropertyInfo ro = hdr.GetProperty("IsReadOnly",BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase | BindingFlags.FlattenHierarchy);
 			// Remove the ReadOnly property

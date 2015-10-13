@@ -120,7 +120,7 @@ namespace ru.org.openam.sdk.nunit
 			module.Setup(m => m.CompleteRequest(_httpContext.Object));
 			module.Object.OnAuthentication(_httpContext.Object);
 
-            module.Verify(x => x.CompleteRequest(It.IsAny<HttpContextBase>()), Times.Once());
+			module.Verify(x => x.CompleteRequest(It.IsAny<HttpContextBase>()), Times.Never());
 			_httpResponse.Verify(r => r.Redirect("http://ibank.staging.rapidsoft.ru:80/"), Times.Never());
 		}
 
@@ -226,6 +226,7 @@ namespace ru.org.openam.sdk.nunit
 			_httpRequest.SetupGet(request => request.Url).Returns(new Uri("https://www.mysite.com:444/static/image.jpg"));
 
 			var agent = new Mock<Agent>();
+			agent.Setup(a => a.GetSingle("com.sun.identity.agents.config.anonymous.user.enable")).Returns("true");
 			agent.Setup(a => a.GetOrderedArray("com.sun.identity.agents.config.notenforced.url"))
 				.Returns(new[] {"https://www.mysite.com:444/static/*"});
 
@@ -264,6 +265,7 @@ namespace ru.org.openam.sdk.nunit
 			_httpRequest.SetupGet(request => request.Url).Returns(new Uri("https://www.mysite.com:444/static/image.jpg"));
 
 			var agent = new Mock<Agent>();
+			agent.Setup(a => a.GetSingle("com.sun.identity.agents.config.anonymous.user.enable")).Returns("true");
 			agent.Setup(a => a.GetOrderedArray("com.sun.identity.agents.config.notenforced.url"))
 				.Returns(new[] {"https://www.mysite.com:444/static/image.jpg"});
 

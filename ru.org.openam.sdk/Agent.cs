@@ -5,6 +5,8 @@ using System.Text.RegularExpressions;
 using System.Web;
 using ru.org.openam.sdk.auth.callback;
 using System.Reflection;
+using System.Runtime.Caching;
+using System.Security.Principal;
 
 namespace ru.org.openam.sdk
 {
@@ -495,6 +497,61 @@ namespace ru.org.openam.sdk
 		static String Version=((AssemblyInformationalVersionAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false).FirstOrDefault()).InformationalVersion;
 		public static String getVersion(){
 			return Version;
+		}
+
+		// com.sun.identity.agents.config.polling.interval
+		// com.sun.identity.agents.config.cleanup.interval
+		public static int getConfigPoolingInterval(){
+			int res = 10;
+			int.TryParse (Instance.GetSingle ("com.sun.identity.agents.config.polling.interval"), out res);
+			return Math.Min (60, Math.Max(1,res));
+		}
+
+		private readonly MemoryCache freeCache=new MemoryCache("com.sun.identity.agents.config.notenforced.url");
+		public bool isNotenforced(Uri url)
+		{
+			var result = freeCache.Get(url.ToString());
+			if (result == null) 
+				lock(url){
+					result = freeCache.Get(url.ToString());
+					if (result == null) {
+						result = false;
+						var freeUrls = GetOrderedArray ("com.sun.identity.agents.config.notenforced.url");
+						foreach (var u in freeUrls) {
+							//TODO regexp !!!!!
+							if (u.EndsWith ("*") && url.OriginalString.StartsWith (u.Substring (0, u.Length - 1), StringComparison.InvariantCultureIgnoreCase)) {
+								result = true;
+								break;
+							} else if (url.OriginalString.Equals (u, StringComparison.InvariantCultureIgnoreCase)) {
+								result = true;
+								break;
+							}
+						}
+						if ("true".Equals (GetSingle ("com.sun.identity.agents.config.notenforced.url.invert")))
+							result = !(bool)result;
+						freeCache.Set(url.ToString(),result,DateTime.Now.AddMinutes(getConfigPoolingInterval()));
+					}
+				}
+			Log.Trace(string.Format(" {0} isNotenforced: {1}", url,result));
+			return (bool)result;
+		}
+
+		//com.sun.identity.agents.config.iis.auth.type
+		//User ID can be fetched from either SESSION and LDAP attributes. (property name: com.sun.identity.agents.config.userid.param.type) 
+		//Agent sets value of User Id to REMOTE_USER server variable. (property name: com.sun.identity.agents.config.userid.param) 
+		//User id of unauthenticated users. (property name: com.sun.identity.agents.config.anonymous.user.id) 
+		//Enable/Disable REMOTE_USER processing for anonymous users. (property name: com.sun.identity.agents.config.anonymous.user.enable) 
+		public GenericPrincipal GetPrincipal(Session session,Policy policy){
+			string type = GetSingle("com.sun.identity.agents.config.userid.param.type");
+			string param = GetSingle("com.sun.identity.agents.config.userid.param");
+			string authtype = GetSingle("com.sun.identity.agents.config.iis.auth.type");
+			string userid = "LDAP".Equals (type) ? (param==null||policy==null||policy.result==null)?null:Convert.ToString(policy.result.attributes [param]) : (param==null||session==null)?null:session.token.property[param];
+			if (userid == null && "true".Equals (GetSingle ("com.sun.identity.agents.config.anonymous.user.enable"))) {
+				userid = GetSingle ("com.sun.identity.agents.config.anonymous.user.id");
+				if (userid == null)
+					userid = "";
+			}
+			return (userid==null) ? null : new GenericPrincipal(new GenericIdentity(userid,string.IsNullOrWhiteSpace(authtype)?"OpenAM":authtype), new string[0]);
 		}
 	}
 }
