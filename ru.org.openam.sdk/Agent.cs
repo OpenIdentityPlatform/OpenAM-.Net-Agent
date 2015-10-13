@@ -517,16 +517,15 @@ namespace ru.org.openam.sdk
 					if (result == null) {
 						result = false;
 						var freeUrls = GetOrderedArray ("com.sun.identity.agents.config.notenforced.url");
-						foreach (var u in freeUrls) {
-							//TODO regexp !!!!!
-							if (u.EndsWith ("*") && url.OriginalString.StartsWith (u.Substring (0, u.Length - 1), StringComparison.InvariantCultureIgnoreCase)) {
-								result = true;
-								break;
-							} else if (url.OriginalString.Equals (u, StringComparison.InvariantCultureIgnoreCase)) {
-								result = true;
-								break;
+						foreach (var u in freeUrls) 
+							try{
+								if (!string.IsNullOrWhiteSpace (u) && new Regex (Regex.Escape (u).Replace (@"\*", ".*").Replace (@"\?", "."), RegexOptions.IgnoreCase).IsMatch (url.ToString ())) {
+									result = true;
+									break;
+								}
+							}catch(Exception e){
+								Log.Fatal(string.Format(" {0} regexp error: {1}", u,e));
 							}
-						}
 						if ("true".Equals (GetSingle ("com.sun.identity.agents.config.notenforced.url.invert")))
 							result = !(bool)result;
 						freeCache.Set(url.ToString(),result,DateTime.Now.AddMinutes(getConfigPoolingInterval()));
