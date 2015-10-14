@@ -39,3 +39,10 @@ OpenAM .Net SDK and IIS policy agent
 
 ### Примеры настройки
 Пример настройки ${site}/web.config: https://github.com/openam-org-ru/ru.org.openam.dotnet/blob/master/ru.org.openam.iis.site.sample/web.config
+
+### Возможные проблемы
+
+#### System.Net.WebException: The underlying connection was closed: Could not establish trust relationship for the SSL/TLS secure channel
+На сервере используется не доверенный сертификат. Добавьте сертификат сервера в список надежных или отключите строгую проверку сертификатов (не рекомендуется в продуктивной среде) настройкой:
+<add key="com.sun.identity.agents.config.trust.server.certs" value="true"/>
+ 
