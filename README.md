@@ -44,5 +44,6 @@ OpenAM .Net SDK and IIS policy agent
 
 #### System.Net.WebException: The underlying connection was closed: Could not establish trust relationship for the SSL/TLS secure channel
 На сервере используется не доверенный сертификат. Добавьте сертификат сервера в список надежных или отключите строгую проверку сертификатов (не рекомендуется в продуктивной среде) настройкой:
+
 \<add key="com.sun.identity.agents.config.trust.server.certs" value="true"/\>
  
