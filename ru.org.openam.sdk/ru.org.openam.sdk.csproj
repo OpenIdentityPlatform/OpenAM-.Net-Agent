@@ -47,7 +47,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="NLog">
-      <HintPath>..\packages\NLog.4.1.2\lib\net40\NLog.dll</HintPath>
+      <HintPath>..\packages\NLog.4.2.1\lib\net40\NLog.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -114,7 +114,7 @@
   <UsingTask TaskName="MSBuild.Community.Tasks.Git.GitDescribe" AssemblyFile="$(SolutionDir)\ru.org.openam.build.tasks\bin\$(Configuration)\ru.org.openam.build.tasks.dll" />
   <UsingTask TaskName="MSBuild.Community.Tasks.Git.GitBranch" AssemblyFile="$(SolutionDir)\ru.org.openam.build.tasks\bin\$(Configuration)\ru.org.openam.build.tasks.dll" />
   <UsingTask TaskName="MSBuild.Community.Tasks.AssemblyInfo" AssemblyFile="$(SolutionDir)\ru.org.openam.build.tasks\bin\$(Configuration)\ru.org.openam.build.tasks.dll" />
-  <Target Name="BeforeBuild" >
+  <Target Name="BeforeBuild">
     <GitVersion LocalPath="$(SolutionDir)" Short="true">
       <Output TaskParameter="CommitHash" PropertyName="Revision" />
     </GitVersion>

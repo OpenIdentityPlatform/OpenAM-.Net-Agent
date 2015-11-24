@@ -21,9 +21,10 @@ namespace ru.org.openam.iis
 {
 	public class OpenAMHttpModule : BaseHttpModule
 	{
+		private static Agent _agent= new Agent();
+
 		public OpenAMHttpModule()
 		{
-			_agent = new Agent();
 		}
 
 		// конструктор для тестов
@@ -31,8 +32,6 @@ namespace ru.org.openam.iis
 		{
 			_agent = agent;
 		}
-
-		private readonly Agent _agent;
 
 		public override void OnEndRequest(HttpContextBase context)
 		{
