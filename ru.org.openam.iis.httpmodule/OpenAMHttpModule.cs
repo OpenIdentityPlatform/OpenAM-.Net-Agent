@@ -21,7 +21,7 @@ namespace ru.org.openam.iis
 {
 	public class OpenAMHttpModule : BaseHttpModule
 	{
-		private static Agent _agent= new Agent();
+		private static Agent _agent= Agent.Instance;
 
 		public OpenAMHttpModule()
 		{
@@ -146,7 +146,7 @@ namespace ru.org.openam.iis
 
 				//com.sun.identity.agents.config.client.ip.validation.enable
 				if(session!=null && !ip.Equals(session.token.property["Host"]) && "true".Equals(_agent.GetSingle("com.sun.identity.agents.config.client.ip.validation.enable"))){
-					Log.Audit(false,string.Format("DENY IP CHANGE {0}->{1} {2} {3}",session.token.property["Host"],ip, GetName(user) ,url));
+					Log.Audit(false,string.Format("DENY IP CHANGE {0}->{1} {2} {3} {4}",session.token.property["Host"],ip, GetName(user) ,url,HttpCookieCollection2String(request.Cookies)));
 					session=null;
 					policy=null;
 					user=null;
@@ -163,18 +163,18 @@ namespace ru.org.openam.iis
 
 				//authoried ?
 				if (isNotenforced){
-					Log.Audit(true,string.Format("ALLOW NOTENFORCED {0} {1} {2}",ip,GetName(user),url));
+					Log.Audit(true,string.Format("ALLOW NOTENFORCED {0} {1} {2} {3}",ip,GetName(user)==null?"anonymouse":GetName(user),url,HttpCookieCollection2String(request.Cookies)));
 					return;
 				}else if (user!=null && "true".Equals(_agent.GetSingle("com.sun.identity.agents.config.sso.only"))){ 
-					Log.Audit(true,string.Format("ALLOW SSO {0} {1} {2} ",ip,GetName(user) ,url));
+					Log.Audit(true,string.Format("ALLOW SSO {0} {1} {2} {3}",ip,GetName(user) ,url,HttpCookieCollection2String(request.Cookies)));
 					return;
 				}else if (policy != null && policy.result != null && policy.result.isAllow(context.Request.HttpMethod)){
-					Log.Audit(true,string.Format("ALLOW POLICY {0} {1} {2} ",ip,GetName(user) ,url));
+					Log.Audit(true,string.Format("ALLOW POLICY {0} {1} {2} {3}",ip,GetName(user) ,url,HttpCookieCollection2String(request.Cookies)));
 					return;
 				}
 
 				//access denied
-				Log.Audit(false,string.Format("DENY {0} {1} {2} ({3})",ip, GetName(user) ,url,user == null ? 401 : 403));
+				Log.Audit(false,string.Format("DENY {0} {1} {2} ({3}) {4}",ip, (GetName(user)==null?"anonymouse":GetName(user)),url,(user == null ? 401 : 403),HttpCookieCollection2String(request.Cookies)));
 				ResetCookie("com.sun.identity.agents.config.cookie.reset", response);
 				LogOff(user == null, url, context);
 			}
@@ -189,6 +189,15 @@ namespace ru.org.openam.iis
 					CompleteRequest(context);	
 				}				
 			}
+		}
+
+		String HttpCookieCollection2String(HttpCookieCollection cookies){
+			if (cookies == null)
+				return null;
+			String res = "";
+			foreach (String cookie in cookies) 
+				res += string.Format ("{0}={1} ", cookie, cookies.Get(cookie).Value);
+			return res;
 		}
 
 		string GetName(IPrincipal principal){

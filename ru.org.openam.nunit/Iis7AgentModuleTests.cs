@@ -251,7 +251,7 @@ namespace ru.org.openam.sdk.nunit
 
             VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(2));
-            _request.Verify(x => x.Cookies, Times.Once());
+			_request.Verify(x => x.Cookies, Times.Exactly(2));
 			_context.VerifySet(x => x.User = null, Times.AtMostOnce());
         }
 
@@ -383,7 +383,7 @@ namespace ru.org.openam.sdk.nunit
 
             VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(2));
-            _request.Verify(x => x.Cookies, Times.Once());
+			_request.Verify(x => x.Cookies, Times.Exactly(2));
             _context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "" && !u.Identity.IsAuthenticated), Times.Once());
         }
 
@@ -431,7 +431,7 @@ namespace ru.org.openam.sdk.nunit
 
             VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(2));
-            _request.Verify(x => x.Cookies, Times.Once());
+			_request.Verify(x => x.Cookies, Times.Exactly(2));
             _response.Verify(x => x.AddHeader("Set-Cookie", "cookie1"), Times.Once());
             _response.Verify(x => x.AddHeader("Set-Cookie", "cookie2"), Times.Once());
             module.Verify(m => m.Redirect(redirectUrl, _context.Object), Times.Once());
@@ -477,7 +477,7 @@ namespace ru.org.openam.sdk.nunit
 
             VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(2));
-            _request.Verify(x => x.Cookies, Times.Once());
+			_request.Verify(x => x.Cookies, Times.Exactly(2));
 			module.Verify(m => m.Redirect((string)settings["com.sun.identity.agents.config.login.url"], _context.Object), Times.Once());
         }
 
@@ -520,7 +520,7 @@ namespace ru.org.openam.sdk.nunit
 
             VerifyAgent(settings, _agent);
             _request.Verify(x => x.Url, Times.Exactly(2));
-            _request.Verify(x => x.Cookies, Times.Once());
+			_request.Verify(x => x.Cookies, Times.Exactly(2));
             _response.VerifySet(x => x.StatusCode = 401, Times.Once());
             module.Verify(x => x.CompleteRequest(It.IsAny<HttpContextBase>()), Times.Once());
         }
@@ -638,7 +638,7 @@ namespace ru.org.openam.sdk.nunit
 
             VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(2));
-            _request.Verify(x => x.Cookies, Times.Exactly(2));
+            _request.Verify(x => x.Cookies, Times.Exactly(3));
             //_request.Verify(x => x.ServerVariables, Times.Exactly(4));
             _context.Verify(x => x.Items, Times.Exactly(3));
 			_context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "11111111111" && u.Identity.IsAuthenticated), Times.Exactly(1));
@@ -696,7 +696,7 @@ namespace ru.org.openam.sdk.nunit
 
             VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(2));
-            _request.Verify(x => x.Cookies, Times.Exactly(3));
+            _request.Verify(x => x.Cookies, Times.Exactly(4));
 			_request.Verify(x => x.UserHostAddress, Times.Exactly(1));
             _context.Verify(x => x.Items, Times.Exactly(2));
 			_context.VerifySet(x => x.User = It.Is<GenericPrincipal>(u => u.Identity.Name == "11111111111" && u.Identity.IsAuthenticated), Times.Exactly(1));
@@ -753,7 +753,7 @@ namespace ru.org.openam.sdk.nunit
 
             VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(2));
-            _request.Verify(x => x.Cookies, Times.Exactly(2));
+            _request.Verify(x => x.Cookies, Times.Exactly(3));
             //_request.Verify(x => x.UserHostAddress, Times.Once());
 			_request.Verify(x => x.Headers, Times.Exactly(1));
             _context.Verify(x => x.Items, Times.Exactly(2));
@@ -882,7 +882,7 @@ namespace ru.org.openam.sdk.nunit
             
             //VerifyAgent(settings);
             _request.Verify(x => x.Url, Times.Exactly(2));
-            _request.Verify(x => x.Cookies, Times.Exactly(3));
+            _request.Verify(x => x.Cookies, Times.Exactly(4));
             _request.Verify(x => x.HttpMethod, Times.Once());
            //_request.Verify(x => x.ServerVariables, Times.Exactly(4));
             _context.Verify(x => x.Items, Times.Exactly(4));
