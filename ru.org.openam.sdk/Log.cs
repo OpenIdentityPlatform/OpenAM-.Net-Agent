@@ -58,7 +58,8 @@ namespace ru.org.openam.sdk
 			config.AddTarget("async", asyncTargetWrapper);
 
 			fileTarget.Layout = @"${longdate} ${level} ${message}";
-			String prefix = Agent.Instance.HasConfig()?Agent.Instance.GetSingle ("com.sun.identity.agents.config.local.log.path"):ConfigurationManager.AppSettings ["com.sun.identity.agents.config.local.log.path"];
+            var agentConfig = Agent.Instance.HasConfig() ? Agent.Instance.GetSingle("com.sun.identity.agents.config.local.log.path") : null;
+            String prefix = ConfigurationManager.AppSettings["com.sun.identity.agents.config.local.log.path"] != null ? ConfigurationManager.AppSettings["com.sun.identity.agents.config.local.log.path"] : agentConfig;
 			fileTarget.FileName = (String.IsNullOrWhiteSpace(prefix)?"${basedir}/App_Data/Logs":prefix)+"/${logger}/${date:format=yyyy-MM-dd}.log";
 			fileTarget.Encoding = Encoding.UTF8;
 
