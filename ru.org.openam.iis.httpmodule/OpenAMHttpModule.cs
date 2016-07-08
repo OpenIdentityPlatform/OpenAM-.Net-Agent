@@ -129,9 +129,7 @@ namespace ru.org.openam.iis
 
 				//read user attr from server
 				if (!(isNotenforced && !"true".Equals(_agent.GetSingle("com.sun.identity.agents.config.notenforced.url.attributes.enable")))){
-					session=Session.getSession(_agent, _agent.GetAuthCookie(request.Cookies));
-					if (session!=null && session.token==null)
-						session=null;
+					session=Session.getSession(_agent, request.Cookies);
 					if (session!=null)
 						MapAttrsProps(session, context);
 					if (session!=null && GetAttrsNames().Count>0){ //read policy only for attr
@@ -326,7 +324,7 @@ namespace ru.org.openam.iis
 				}
 			}
 
-			context.Items["am_auth_cookie"] = _agent.GetAuthCookie(context.Request.Cookies);
+			context.Items["am_auth_cookie"] = _agent.GetAuthCookieValue(context.Request.Cookies);
 		}
 
 		private void MapPolicyProps(Dictionary<string, object> attributes, HttpContextBase context)

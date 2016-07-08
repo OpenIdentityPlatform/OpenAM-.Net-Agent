@@ -10,7 +10,7 @@ namespace ru.org.openam.sdk
     {
         public static Uri getUrl()
         {
-            Uri res = new Uri(ConfigurationManager.AppSettings["com.sun.identity.agents.config.naming.url"]);
+            Uri res = new Uri(ConfigurationManager.AppSettings["com.sun.identity.agents.config.naming.url"]); 
             return res;
         }
         public static String getAppRealm()

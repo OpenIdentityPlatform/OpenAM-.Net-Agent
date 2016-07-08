@@ -47,7 +47,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="NLog">
-      <HintPath>..\packages\NLog.4.2.1\lib\net40\NLog.dll</HintPath>
+      <HintPath>..\packages\NLog.4.3.5\lib\net40\NLog.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -110,6 +110,9 @@
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <UsingTask TaskName="MSBuild.Community.Tasks.Git.GitVersion" AssemblyFile="$(SolutionDir)\ru.org.openam.build.tasks\bin\$(Configuration)\ru.org.openam.build.tasks.dll" />
   <UsingTask TaskName="MSBuild.Community.Tasks.Git.GitDescribe" AssemblyFile="$(SolutionDir)\ru.org.openam.build.tasks\bin\$(Configuration)\ru.org.openam.build.tasks.dll" />
   <UsingTask TaskName="MSBuild.Community.Tasks.Git.GitBranch" AssemblyFile="$(SolutionDir)\ru.org.openam.build.tasks\bin\$(Configuration)\ru.org.openam.build.tasks.dll" />
@@ -128,7 +131,4 @@
     </GitBranch>
     <AssemblyInfo CodeLanguage="CS" OutputFile="Properties\AssemblyInfo.cs" AssemblyTitle="ru.org.openam.sdk" AssemblyDescription="OpenAM client SDK (.Net)" AssemblyCompany="3A Systems, LLC" AssemblyProduct="OpenAM" AssemblyCopyright="support@openam.org.ru" ComVisible="false" CLSCompliant="true" AssemblyInformationalVersion="$(Tag).$(CommitCount)/$(GitBranch)-$(Revision)" AssemblyVersion="$(Tag).$(CommitCount)" AssemblyFileVersion="$(Tag).$(CommitCount)" />
   </Target>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
 </Project>

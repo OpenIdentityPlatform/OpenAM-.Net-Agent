@@ -641,7 +641,7 @@ namespace ru.org.openam.sdk.nunit
 
 		private void Login(){
 			var cookieCollection = new HttpCookieCollection();
- 			var sid = Auth.login("/clients", indexType.service, "ldap", new Callback[] { new NameCallback("11111111111"), new PasswordCallback("1111111111") }).sessionId;
+			var sid = Auth.login("/clients", indexType.service, "ldap", new Callback[] { new NameCallback("11111111111"), new PasswordCallback("1111111111") }).token.sid;
 			cookieCollection.Set(new HttpCookie("svbid", sid));
 			_httpRequest.SetupGet(r => r.Cookies).Returns(cookieCollection);
 			_httpRequest.SetupGet(r => r.HttpMethod).Returns("GET");

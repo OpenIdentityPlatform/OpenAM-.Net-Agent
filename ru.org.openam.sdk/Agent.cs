@@ -31,14 +31,15 @@ namespace ru.org.openam.sdk
 			_instance = this;
 		}
 
-		String sessionId=null;
+		Session session = null;
+
 		public Session getSession()
 		{
-			Session session=Session.getSession(this,sessionId);	
+			session=Session.getSession(this,session);	
 			if (session == null || !session.isValid())
 				lock (this)
 				{
-					session=Session.getSession(this,sessionId);	
+					session=Session.getSession(this,session);	
 					if (session == null || !session.isValid()) //need re-auth ?
 					{
 						session = Auth.login(
@@ -49,9 +50,9 @@ namespace ru.org.openam.sdk
                                 new PasswordCallback(Bootstrap.getAppPassword()) 
                             }
 						);
-						sessionId = session.sessionId;
-						naming = null; //clear naming
-						config = null;//clear config
+						naming = Naming.Get(new naming.Request(session));
+						reread_config = true;//clear config
+						config=GetConfig();
 					}
 				}
 			return session;
@@ -367,10 +368,12 @@ namespace ru.org.openam.sdk
 		//      <value>10</value>
 		//   </attribute>
 		//</identitydetails>
+
 		Dictionary<String, Object> config;
+		Boolean reread_config=true;
 		public Dictionary<String, Object> GetConfig()
 		{
-			if (config == null){
+			if (config == null || reread_config){
 				config =
 					((identity.Response)new identity.Request(
 						getSession().GetProperty("UserId"),
@@ -384,6 +387,7 @@ namespace ru.org.openam.sdk
 						},
 						getSession()
 					).getResponse()).property;
+				reread_config = false;
 				Log.Init();
 			}
 			return config;
@@ -474,23 +478,32 @@ namespace ru.org.openam.sdk
 		public string GetLBCookieName()
 		{
 			String res = null;
-			if (HasConfig())
+			if (HasConfig()&&config.ContainsKey(AM_LB_COOKIE_NAME))
 				res=(string)config[AM_LB_COOKIE_NAME];
 			if (res==null)
 				res=ConfigurationManager.AppSettings[AM_LB_COOKIE_NAME];
 			return (res==null)?"amlbcookie":res;
 		}
 
-		public string GetAuthCookie(HttpCookieCollection cookies)
+		public string GetAuthCookieValue(HttpCookieCollection cookies)
 		{
 			if (!HasConfig ())
 				GetConfig ();
-			var cookie = cookies[GetCookieName()];
-			if (cookie == null || string.IsNullOrWhiteSpace(cookie.Value))
-			{
-				return null;
-			}
+			return GetCookie(cookies,GetCookieName());
+		}	
 
+		public string GetLBCookieValue(HttpCookieCollection cookies)
+		{
+			if (!HasConfig ())
+				GetConfig ();
+			return GetCookie(cookies,GetLBCookieName());
+		}	
+
+		public string GetCookie(HttpCookieCollection cookies,String name)
+		{
+			var cookie = cookies.Get(name);
+			if (cookie == null || string.IsNullOrWhiteSpace(cookie.Value))
+				return null;
 			return cookie.Value;
 		}	
 

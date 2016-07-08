@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Net;
+using System.Web;
 
 namespace ru.org.openam.sdk.session
 {
@@ -27,34 +28,49 @@ namespace ru.org.openam.sdk.session
             : base()
         {
             svcid = pll.type.session;
-			uri=getUrl();
         }
 
-        public Request(String SessionID)
+		private Request(String SessionID)
             : this()
         {
             this.SessionID = SessionID;
         }
 
-		Uri uri=null;
+		public Request(String SessionID,HttpCookieCollection cookies):this(SessionID) {
+			CookieContainer cookieContainer= getCookieContainer();
+			foreach (Cookie cookie in cookies) {
+				cookieContainer.Add (cookie);
+			}
+		}
 
-        public Request(Session session)
-            : this(session.sessionId)
+		public Request(Session session): this(session.token.sid)
         {
+			Log.Trace(string.Format("session {0} revalidate", SessionID));
 			cookieContainer = session.token.cookieContainer;
-            //save LB cookie
+            //replace LB cookie from old token
 			if (session.token.property ["amlbcookie"] != null) {
-				CookieCollection cc = cookieContainer.GetCookies (uri);
+				CookieCollection cc = cookieContainer.GetCookies (getUrl());
 				foreach (Cookie co in cc)
-					if (co.Name.Equals("amlbcookie"))
+					if (co.Name.Equals (Agent.Instance.GetLBCookieName ()) && !co.Value.Equals (session.token.property ["amlbcookie"])) {
+						Log.Warning(string.Format("replace session {0} server {1}->{2}", SessionID,co.Value,session.token.property ["amlbcookie"]));
 						co.Expired = true;
-				cookieContainer.Add (new Cookie ("amlbcookie", session.token.property ["amlbcookie"]) { Domain = uri.Host });
+						cookieContainer.Add (new Cookie (Agent.Instance.GetLBCookieName (), session.token.property ["amlbcookie"]) { Domain = uri.Host });
+					}
 			}
         }
 
+		public Request(auth.Response authResponse)
+			: this(authResponse.ssoToken)
+		{
+			cookieContainer = authResponse.cookieContainer;
+		}
+
+		Uri uri=null;
 		override public Uri getUrl()
 		{
-			return new Uri(GetNaming().property["iplanet-am-naming-session-url"].Replace("%protocol://%host:%port%uri", Bootstrap.getUrl().ToString().Replace("/namingservice", "")));
+			if (uri == null)
+				uri = new Uri (GetNaming ().property ["iplanet-am-naming-session-url"].Replace ("%protocol://%host:%port%uri", Bootstrap.getUrl ().ToString ().Replace ("/namingservice", "")));
+			return uri;
 		}
 
         override public String ToString()

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using ru.org.openam.sdk.session;
+using System.Web;
 
 namespace ru.org.openam.sdk
 {
@@ -9,10 +10,6 @@ namespace ru.org.openam.sdk
 		private readonly Agent agent;
 
 		private static readonly Cache _cache = new Cache();
-
-		internal Cache PolicyCache {get; private set;}=new Cache();
-
-        public String sessionId;
 
         session.Response _token;
 		public session.Response token
@@ -24,52 +21,50 @@ namespace ru.org.openam.sdk
 				_cache.Set (value.sid,this,Math.Max(1,Math.Min((int)value.maxcaching,3)));
 			}
 		}
-
-        public Session(string sessionId)
-        {
-			try{
-            	token = Get(new session.Request(sessionId));
-			}catch(SessionException){
-				//cache session not found 1 min
-				_token=null;
-				_cache.Set(sessionId,this,1);
-			}
-            this.sessionId = sessionId;
-        }
+		private Session(session.Response token){
+			this.token = token;
+		}
 
 		public Session(auth.Response authResponse)
 		{
-			session.Request request = new session.Request(authResponse.ssoToken);
-			request.cookieContainer = authResponse.cookieContainer;
-			//remove AMAuthCookie after auth
-			CookieCollection cc = request.cookieContainer.GetCookies (request.getUrl());
-			foreach (Cookie co in cc)
-				if (co.Name.Equals ("AMAuthCookie"))
-					co.Expired = true;
-			token = Get(request);
-			this.sessionId = token.sid;
+			token = (session.Response)new session.Request(authResponse).getResponse();
 		}
 
-        private Session(Agent agent, string authCookie)
-            : this(authCookie)
-        {
-            this.agent = agent;
-        }
+		private static Session getSessionFromCache(String sid){
+			return _cache.Get<Session> (sid);
+		}
 
-        public static Session getSession(Agent agent, string authCookie)
-        {
-			if (authCookie == null)
+		public static Session getSession(Agent agent, Session oldSession){
+			if (oldSession == null || oldSession.token==null)
 				return null;
+			Session session=getSessionFromCache(oldSession.token.sid);
+			if (session != null)
+				return session;
+			session.Response token =(session.Response)new session.Request(oldSession).getResponse() ;
+			if (token == null)
+				return null;
+			return new Session(token);
+		}
 
-			Session userSession=_cache.Get<Session>(authCookie);
+		public static Session getSession(Agent agent, HttpCookieCollection cookies)
+		{
+			if (cookies == null)
+				return null;
+			
+			String sid = agent.GetAuthCookieValue (cookies);
+			if (String.IsNullOrEmpty(sid))
+				return null;
+			
+			Session userSession=getSessionFromCache(sid);
 			if (userSession == null) 
-				lock (authCookie){
-					userSession=_cache.Get<Session>(authCookie);
-					if (userSession == null) 
-						userSession = new Session (agent, authCookie);
+				lock (sid){
+					userSession=getSessionFromCache(sid);
+					session.Response token =(session.Response)new session.Request(sid,cookies).getResponse() ;
+					if (token != null)
+						userSession=new Session(token);
 				}
-            return userSession;
-        }
+			return userSession;
+		}
 
         public bool isValid()
         {
@@ -81,24 +76,20 @@ namespace ru.org.openam.sdk
             return agent==null?Bootstrap.GetNaming():agent.GetNaming();
         }
 
-        public session.Response Get(session.Request request)
-        {
-			return (session.Response)request.getResponse();
-        }
-
         override public String ToString()
         {
-            return "Session: " + sessionId;
+			return "Session: " + token;
         }
 
-        public String GetProperty(String key, String value)
+        public String GetProperty(String key, String defaultValue)
         {
             String res = GetProperty(key);
-            return res ?? value;
+			return res ?? defaultValue;
         }
         public String GetProperty(String key)
         {
-            //Validate();
+			if (token == null)
+				return null;
             return token.property[key];
         }
     }

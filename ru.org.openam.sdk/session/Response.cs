@@ -18,6 +18,10 @@ namespace ru.org.openam.sdk.session
             : base()
         {
         }
+		override public String ToString()
+		{
+			return cid;
+		}
 
         //<GetSession>
         //<Session sid="AQIC5wM2LY4SfcykzPvJaL_XIcF8gIZuF7PY5z7thlEfxDg.*AAJTSQACMDM.*" stype="user" cid="ws.api" cdomain="dc=rapidsoft,dc=ru" maxtime="153722867280912930" maxidle="153722867280912930" maxcaching="153722867280912930" timeidle="0" timeleft="153722867280912930" state="valid">

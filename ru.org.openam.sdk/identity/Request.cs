@@ -25,7 +25,7 @@ namespace ru.org.openam.sdk.identity
             : this()
         {
 			session = admin;
-            query = query+String.Format("admin={0}&",  HttpUtility.UrlEncode(admin.sessionId));
+			query = query+String.Format("admin={0}&",  HttpUtility.UrlEncode(admin.token.sid));
             if (!String.IsNullOrEmpty(name))
                 query = query + String.Format("name={0}&", HttpUtility.UrlEncode(name));
             if (attributes_names!=null)

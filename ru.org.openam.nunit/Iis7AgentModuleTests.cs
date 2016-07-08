@@ -42,36 +42,38 @@ namespace ru.org.openam.sdk.nunit
         }
 
 		[Test]
-		[ExpectedException(typeof (ArgumentException))]
+		//[ExpectedException(typeof (ArgumentException))]
 		[Description("Бросаем ArgumentException, если не определен HttpContext")]
 		public void OnAuthentication_WithoutHttpContextTest()
 		{
-			_module.OnAuthentication(null);
+			//_module.OnAuthentication(null);
+			Assert.Throws<ArgumentException> (() => _module.OnAuthentication (null));
 		}
 
         [Test]
-        [ExpectedException(typeof (ArgumentException))]
+        //[ExpectedException(typeof (ArgumentException))]
         [Description("Бросаем ArgumentException, если не определен HttpRequest")]
         public void OnAuthentication_WithoutHttpRequestTest()
         {
             _context.Setup(x => x.Request).Returns((HttpRequestBase) null);
 
-            _module.OnAuthentication(_context.Object);
-
-            _context.Verify(x => x.Request, Times.Once());
+            //_module.OnAuthentication(_context.Object);
+			Assert.Throws<ArgumentException> (() => _module.OnAuthentication (_context.Object));
+			_context.Verify(x => x.Request, Times.Exactly(2));
         }
 
         [Test]
-        [ExpectedException(typeof (ArgumentException))]
+        //[ExpectedException(typeof (ArgumentException))]
         [Description("Бросаем ArgumentException, если не определен Url в HttpRequest")]
         public void OnAuthentication_WithoutHttpRequestUrlTest()
         {
             _request.Setup(x => x.IsLocal).Returns(true);
             _request.Setup(x => x.Url).Returns((Uri) null);
 
-            _module.OnAuthentication(_context.Object);
+            //_module.OnAuthentication(_context.Object);
+			Assert.Throws<ArgumentException> (() => _module.OnAuthentication (_context.Object));
 
-            _context.Verify(x => x.Request, Times.Once());
+            _context.Verify(x => x.Request, Times.Exactly (4));
             _request.Verify(x => x.Url, Times.Once());
         }
 
@@ -191,7 +193,7 @@ namespace ru.org.openam.sdk.nunit
         }
 
         [Test]
-        [ExpectedException(typeof (InvalidOperationException))]
+        //[ExpectedException(typeof (InvalidOperationException))]
         [Description("Бросаем InvalidOperationException, если не определены com.sun.identity.agents.config.logout.redirect.url и com.sun.identity.agents.config.login.url")]
         public void OnAuthentication_IsLogoffWithoutLogoutRedirectUrlAndLoginUrlTest()
         {
@@ -210,7 +212,8 @@ namespace ru.org.openam.sdk.nunit
             _request.Setup(x => x.IsLocal).Returns(true);
             _request.Setup(x => x.Url).Returns(new Uri(DefaultUrl));
 
-            _module.OnAuthentication(_context.Object);
+            //_module.OnAuthentication(_context.Object);
+			Assert.Throws<InvalidOperationException> (() => _module.OnAuthentication (_context.Object));
         }
 
         [Test]
@@ -219,7 +222,8 @@ namespace ru.org.openam.sdk.nunit
         {
             var settings = new Dictionary<string, object>
             {
-                //{ "com.sun.identity.agents.config.override.host", "false" },
+                { "com.sun.identity.agents.config.receive.timeout", "0" },
+				{ "com.sun.identity.agents.config.connect.timeout", "0" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
 				{ "com.sun.identity.agents.config.notenforced.url.invert", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
@@ -353,7 +357,8 @@ namespace ru.org.openam.sdk.nunit
         {
             var settings = new Dictionary<string, object>
             {
-                //{ "com.sun.identity.agents.config.override.host", "false" },
+                { "com.sun.identity.agents.config.receive.timeout", "0" },
+				{ "com.sun.identity.agents.config.connect.timeout", "0" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
                 { "com.sun.identity.agents.config.notenforced.url", new string[0] },
@@ -394,7 +399,8 @@ namespace ru.org.openam.sdk.nunit
         {
             var settings = new Dictionary<string, object>
             {
-                //{ "com.sun.identity.agents.config.override.host", "false" },
+                { "com.sun.identity.agents.config.receive.timeout", "0" },
+				{ "com.sun.identity.agents.config.connect.timeout", "0" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
 				{ "com.sun.identity.agents.config.notenforced.url.invert", null },
@@ -444,7 +450,8 @@ namespace ru.org.openam.sdk.nunit
         {
             var settings = new Dictionary<string, object>
             {
-                //{ "com.sun.identity.agents.config.override.host", "false" },
+                { "com.sun.identity.agents.config.receive.timeout", "0" },
+				{ "com.sun.identity.agents.config.connect.timeout", "0" },
                 { "com.sun.identity.agents.config.fqdn.default", null },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
 				{ "com.sun.identity.agents.config.notenforced.url.invert", null },
@@ -487,8 +494,9 @@ namespace ru.org.openam.sdk.nunit
         {
             var settings = new Dictionary<string, object>
             {
-                //{ "com.sun.identity.agents.config.override.host", "false" },
-                { "com.sun.identity.agents.config.fqdn.default", null },
+				{"com.sun.identity.agents.config.fqdn.default",null},
+                { "com.sun.identity.agents.config.receive.timeout", "0" },
+				{ "com.sun.identity.agents.config.connect.timeout", "0" },
                 { "com.sun.identity.agents.config.agent.logout.url", new string[0] },
 				{ "com.sun.identity.agents.config.notenforced.url.invert", null },
                 { "com.sun.identity.agents.config.notenforced.url", new string[0] },
@@ -996,7 +1004,7 @@ namespace ru.org.openam.sdk.nunit
 
         private string GetAuthCookie()
         {
-            var sid = Auth.login("/clients", indexType.service, "ldap", new Callback[] { new NameCallback("11111111111"), new PasswordCallback("1111111111") }).sessionId;
+			var sid = Auth.login("/clients", indexType.service, "ldap", new Callback[] { new NameCallback("11111111111"), new PasswordCallback("1111111111") }).token.sid;
 
             return sid;
         }

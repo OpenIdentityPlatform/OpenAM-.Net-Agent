@@ -72,9 +72,9 @@ namespace ru.org.openam.sdk.policy
             writer.WriteAttributeString("version", "1.0");
             writer.WriteStartElement("PolicyRequest");
             writer.WriteAttributeString("requestId", (reqid++).ToString());
-            writer.WriteAttributeString("appSSOToken", agent.getSession().sessionId);
+			writer.WriteAttributeString("appSSOToken", agent.getSession().token.sid);
                 writer.WriteStartElement("GetResourceResults");
-                writer.WriteAttributeString("userSSOToken", session.sessionId);
+				writer.WriteAttributeString("userSSOToken", session.token.sid);
                 writer.WriteAttributeString("serviceName", type.iPlanetAMWebAgentService.ToString());
                 writer.WriteAttributeString("resourceName", resourceName);
                 writer.WriteAttributeString("resourceScope", "self");

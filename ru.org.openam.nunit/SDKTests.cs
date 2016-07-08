@@ -81,7 +81,7 @@ namespace ru.org.openam.sdk.nunit
 		{
 			try
 			{
-				new Session("000000000000000000000000000000");
+				new session.Request("ssssss",new System.Web.HttpCookieCollection());
 				Assert.IsTrue(true);
 			}
 			catch (SessionException)

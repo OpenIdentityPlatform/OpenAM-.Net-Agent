@@ -54,7 +54,7 @@ namespace ru.org.openam.sdk.naming
             writer.WriteAttributeString("vers", "3.0");
             writer.WriteAttributeString("reqid", (reqid++).ToString());
             if (session != null)
-                writer.WriteAttributeString("sessid", session.sessionId);
+				writer.WriteAttributeString("sessid", session.token.sid);
             writer.WriteStartElement("GetNamingProfile");
             writer.WriteString("");
             writer.WriteEndElement();
