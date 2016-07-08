@@ -133,7 +133,13 @@ namespace ru.org.openam.iis
 					if (session!=null)
 						MapAttrsProps(session, context);
 					if (session!=null && GetAttrsNames().Count>0){ //read policy only for attr
-						policy = Policy.Get(_agent, session, url, null, GetAttrsNames());
+						try {
+							policy = Policy.Get (_agent, session, url, null, GetAttrsNames ());
+						} catch (sdk.policy.PolicyException e) {
+							session = null;
+							if (session.token!=null)
+								Session.invalidate (session.token.sid);
+						}
 						if(policy != null && policy.result != null)
 							MapPolicyProps(policy.result.attributes, context);
 					}

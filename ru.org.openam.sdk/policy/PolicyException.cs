@@ -6,7 +6,7 @@ using System.Xml;
 
 namespace ru.org.openam.sdk.policy
 {
-    class PolicyException : Exception
+    public class PolicyException : Exception
     {
         public PolicyException(String message)
             : base(message)

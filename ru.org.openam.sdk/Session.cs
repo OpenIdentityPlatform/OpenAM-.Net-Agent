@@ -30,6 +30,11 @@ namespace ru.org.openam.sdk
 			token = (session.Response)new session.Request(authResponse).getResponse();
 		}
 
+		public static void invalidate(String sid)
+		{
+			_cache.Remove(sid);
+		}
+
 		private static Session getSessionFromCache(String sid){
 			return _cache.Get<Session> (sid);
 		}
