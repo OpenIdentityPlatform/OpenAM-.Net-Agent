@@ -127,12 +127,20 @@ namespace ru.org.openam.sdk.pll
 			using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
 			{
 				try{
+					String data = "";
 					using (StreamReader streamReader = new StreamReader(response.GetResponseStream ())) {
 						try{
-							String data=streamReader.ReadToEnd();
+							data=streamReader.ReadToEnd();
 							Log.Info(string.Format("Message received (uuid: {1}){0}{3}{2}{0}", Environment.NewLine, uuid, data,response.Headers));
 							return getResponse(data);
-						}finally{
+						}catch(XmlException e){
+							Log.Fatal(string.Format ("Message received (uuid: {1}){0}{3}{2}{0}", Environment.NewLine, uuid, data, response.Headers));
+							throw e;
+						}catch (WebException e) {
+							Log.Fatal (string.Format ("Message received (uuid: {1}){0}{3}{2}{0}", Environment.NewLine, uuid, data, response.Headers));
+							throw e;
+						}
+						finally{
 							streamReader.Close();
 						}
 					}
