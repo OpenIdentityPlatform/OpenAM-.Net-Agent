@@ -16,7 +16,7 @@ notifications:
   - support@openam.org.ru
 install:
   - nuget restore ru.org.openam.dotnet.sln
-  - nuget install NUnit.Runners -Version 3.4.1 -OutputDirectory testrunner
+  - nuget install NUnit.Runners -Version 2.4.8 -OutputDirectory testrunner
 script:
   - xbuild /p:Configuration=Release ru.org.openam.dotnet.sln
-  - mono ./testrunner/NUnit.Runners.3.4.1/tools/nunit-console.exe ./ru.org.openam.nunit/bin/Release/ru.org.openam.sdk.nunit.dll
+  - mono ./testrunner/NUnit.Runners.2.4.8/tools/nunit-console.exe ./ru.org.openam.nunit/bin/Release/ru.org.openam.sdk.nunit.dll
