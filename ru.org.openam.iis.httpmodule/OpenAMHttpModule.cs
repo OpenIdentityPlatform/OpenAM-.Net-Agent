@@ -135,7 +135,7 @@ namespace ru.org.openam.iis
 					if (session!=null && GetAttrsNames().Count>0){ //read policy only for attr
 						try {
 							policy = Policy.Get (_agent, session, url, null, GetAttrsNames ());
-						} catch (sdk.policy.PolicyException e) {
+						} catch (sdk.policy.PolicyException ) {
 							session = null;
 							if (session.token!=null)
 								Session.invalidate (session.token.sid);

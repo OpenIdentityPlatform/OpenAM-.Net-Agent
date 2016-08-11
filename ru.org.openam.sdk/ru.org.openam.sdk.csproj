@@ -47,7 +47,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="NLog">
-      <HintPath>..\packages\NLog.4.3.5\lib\net40\NLog.dll</HintPath>
+      <HintPath>..\packages\NLog.4.3.7\lib\net40\NLog.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
