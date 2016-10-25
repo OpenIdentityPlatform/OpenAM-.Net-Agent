@@ -118,7 +118,7 @@ namespace ru.org.openam.sdk
 				oldRule = config.LoggingRules.FirstOrDefault(l => l.LoggerNamePattern == "*");
 				if(oldRule != null)
 					config.LoggingRules.Remove(oldRule);
-				config.LoggingRules.Add(new LoggingRule("*", LogLevel.Warn, syslog));
+				config.LoggingRules.Add(new LoggingRule("*", LogLevel.Fatal, syslog));
 
 				LogManager.Configuration = config;
 
@@ -145,6 +145,15 @@ namespace ru.org.openam.sdk
 		{
 			if(_debugLogger != null)
 				_debugLogger.Fatal("(web request id: {0}) {1}", GetRequestId(), message);
+		}
+
+		public static void Error(Exception e)
+		{
+			if (e == null)
+				return;
+
+			if(_debugLogger != null)
+				_debugLogger.Error("(web request id: {0}) {1}", GetRequestId(), e);
 		}
 
 		/// <summary>
