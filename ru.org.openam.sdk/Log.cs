@@ -154,13 +154,18 @@ namespace ru.org.openam.sdk
 
 			if(_debugLogger != null)
 				_debugLogger.Error("(web request id: {0}) {1}", GetRequestId(), e);
-		}
+        }
+        public static void Error(string message)
+        {
+            if (_debugLogger != null)
+                _debugLogger.Error("(web request id: {0}) {1}", GetRequestId(), message);
+        }
 
-		/// <summary>
-		/// Залогировать предупреждение.
-		/// </summary>
-		/// <param name="message">Строка сообщения.</param>
-		public static void Warning(string message)
+        /// <summary>
+        /// Залогировать предупреждение.
+        /// </summary>
+        /// <param name="message">Строка сообщения.</param>
+        public static void Warning(string message)
 		{
 			if(_debugLogger != null)
 				_debugLogger.Warn("(web request id: {0}) {1}", GetRequestId(), message);

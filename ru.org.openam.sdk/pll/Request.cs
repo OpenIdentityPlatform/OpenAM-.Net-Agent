@@ -134,10 +134,10 @@ namespace ru.org.openam.sdk.pll
 							Log.Info(string.Format("Message received (uuid: {1}){0}{3}{2}{0}", Environment.NewLine, uuid, data,response.Headers));
 							return getResponse(data);
 						}catch(XmlException e){
-							Log.Fatal(string.Format ("Message received (uuid: {1}){0}{3}{2}{0}", Environment.NewLine, uuid, data, response.Headers));
+							Log.Error(string.Format ("Message received (uuid: {1}){0}{3}{2}{0}", Environment.NewLine, uuid, data, response.Headers));
 							throw e;
 						}catch (WebException e) {
-							Log.Fatal (string.Format ("Message received (uuid: {1}){0}{3}{2}{0}", Environment.NewLine, uuid, data, response.Headers));
+							Log.Error(string.Format ("Message received (uuid: {1}){0}{3}{2}{0}", Environment.NewLine, uuid, data, response.Headers));
 							throw e;
 						}
 						finally{
