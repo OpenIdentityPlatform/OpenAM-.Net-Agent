@@ -184,7 +184,7 @@ namespace ru.org.openam.iis
 			}
 			catch (Exception ex)
 			{
-				Log.Fatal(ex);
+				Log.Error(ex);
 				if(context == null || context.Request == null || context.Request.IsLocal)
 					throw;
 				else
