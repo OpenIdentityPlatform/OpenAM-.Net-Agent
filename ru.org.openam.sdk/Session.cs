@@ -45,10 +45,14 @@ namespace ru.org.openam.sdk
 			Session session=getSessionFromCache(oldSession.token.sid);
 			if (session != null)
 				return session;
-			session.Response token =(session.Response)new session.Request(oldSession).getResponse() ;
-			if (token == null)
+			try {
+				session.Response token =(session.Response)new session.Request(oldSession).getResponse() ;
+				if (token == null)
+					return null;
+				return new Session (token);
+			} catch (SessionException) {
 				return null;
-			return new Session(token);
+			}
 		}
 
 		public static Session getSession(Agent agent, HttpCookieCollection cookies)
@@ -64,9 +68,13 @@ namespace ru.org.openam.sdk
 			if (userSession == null) 
 				lock (sid){
 					userSession=getSessionFromCache(sid);
-					session.Response token =(session.Response)new session.Request(sid,cookies).getResponse() ;
-					if (token != null)
-						userSession=new Session(token);
+					try {
+						session.Response token = (session.Response)new session.Request (sid, cookies).getResponse ();
+						if (token != null)
+							userSession = new Session (token);
+					} catch (SessionException) {
+						return null;
+					}
 				}
 			return userSession;
 		}

@@ -46,15 +46,15 @@ namespace ru.org.openam.sdk
             messageSecurity.InitiatorTokenParameters = initiator;
             
             var binding = new CustomBinding(messageSecurity, textmessageEncoding,new StrippingChannelBindingElement(), new HttpTransportBindingElement());
-            WSTrustChannelFactory trustChannelFactory = new WSTrustChannelFactory(binding, new EndpointAddress(new Uri("http://login.staging.rapidsoft.ru:80/auth/sts"), EndpointIdentity.CreateDnsIdentity("test")));
+            Microsoft.IdentityModel.Protocols.WSTrust.WSTrustChannelFactory trustChannelFactory = new Microsoft.IdentityModel.Protocols.WSTrust.WSTrustChannelFactory(binding, new EndpointAddress(new Uri("http://login.staging.rapidsoft.ru:80/auth/sts"), EndpointIdentity.CreateDnsIdentity("test")));
             trustChannelFactory.Credentials.ClientCertificate.SetCertificate(StoreLocation.CurrentUser, StoreName.My, X509FindType.FindByIssuerName, "test");
             trustChannelFactory.Credentials.ServiceCertificate.SetDefaultCertificate(StoreLocation.CurrentUser, StoreName.My, X509FindType.FindByIssuerName, "test");
             trustChannelFactory.Credentials.ServiceCertificate.Authentication.CertificateValidationMode = X509CertificateValidationMode.None;
             trustChannelFactory.Credentials.ClientCertificate.SetCertificate(StoreLocation.CurrentUser, StoreName.My, X509FindType.FindByIssuerName, "test");
             trustChannelFactory.Endpoint.Contract.ProtectionLevel = ProtectionLevel.None;
             trustChannelFactory.TrustVersion = System.ServiceModel.Security.TrustVersion.WSTrust13;
-            
-            WSTrustChannel channel = (WSTrustChannel)trustChannelFactory.CreateChannel();
+
+            Microsoft.IdentityModel.Protocols.WSTrust.WSTrustChannel channel = (Microsoft.IdentityModel.Protocols.WSTrust.WSTrustChannel)trustChannelFactory.CreateChannel();
 
             RequestSecurityToken rst = new RequestSecurityToken(RequestTypes.Issue);
             rst.OnBehalfOf = new Microsoft.IdentityModel.Tokens.SecurityTokenElement(token, new Microsoft.IdentityModel.Tokens.SecurityTokenHandlerCollection());

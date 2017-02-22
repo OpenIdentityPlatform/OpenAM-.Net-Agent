@@ -36,12 +36,23 @@ namespace ru.org.openam.sdk.session
             this.SessionID = SessionID;
         }
 
-		public Request(String SessionID,HttpCookieCollection cookies):this(SessionID) {
-			CookieContainer cookieContainer= getCookieContainer();
-			foreach (Cookie cookie in cookies) {
-				cookieContainer.Add (cookie);
-			}
-		}
+        public Request(String SessionID, HttpCookieCollection cookies) : this(SessionID)
+        {
+            CookieContainer cookieContainer = getCookieContainer();
+            for (int i = 0; i < cookies.Count; i++)
+            {
+                cookieContainer.Add(
+                    new System.Net.Cookie
+                    {
+                        Name = cookies[i].Name,
+                        Value = cookies[i].Value,
+                        Expires = cookies[i].Expires,
+                        Domain = string.IsNullOrEmpty(cookies[i].Domain)
+                                ? this.getUrl().Host
+                                : cookies[i].Domain
+                    });
+            }
+        }
 
 		public Request(Session session): this(session.token.sid)
         {
