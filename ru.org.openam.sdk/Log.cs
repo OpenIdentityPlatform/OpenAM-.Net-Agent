@@ -118,7 +118,7 @@ namespace ru.org.openam.sdk
 				oldRule = config.LoggingRules.FirstOrDefault(l => l.LoggerNamePattern == "*");
 				if(oldRule != null)
 					config.LoggingRules.Remove(oldRule);
-				config.LoggingRules.Add(new LoggingRule("*", LogLevel.Warn, syslog));
+				config.LoggingRules.Add(new LoggingRule("*", LogLevel.Fatal, syslog));
 
 				LogManager.Configuration = config;
 
@@ -147,11 +147,25 @@ namespace ru.org.openam.sdk
 				_debugLogger.Fatal("(web request id: {0}) {1}", GetRequestId(), message);
 		}
 
-		/// <summary>
-		/// Залогировать предупреждение.
-		/// </summary>
-		/// <param name="message">Строка сообщения.</param>
-		public static void Warning(string message)
+		public static void Error(Exception e)
+		{
+			if (e == null)
+				return;
+
+			if(_debugLogger != null)
+				_debugLogger.Error("(web request id: {0}) {1}", GetRequestId(), e);
+        }
+        public static void Error(string message)
+        {
+            if (_debugLogger != null)
+                _debugLogger.Error("(web request id: {0}) {1}", GetRequestId(), message);
+        }
+
+        /// <summary>
+        /// Залогировать предупреждение.
+        /// </summary>
+        /// <param name="message">Строка сообщения.</param>
+        public static void Warning(string message)
 		{
 			if(_debugLogger != null)
 				_debugLogger.Warn("(web request id: {0}) {1}", GetRequestId(), message);

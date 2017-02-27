@@ -537,7 +537,7 @@ namespace ru.org.openam.sdk
 									break;
 								}
 							}catch(Exception e){
-								Log.Fatal(string.Format(" {0} regexp error: {1}", u,e));
+								Log.Error(string.Format(" {0} regexp error: {1}", u,e));
 							}
 						if ("true".Equals (GetSingle ("com.sun.identity.agents.config.notenforced.url.invert")))
 							result = !(bool)result;

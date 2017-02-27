@@ -48,14 +48,14 @@ namespace ru.org.openam.iis
 			}
 			catch (Exception ex)
 			{ 
-				Log.Fatal(ex);
-				if(context == null || context.Request == null || context.Request.IsLocal)
-					throw;
-				else
-				{
+				Log.Error(ex);
+				//if(context == null || context.Request == null || context.Request.IsLocal)
+				//	throw;
+				//else
+				//{
 					context.Response.StatusCode = 500;
 					CompleteRequest(context);	
-				}
+				//}
 			}
 		}
 
@@ -184,14 +184,14 @@ namespace ru.org.openam.iis
 			}
 			catch (Exception ex)
 			{
-				Log.Fatal(ex);
-				if(context == null || context.Request == null || context.Request.IsLocal)
-					throw;
-				else
-				{
+				Log.Error(ex);
+				//if(context == null || context.Request == null || context.Request.IsLocal)
+				//	throw;
+				//else
+				//{
 					context.Response.StatusCode = 500;
 					CompleteRequest(context);	
-				}				
+				//}				
 			}
 		}
 
