@@ -2,8 +2,8 @@ language: csharp
 os:
  - osx
  - linux
- git:
-  depth: 999
+git:
+  depth: 9999
 before_install:
  - date -u
  - uname -a
