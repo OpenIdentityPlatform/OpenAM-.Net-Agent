@@ -74,6 +74,8 @@ namespace ru.org.openam.sdk
 							userSession = new Session (token);
 					} catch (SessionException) {
 						return null;
+					} catch (Exception) {
+						return null;
 					}
 				}
 			return userSession;
