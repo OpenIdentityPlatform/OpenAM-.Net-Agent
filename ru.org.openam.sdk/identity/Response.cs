@@ -84,11 +84,13 @@ namespace ru.org.openam.sdk.identity
                         else
                             throw new Exception("unknown node type=" + attr.LocalName);
                 }
-                else if (node.LocalName.Equals("Exception"))
+				else if (node.LocalName.ToLower().Equals("exception"))
                     throw new IdentityException(node.InnerText);
                 else
                     throw new Exception("unknown node type=" + node.LocalName);
             }
+			if (property.Count==0)
+				throw new IdentityException ("empty property table");
         }
     }
 }
