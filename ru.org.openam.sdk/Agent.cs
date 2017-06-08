@@ -68,7 +68,7 @@ namespace ru.org.openam.sdk
 
 		public bool HasConfig()
 		{
-			return config != null;
+			return config != null && !reread_config ;
 		}
 
 		//<identitydetails>
