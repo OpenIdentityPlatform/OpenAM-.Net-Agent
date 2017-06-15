@@ -23,6 +23,7 @@ namespace ru.org.openam.sdk.pll
     public abstract class  Request
     {
 		static Request(){
+			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 			ServicePointManager.DefaultConnectionLimit = 1024;
 			ServicePointManager.Expect100Continue = false;
 			if ("true".Equals(ConfigurationManager.AppSettings["com.sun.identity.agents.config.trust.server.certs"]))
