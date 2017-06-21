@@ -24,6 +24,9 @@ namespace ru.org.openam.sdk.pll
             reqid=int.Parse(element.Attributes["reqid"].Value);
             foreach (XmlNode result in element.ChildNodes)
             {
+				if ("<![CDATA[null]]>".Equals(result.FirstChild.Value))
+					throw new Exception ("<![CDATA[null]]> svcid=" + svcid);
+				
 				XmlDocument response=new XmlDocument();
                 response.LoadXml(result.FirstChild.Value);
                 
@@ -36,7 +39,7 @@ namespace ru.org.openam.sdk.pll
                 else if (response.DocumentElement.Name.Equals("PolicyService"))
 					Add(new policy.Response(cookieContainer, response.DocumentElement.FirstChild));
                 else
-                    throw new Exception("unknown svcid=" + svcid);
+                    throw new Exception("unknown svcid=" + svcid +" "+result.FirstChild.Value);
             }
         }
     }

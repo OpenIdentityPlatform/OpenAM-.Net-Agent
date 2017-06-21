@@ -7,7 +7,7 @@ namespace ru.org.openam.sdk
 {
 	public class Session
     {
-		private readonly Agent agent;
+		private readonly Agent agent=null;
 
 		private static readonly Cache _cache = new Cache();
 

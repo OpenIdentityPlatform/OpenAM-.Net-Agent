@@ -118,36 +118,35 @@ namespace ru.org.openam.sdk.pll
 			request.ContentLength = postBytes.Length;
 			using (Stream requestStream = request.GetRequestStream()){ 
 				try{
-					Log.Info (string.Format("{1} {2}{0}{3}{4}{0}",Environment.NewLine,request.Method,request.RequestUri,request.Headers,body));
 					requestStream.Write(postBytes, 0, postBytes.Length);
 				}finally{
 					requestStream.Close();
 				}
 			}
-
-			using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-			{
-				try{
-					String data = "";
-					using (StreamReader streamReader = new StreamReader(response.GetResponseStream ())) {
-						try{
-							data=streamReader.ReadToEnd();
-							Log.Info(string.Format("Message received (uuid: {1}){0}{3}{2}{0}", Environment.NewLine, uuid, data,response.Headers));
-							return getResponse(data);
-						}catch(XmlException e){
-							Log.Error(string.Format ("Message received (uuid: {1}){0}{3}{2}{0}", Environment.NewLine, uuid, data, response.Headers));
-							throw e;
-						}catch (WebException e) {
-							Log.Error(string.Format ("Message received (uuid: {1}){0}{3}{2}{0}", Environment.NewLine, uuid, data, response.Headers));
-							throw e;
+			try {
+				using (HttpWebResponse response = (HttpWebResponse)request.GetResponse ()) {
+					try {
+						Log.Info (string.Format ("{1} {2}{0}{3}{4}{0}", Environment.NewLine, request.Method, request.RequestUri, request.Headers, body));
+						String data = "";
+						using (StreamReader streamReader = new StreamReader (response.GetResponseStream ())) {
+							try {
+								data = streamReader.ReadToEnd ();
+								Log.Info (string.Format ("Message received (uuid: {1}){0}{3}{2}{0}", Environment.NewLine, uuid, data, response.Headers));
+								return getResponse (data);
+							} catch (XmlException e) {
+								Log.Error (string.Format ("Message received (uuid: {1}){0}{3}{2}{0}", Environment.NewLine, uuid, data, response.Headers));
+								throw e;
+							} finally {
+								streamReader.Close ();
+							}
 						}
-						finally{
-							streamReader.Close();
-						}
+					} finally {
+						response.Close ();
 					}
-				}finally{
-					response.Close ();
 				}
+			} catch (WebException e) {
+				Log.Error (string.Format ("Message received (uuid: {1}){0}{2}{0}", Environment.NewLine, uuid, e));
+				throw e;
 			}
 		}
     }
