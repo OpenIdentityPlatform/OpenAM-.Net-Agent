@@ -45,13 +45,10 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Microsoft.IdentityModel">
-      <HintPath>lib\x86\Microsoft.IdentityModel.dll</HintPath>
-    </Reference>
     <Reference Include="System.Configuration" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="NLog">
-      <HintPath>..\packages\NLog.4.4.3\lib\net45\NLog.dll</HintPath>
+      <HintPath>..\packages\NLog.4.4.11\lib\net45\NLog.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -86,7 +83,6 @@
     <Compile Include="session\SessionException.cs" />
     <Compile Include="session\Request.cs" />
     <Compile Include="session\Response.cs" />
-    <Compile Include="STS.cs" />
     <Compile Include="sts\fixWCF\StrippingRequestChannel.cs" />
     <Compile Include="sts\Token.cs" />
     <Compile Include="ConfigurationManager.cs" />

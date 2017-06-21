@@ -9,8 +9,8 @@
     <AssemblyName>ru.org.openam.sdk.nunit</AssemblyName>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <TargetFrameworkProfile />
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -37,14 +37,14 @@
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.3.7.1\lib\net45\nunit.framework.dll</HintPath>
+    </Reference>
     <Reference Include="Castle.Core">
-      <HintPath>..\packages\Castle.Core.4.0.0\lib\net45\Castle.Core.dll</HintPath>
+      <HintPath>..\packages\Castle.Core.4.1.0\lib\net45\Castle.Core.dll</HintPath>
     </Reference>
     <Reference Include="Moq">
-      <HintPath>..\packages\Moq.4.7.0\lib\net45\Moq.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.3.6.1\lib\net45\nunit.framework.dll</HintPath>
+      <HintPath>..\packages\Moq.4.7.63\lib\net45\Moq.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
