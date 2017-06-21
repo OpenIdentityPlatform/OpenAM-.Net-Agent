@@ -40,18 +40,7 @@ namespace ru.org.openam.sdk.session
         {
             CookieContainer cookieContainer = getCookieContainer();
             for (int i = 0; i < cookies.Count; i++)
-            {
-                cookieContainer.Add(
-                    new System.Net.Cookie
-                    {
-                        Name = cookies[i].Name,
-                        Value = cookies[i].Value,
-                        Expires = cookies[i].Expires,
-                        Domain = string.IsNullOrEmpty(cookies[i].Domain)
-                                ? this.getUrl().Host
-                                : cookies[i].Domain
-                    });
-            }
+                cookieContainer.Add(new System.Net.Cookie(cookies[i].Name,cookies[i].Value) { Domain = getUrl().Host });
         }
 
 		public Request(Session session): this(session.token.sid)
