@@ -24,8 +24,8 @@ namespace ru.org.openam.sdk.pll
             reqid=int.Parse(element.Attributes["reqid"].Value);
             foreach (XmlNode result in element.ChildNodes)
             {
-				if ("<![CDATA[null]]>".Equals(result.FirstChild.Value))
-					throw new Exception ("<![CDATA[null]]> svcid=" + svcid);
+				if ("null".Equals(result.FirstChild.Value))
+                    throw new EmptyResponseException ("empty response svcid=" + svcid);
 				
 				XmlDocument response=new XmlDocument();
                 response.LoadXml(result.FirstChild.Value);

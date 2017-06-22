@@ -87,6 +87,7 @@
     <Compile Include="sts\Token.cs" />
     <Compile Include="ConfigurationManager.cs" />
     <Compile Include="Bootstrap.cs" />
+    <Compile Include="pll\EmptyResponseException.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="lib\x86\Microsoft.IdentityModel.dll" />
