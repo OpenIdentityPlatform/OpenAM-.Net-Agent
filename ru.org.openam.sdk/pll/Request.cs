@@ -24,7 +24,7 @@ namespace ru.org.openam.sdk.pll
     {
 		static Request(){
 			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-			ServicePointManager.DefaultConnectionLimit = 1024;
+			ServicePointManager.DefaultConnectionLimit = 65000; 
 			ServicePointManager.Expect100Continue = false;
 			if ("true".Equals(ConfigurationManager.AppSettings["com.sun.identity.agents.config.trust.server.certs"]))
 				ServicePointManager.ServerCertificateValidationCallback +=
@@ -73,7 +73,7 @@ namespace ru.org.openam.sdk.pll
 			request.ContentType = getContentType();
 			request.UserAgent = UserAgent;
 			request.CookieContainer = getCookieContainer();
-			int connect_timeout=7000,receive_timeout=15000;
+			int connect_timeout=5000,receive_timeout=15000;
 			if (Agent.Instance.HasConfig()) {
 				int.TryParse (Agent.Instance.GetSingle ("com.sun.identity.agents.config.connect.timeout"), out connect_timeout);
 				int.TryParse (Agent.Instance.GetSingle ("com.sun.identity.agents.config.receive.timeout"), out receive_timeout);
