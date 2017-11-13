@@ -26,6 +26,7 @@ namespace ru.org.openam.sdk.pll
 			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 			ServicePointManager.DefaultConnectionLimit = 65000; 
 			ServicePointManager.Expect100Continue = false;
+            ServicePointManager.MaxServicePointIdleTime = 10 * 1000; //https://support.microsoft.com/ru-ru/help/2017977/the-underlying-connection-was-closed-a-connection-that-was-expected-to
 			if ("true".Equals(ConfigurationManager.AppSettings["com.sun.identity.agents.config.trust.server.certs"]))
 				ServicePointManager.ServerCertificateValidationCallback +=
 					delegate(object sender, System.Security.Cryptography.X509Certificates.X509Certificate certificate,
