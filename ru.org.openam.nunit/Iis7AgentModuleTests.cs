@@ -288,7 +288,8 @@ namespace ru.org.openam.sdk.nunit
 				{ "com.sun.identity.agents.config.userid.param.type", null },
 				{ "com.sun.identity.agents.config.iis.auth.type", null },
 				{ "com.sun.identity.agents.config.client.ip.validation.enable", "false" },
-                { "com.sun.identity.agents.config.policy.cache.polling.interval", "false" }
+                { "com.sun.identity.agents.config.policy.cache.polling.interval", "false" },
+                {"org.forgerock.agents.config.keepalive.disable",null}
             };
 
             SetupAgent(settings); 
