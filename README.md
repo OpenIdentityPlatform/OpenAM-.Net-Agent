@@ -47,3 +47,9 @@ OpenAM .Net SDK and IIS policy agent
 
 \<add key="com.sun.identity.agents.config.trust.server.certs" value="true"/\>
  
+#### System.Net.WebException: The underlying connection was closed: A connection that was expected to be kept alive was closed by the server. at System.Net.HttpWebRequest.GetResponse()
+Сетевое оборудование некорректно обрабатывает поддержание открытых сетевых соединений, попробуйте запретить открытые соединения:
+
+\<add key="org.openidentityplatform.agents.config.keepalive.disable" value="true"/\>
+
+

@@ -77,9 +77,9 @@ namespace ru.org.openam.sdk
 					long temp;
 					fileTarget.ArchiveAboveSize = 104857600;
 					fileTarget.MaxArchiveFiles = 9999;
-					fileTarget.ArchiveFileName = "${basedir}/App_Data/Logs/${logger}/${date:format=yyyy-MM-dd}_{#}.log";
+                    fileTarget.ArchiveFileName = (String.IsNullOrWhiteSpace(prefix) ? "${basedir}/App_Data/Logs" : prefix) + "/${logger}/${date:format=yyyy-MM-dd}_{#}.log";
 					fileTarget.ArchiveNumbering = ArchiveNumberingMode.Sequence;
-					fileTarget.ArchiveEvery = FileArchivePeriod.None;
+                    fileTarget.ArchiveEvery = FileArchivePeriod.Hour;
 					if (long.TryParse(Agent.Instance.GetSingle("com.sun.identity.agents.config.local.log.size"), out temp))
 						fileTarget.ArchiveAboveSize = temp;
 				}

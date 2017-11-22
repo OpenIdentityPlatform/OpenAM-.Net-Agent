@@ -24,8 +24,10 @@ namespace ru.org.openam.sdk.pll
     {
 		static Request(){
 			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-			ServicePointManager.DefaultConnectionLimit = 65000; 
+			ServicePointManager.DefaultConnectionLimit = 128; 
 			ServicePointManager.Expect100Continue = false;
+            ServicePointManager.SetTcpKeepAlive(true,15*1000,5*1000);
+            ServicePointManager.MaxServicePointIdleTime = 14 * 1000; //https://support.microsoft.com/ru-ru/help/2017977/the-underlying-connection-was-closed-a-connection-that-was-expected-to
 			if ("true".Equals(ConfigurationManager.AppSettings["com.sun.identity.agents.config.trust.server.certs"]))
 				ServicePointManager.ServerCertificateValidationCallback +=
 					delegate(object sender, System.Security.Cryptography.X509Certificates.X509Certificate certificate,
@@ -64,10 +66,22 @@ namespace ru.org.openam.sdk.pll
 			)
 		);
 
+        static bool? keepAlive = null;
+        static bool KeepAlive(){
+            if (keepAlive == null)
+            {
+                String setting = ConfigurationManager.AppSettings["org.openidentityplatform.agents.config.keepalive.disable"];
+                if (String.IsNullOrEmpty(setting))
+                    setting = Agent.Instance.GetSingle("org.openidentityplatform.agents.config.keepalive.disable");
+                keepAlive = !(!String.IsNullOrEmpty(setting) && bool.Parse(setting));
+            }
+            return (bool)keepAlive; 
+        }
+
 		HttpWebRequest getHttpWebRequest()
 		{
 			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(getUrl());
-			request.KeepAlive = true;
+            request.KeepAlive =KeepAlive();
 			request.AutomaticDecompression = DecompressionMethods.None; //TODO configure
 			request.Method = getMethod();
 			request.ContentType = getContentType();
@@ -128,18 +142,30 @@ namespace ru.org.openam.sdk.pll
 					try {
 						Log.Info (string.Format ("{1} {2}{0}{3}{4}{0}", Environment.NewLine, request.Method, request.RequestUri, request.Headers, body));
 						String data = "";
-						using (StreamReader streamReader = new StreamReader (response.GetResponseStream ())) {
-							try {
-								data = streamReader.ReadToEnd ();
-								Log.Info (string.Format ("Message received (uuid: {1}){0}{3}{2}{0}", Environment.NewLine, uuid, data, response.Headers));
-								return getResponse (data);
-							} catch (XmlException e) {
-								Log.Error (string.Format ("Message received (uuid: {1}){0}{3}{2}{0}", Environment.NewLine, uuid, data, response.Headers));
-								throw e;
-							} finally {
-								streamReader.Close ();
-							}
-						}
+                        using (Stream receiveStream = response.GetResponseStream())
+                            try
+                            {
+                                using (StreamReader streamReader = new StreamReader(receiveStream, Encoding.UTF8))
+                                {
+                                    try
+                                    {
+                                        data = streamReader.ReadToEnd();
+                                        Log.Info(string.Format("Message received (uuid: {1}){0}{3}{2}{0}", Environment.NewLine, uuid, data, response.Headers));
+                                    }
+                                    catch (XmlException e)
+                                    {
+                                        Log.Error(string.Format("Message received (uuid: {1}){0}{3}{2}{0}", Environment.NewLine, uuid, data, response.Headers));
+                                        throw e;
+                                    }
+                                    finally
+                                    {
+                                        streamReader.Close();
+                                    }
+                                    return getResponse(data);
+                                }
+                            }finally{
+                                receiveStream.Close();
+                            }
 					} finally {
 						response.Close ();
 					}
