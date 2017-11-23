@@ -1,7 +1,9 @@
-# ru.org.openam.dotnet
-OpenAM .Net SDK and IIS policy agent
-
-[![Build Status](https://travis-ci.org/openam-org-ru/ru.org.openam.dotnet.svg)](https://travis-ci.org/openam-org-ru/ru.org.openam.dotnet)
+# OpenAM .Net SDK and IIS policy agent
+[![Build Status](https://travis-ci.org/OpenIdentityPlatform/OpenAM-.Net-Agent.svg)](https://travis-ci.org/OpenIdentityPlatform/OpenAM-.Net-Agent)
+[![License](https://img.shields.io/badge/license-CDDL-blue.svg)](https://github.com/OpenIdentityPlatform/OpenAM-.Net-Agent/blob/master/LICENSE.md)
+[![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](http://gitter.im/OpenIdentityPlatform)
+[![GitHub top language](https://img.shields.io/github/languages/top/OpenIdentityPlatform/OpenAM-.Net-Agent.svg)](https://github.com/OpenIdentityPlatform/OpenAM-.Net-Agent)
+[![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/OpenIdentityPlatform/OpenAM-.Net-Agent.svg)](https://github.com/OpenIdentityPlatform/OpenAM-.Net-Agent)
 
 ## Установка и настройка
 Идентифицируйте папку ${site}, в которой размещены файлы вашего приложения, путем поиска файла ${site}/web.config
