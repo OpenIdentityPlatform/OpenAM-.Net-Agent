@@ -10,7 +10,7 @@
 Идентифицируйте папку ${site}, в которой размещены файлы вашего приложения, путем поиска файла ${site}/web.config
 
 ### Установка файлов бинарной поставки:
-*  Скачайте файлы бинарной поставки по ссылке http://repo.openam.org.ru/ru.org.openam.iis.httpmodule.zip
+*  Скачайте [файл бинарной поставки](https://ci.appveyor.com/api/projects/vharseko/openam-net-agent/artifacts/ru.org.openam.iis.httpmodule.zip?branch=master)
 *  Распакуйте содержимое в папку ${site}/bin
 
 ### Настройка записи журналов полиси агента: 
