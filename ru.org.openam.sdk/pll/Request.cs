@@ -58,7 +58,7 @@ namespace ru.org.openam.sdk.pll
 		}
 
 		static string UserAgent = string.Format(
-			"openam.org.ru (.Net {0} {1} {2}/{3})"
+            "OpenAM Policy Agent (.Net {0} {1} {2}/{3})"
 				,Agent.getVersion()
 				,Bootstrap.getAppUser()
 				,System.Environment.MachineName
@@ -71,7 +71,7 @@ namespace ru.org.openam.sdk.pll
             if (keepAlive == null)
             {
                 String setting = ConfigurationManager.AppSettings["org.openidentityplatform.agents.config.keepalive.disable"];
-                if (String.IsNullOrEmpty(setting))
+                if (String.IsNullOrEmpty(setting)&&Agent.Instance.HasConfig())
                     setting = Agent.Instance.GetSingle("org.openidentityplatform.agents.config.keepalive.disable");
                 keepAlive = !(!String.IsNullOrEmpty(setting) && bool.Parse(setting));
             }

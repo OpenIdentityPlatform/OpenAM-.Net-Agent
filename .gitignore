@@ -41,3 +41,4 @@ ru.org.openam.sdk/Properties/AssemblyInfo.cs
 App_Data
 ru.org.openam.iis.site.sample/Properties/AssemblyInfo.cs
 TestResult.xml
+testrunner
