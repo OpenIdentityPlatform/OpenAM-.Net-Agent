@@ -16,6 +16,7 @@ notifications:
 before_build:
   - cmd: nuget restore
 after_build:
- - ps: type ru.org.openam.iis.httpmodule\Properties\AssemblyInfo.cs;copy ru.org.openam.iis.httpmodule\Properties\AssemblyInfo.cs %APPVEYOR_BUILD_FOLDER%\ru.org.openam.iis.httpmodule\bin\Release\ru.org.openam.version.txt
+ - ps: type ru.org.openam.iis.httpmodule\Properties\AssemblyInfo.cs
+ - ps: copy ru.org.openam.iis.httpmodule\Properties\AssemblyInfo.cs ru.org.openam.iis.httpmodule\bin\Release\ru.org.openam.version.txt
 artifacts:
   - path: ru.org.openam.iis.httpmodule\bin\Release\*.*
