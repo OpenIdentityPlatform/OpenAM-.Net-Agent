@@ -1,6 +1,19 @@
 version: 1.0.{build}
-before_build:
-- cmd: nuget restore
 build:
   project: ru.org.openam.dotnet.sln
   verbosity: minimal
+notifications:
+  - provider: Email
+    to:
+      - support@openam.org.ru
+    on_build_success: false
+    on_build_failure: false
+    on_build_status_changed: true
+before_build:
+  - cmd: nuget restore
+after_build:
+ - ps: type %APPVEYOR_BUILD_FOLDER%\ru.org.openam.iis.httpmodule\Properties\AssemblyInfo.cs;copy %APPVEYOR_BUILD_FOLDER%\ru.org.openam.iis.httpmodule\Properties\AssemblyInfo.cs %APPVEYOR_BUILD_FOLDER%\ru.org.openam.iis.httpmodule\bin\Release\ru.org.openam.version.txt
+artifacts:
+  - path: %APPVEYOR_BUILD_FOLDER%\ru.org.openam.iis.httpmodule\bin\Release\*.*
+  name: ru.org.openam.iis.httpmodule
+  
