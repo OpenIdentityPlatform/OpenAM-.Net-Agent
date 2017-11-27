@@ -18,5 +18,6 @@ before_build:
 after_build:
  - ps: type ru.org.openam.iis.httpmodule\Properties\AssemblyInfo.cs
  - ps: copy ru.org.openam.iis.httpmodule\Properties\AssemblyInfo.cs ru.org.openam.iis.httpmodule\bin\Release\ru.org.openam.version.txt
+ - ps: 7z a ru.org.openam.iis.httpmodule.zip ru.org.openam.iis.httpmodule\bin\Release\*
 artifacts:
-  - path: ru.org.openam.iis.httpmodule\bin\Release\*.*
+  - path: ru.org.openam.iis.httpmodule.zip
