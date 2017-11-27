@@ -2,6 +2,10 @@ version: 1.0.{build}
 build:
   project: ru.org.openam.dotnet.sln
   verbosity: minimal
+platform:
+  - Any CPU
+configuration:
+  - Release
 notifications:
   - provider: Email
     to:
