@@ -1,4 +1,4 @@
-version: №{build}
+version: №{APPVEYOR_REPO_COMMIT}
 build:
   project: ru.org.openam.dotnet.sln
   verbosity: minimal
