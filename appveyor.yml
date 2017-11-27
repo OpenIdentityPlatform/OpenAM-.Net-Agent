@@ -1,4 +1,4 @@
-version: №{buid}
+version: №{build}
 build:
   project: ru.org.openam.dotnet.sln
   verbosity: minimal
