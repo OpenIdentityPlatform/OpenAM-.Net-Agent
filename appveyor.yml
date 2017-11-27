@@ -17,7 +17,7 @@ before_build:
   - cmd: nuget restore
 after_build:
  - ps: type ru.org.openam.iis.httpmodule\Properties\AssemblyInfo.cs
- - ps: copy ru.org.openam.iis.httpmodule\Properties\AssemblyInfo.cs ru.org.openam.iis.httpmodule\bin\Releaseёru.org.openam.version.txt
+ - ps: copy ru.org.openam.iis.httpmodule\Properties\AssemblyInfo.cs ru.org.openam.iis.httpmodule\bin\Release\ru.org.openam.version.txt
  - ps: cd ru.org.openam.iis.httpmodule\bin\Release
  - ps: 7z a ru.org.openam.iis.httpmodule.zip *
  - ps: Push-AppveyorArtifact ru.org.openam.iis.httpmodule.zip
