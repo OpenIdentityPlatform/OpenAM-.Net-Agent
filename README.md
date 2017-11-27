@@ -1,5 +1,6 @@
 # OpenAM .Net SDK and IIS policy agent
 [![Build Status](https://travis-ci.org/OpenIdentityPlatform/OpenAM-.Net-Agent.svg)](https://travis-ci.org/OpenIdentityPlatform/OpenAM-.Net-Agent)
+[![Build status](https://ci.appveyor.com/api/projects/status/a518k1mp0a0p95cn/branch/master?svg=true)](https://ci.appveyor.com/project/vharseko/openam-net-agent/branch/master)
 [![License](https://img.shields.io/badge/license-CDDL-blue.svg)](https://github.com/OpenIdentityPlatform/OpenAM-.Net-Agent/blob/master/LICENSE.md)
 [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](http://gitter.im/OpenIdentityPlatform)
 [![GitHub top language](https://img.shields.io/github/languages/top/OpenIdentityPlatform/OpenAM-.Net-Agent.svg)](https://github.com/OpenIdentityPlatform/OpenAM-.Net-Agent)
@@ -9,7 +10,7 @@
 Идентифицируйте папку ${site}, в которой размещены файлы вашего приложения, путем поиска файла ${site}/web.config
 
 ### Установка файлов бинарной поставки:
-*  Скачайте файлы бинарной поставки по ссылке http://repo.openam.org.ru/ru.org.openam.iis.httpmodule.zip
+*  Скачайте [файл бинарной поставки](https://ci.appveyor.com/api/projects/vharseko/openam-net-agent/artifacts/ru.org.openam.iis.httpmodule.zip?branch=master)
 *  Распакуйте содержимое в папку ${site}/bin
 
 ### Настройка записи журналов полиси агента: 

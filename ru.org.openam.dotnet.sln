@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ru.org.openam.sdk", "ru.org.openam.sdk\ru.org.openam.sdk.csproj", "{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ru.org.openam.build.tasks", "ru.org.openam.build.tasks\ru.org.openam.build.tasks.csproj", "{564FAE6B-9D57-4EEF-BB17-C17C44589B5A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ru.org.openam.sdk", "ru.org.openam.sdk\ru.org.openam.sdk.csproj", "{E00C3D8D-6D8F-46D4-B305-BE5E89C8E085}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ru.org.openam.iis.httpmodule", "ru.org.openam.iis.httpmodule\ru.org.openam.iis.httpmodule.csproj", "{AF367FB4-2E40-4682-8496-D0C9732BC8DF}"
 EndProject
