@@ -15,7 +15,7 @@ branches:
    - master
 notifications:
  email:
-  - support@openam.org.ru
+  - open-identity-platform-openam@googlegroups.com
 install:
   - nuget restore ru.org.openam.dotnet.sln
   - nuget install NUnit.Runners -Version 3.6.0 -OutputDirectory testrunner
