@@ -9,7 +9,7 @@ configuration:
 notifications:
   - provider: Email
     to:
-      - support@openam.org.ru
+      - open-identity-platform-openam@googlegroups.com
     on_build_success: false
     on_build_failure: false
     on_build_status_changed: true
