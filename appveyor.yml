@@ -14,7 +14,7 @@ notifications:
     on_build_failure: false
     on_build_status_changed: true
 init:
-  - ps: Update-AppveyorBuild -Version "$env:appveyor_build_number: $($env:appveyor_repo_commit.substring(0,7))"
+  - ps: Update-AppveyorBuild -Version "$env:appveyor_build_number/$($env:appveyor_repo_commit.substring(0,7))"
 before_build:
   - cmd: nuget restore
 after_build:
