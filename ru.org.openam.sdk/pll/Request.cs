@@ -23,12 +23,16 @@ namespace ru.org.openam.sdk.pll
     public abstract class  Request
     {
 		static Request(){
-			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-			ServicePointManager.DefaultConnectionLimit = 128; 
-			ServicePointManager.Expect100Continue = false;
+			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+			ServicePointManager.DefaultConnectionLimit = 128;
+            ServicePointManager.DnsRefreshTimeout = 60*1000;
+            //ServicePointManager.EnableDnsRoundRobin = true;
+            ServicePointManager.Expect100Continue = false;
             ServicePointManager.SetTcpKeepAlive(true,15*1000,5*1000);
             ServicePointManager.MaxServicePointIdleTime = 14 * 1000; //https://support.microsoft.com/ru-ru/help/2017977/the-underlying-connection-was-closed-a-connection-that-was-expected-to
-			if ("true".Equals(ConfigurationManager.AppSettings["com.sun.identity.agents.config.trust.server.certs"]))
+            ServicePointManager.MaxServicePoints = 0;
+            ServicePointManager.MaxServicePointIdleTime = 10*1000;
+            if ("true".Equals(ConfigurationManager.AppSettings["com.sun.identity.agents.config.trust.server.certs"]))
 				ServicePointManager.ServerCertificateValidationCallback +=
 					delegate(object sender, System.Security.Cryptography.X509Certificates.X509Certificate certificate,
 						System.Security.Cryptography.X509Certificates.X509Chain chain,
@@ -82,11 +86,13 @@ namespace ru.org.openam.sdk.pll
 		{
 			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(getUrl());
             request.KeepAlive =KeepAlive();
-			request.AutomaticDecompression = DecompressionMethods.None; //TODO configure
+            request.ProtocolVersion = (request.KeepAlive) ? HttpVersion.Version11 : HttpVersion.Version10;
+            request.AutomaticDecompression = DecompressionMethods.None; //TODO configure
 			request.Method = getMethod();
 			request.ContentType = getContentType();
 			request.UserAgent = UserAgent;
 			request.CookieContainer = getCookieContainer();
+            request.Proxy = null;
 			int connect_timeout=5000,receive_timeout=15000;
 			if (Agent.Instance.HasConfig()) {
 				int.TryParse (Agent.Instance.GetSingle ("com.sun.identity.agents.config.connect.timeout"), out connect_timeout);
