@@ -115,7 +115,7 @@
     <GitVersion LocalPath="$(SolutionDir)" Short="true">
       <Output TaskParameter="CommitHash" PropertyName="Revision" />
     </GitVersion>
-    <GitDescribe LocalPath="$(SolutionDir)">
+    <GitDescribe LocalPath="$(SolutionDir)"  LightWeight="true">
       <Output TaskParameter="Tag" PropertyName="Tag" />
       <Output TaskParameter="CommitCount" PropertyName="CommitCount" />
       <Output TaskParameter="CommitHash" PropertyName="CommitHash" />
@@ -133,7 +133,7 @@
         AssemblyCopyright="3A Systems, LLC" 
         ComVisible="false" 
         CLSCompliant="true" 
-        AssemblyInformationalVersion="$(Tag)/$(GitBranch)-$(Revision)" 
+        AssemblyInformationalVersion="$(Tag)-$(CommitCount)/$(GitBranch)-$(Revision)" 
         AssemblyVersion="$(Tag)" 
         AssemblyFileVersion="$(Tag)" />
   </Target>

@@ -118,6 +118,7 @@ namespace MSBuild.Community.Tasks.Git
             else
             {
                 var line = singleLine.Trim();
+                System.Console.Out.WriteLine("git describe result: "+line);
                 // hashPosition includes the git-describe 'g' delimiter
                 var hashPosition = singleLine.Length - 40 - 1;
 
