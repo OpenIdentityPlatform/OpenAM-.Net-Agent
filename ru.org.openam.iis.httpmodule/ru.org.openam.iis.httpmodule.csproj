@@ -86,6 +86,18 @@
     <GitBranch LocalPath="$(SolutionDir)">
       <Output TaskParameter="Branch" PropertyName="GitBranch" />
     </GitBranch>
-    <AssemblyInfo CodeLanguage="CS" OutputFile="Properties\AssemblyInfo.cs" AssemblyTitle="ru.org.openam.iis.httpmodule" AssemblyDescription="OpenAM Web Agent for IIS (.Net)" AssemblyCompany="3A Systems, LLC" AssemblyProduct="OpenAM" AssemblyCopyright="support@openam.org.ru" ComVisible="false" CLSCompliant="true" AssemblyInformationalVersion="$(Tag).$(CommitCount)/$(GitBranch)-$(Revision)" AssemblyVersion="$(Tag).$(CommitCount)" AssemblyFileVersion="$(Tag).$(CommitCount)" />
+    <AssemblyInfo 
+        CodeLanguage="CS" 
+        OutputFile="Properties\AssemblyInfo.cs" 
+        AssemblyTitle="org.openidentityplatform.openam.iis.httpmodule" 
+        AssemblyDescription="OpenAM Web Agent for IIS (.Net)"
+        AssemblyCompany="Open Identity Platform Community" 
+        AssemblyProduct="OpenAM" 
+        AssemblyCopyright="3A Systems, LLC" 
+        ComVisible="false" 
+        CLSCompliant="true" 
+        AssemblyInformationalVersion="$(Tag)/$(GitBranch)-$(Revision)" 
+        AssemblyVersion="$(Tag)" 
+        AssemblyFileVersion="$(Tag)" />
   </Target>
 </Project>
