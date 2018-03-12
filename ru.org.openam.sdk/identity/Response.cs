@@ -72,7 +72,7 @@ namespace ru.org.openam.sdk.identity
 										else //String to HashSet
                                         {
                                             property.Remove(attr.Value);
-											property.Add(attr.Value, new HashSet<String>(new []{(string)value, node2.InnerXml}));
+											property.Add( attr.Value, new HashSet<String>(new []{(string)value, node2.InnerXml}));
                                         }	
 									}
 									else
