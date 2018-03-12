@@ -6,6 +6,8 @@ platform:
   - Any CPU
 configuration:
   - Release
+skip_commits:
+  message: /\[ci skip\]/
 notifications:
   - provider: Email
     to:
