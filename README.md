@@ -1,9 +1,9 @@
 # OpenAM .Net SDK and IIS policy agent
-[![Latest release](https://img.shields.io/github/release/OpenIdentityPlatform/OpenAM.svg)](https://github.com/OpenIdentityPlatform/OpenAM-.Net-Agent/releases/latest)
+[![Latest release](https://img.shields.io/github/release/OpenIdentityPlatform/OpenAM-.Net-Agent.svg)](https://github.com/OpenIdentityPlatform/OpenAM-.Net-Agent/releases/latest)
 [![Build Status](https://travis-ci.org/OpenIdentityPlatform/OpenAM-.Net-Agent.svg)](https://travis-ci.org/OpenIdentityPlatform/OpenAM-.Net-Agent)
 [![Build status](https://ci.appveyor.com/api/projects/status/a518k1mp0a0p95cn/branch/master?svg=true)](https://ci.appveyor.com/project/OpenIdentityPlatfom/openam-net-agent/branch/master)
-[![Issues](https://img.shields.io/github/issues/OpenIdentityPlatform/OpenAM.svg)](https://github.com/OpenIdentityPlatform/OpenAM-.Net-Agent/issues)
-[![Last commit](https://img.shields.io/github/last-commit/OpenIdentityPlatform/OpenAM.svg)](https://github.com/OpenIdentityPlatform/OpenAM-.Net-Agent/commits/master)
+[![Issues](https://img.shields.io/github/issues/OpenIdentityPlatform/OpenAM-.Net-Agent.svg)](https://github.com/OpenIdentityPlatform/OpenAM-.Net-Agent/issues)
+[![Last commit](https://img.shields.io/github/last-commit/OpenIdentityPlatform/OpenAM-.Net-Agent.svg)](https://github.com/OpenIdentityPlatform/OpenAM-.Net-Agent/commits/master)
 [![License](https://img.shields.io/badge/license-CDDL-blue.svg)](https://github.com/OpenIdentityPlatform/OpenAM-.Net-Agent/blob/master/LICENSE.md)
 [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](http://gitter.im/OpenIdentityPlatform/OpenAM)
 [![GitHub top language](https://img.shields.io/github/languages/top/OpenIdentityPlatform/OpenAM-.Net-Agent.svg)](https://github.com/OpenIdentityPlatform/OpenAM-.Net-Agent)
