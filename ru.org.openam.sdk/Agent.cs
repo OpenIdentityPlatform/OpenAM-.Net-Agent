@@ -373,22 +373,31 @@ namespace ru.org.openam.sdk
 		Boolean reread_config=true;
 		public Dictionary<String, Object> GetConfig()
 		{
-			if (config == null || reread_config){
-				config =
-					((identity.Response)new identity.Request(
-						getSession().GetProperty("UserId"),
-						new String[] {
-							"realm",
-							"objecttype"
-						},
-						new KeyValuePair<string, string>[]{
-							new KeyValuePair<string,string>("realm",Bootstrap.getAppRealm()),
-							new KeyValuePair<string,string>("objecttype","Agent")
-						},
-						getSession()
-					).getResponse()).property;
-				reread_config = false;
-				Log.Init();
+			while (config == null || reread_config){
+                try
+                {
+                    config =
+                        ((identity.Response)new identity.Request(
+                            getSession().GetProperty("UserId"),
+                            new String[] {
+                                "realm",
+                                "objecttype"
+                            },
+                            new KeyValuePair<string, string>[]{
+                                new KeyValuePair<string,string>("realm",Bootstrap.getAppRealm()),
+                                new KeyValuePair<string,string>("objecttype","Agent")
+                            },
+                            getSession()
+                        ).getResponse()).property;
+
+    				reread_config = false;
+    				Log.Init();
+                }
+                catch (identity.IdentityException ex)
+                {
+                    Log.Error(ex);
+                    session = null;
+                }
 			}
 			return config;
 		}
