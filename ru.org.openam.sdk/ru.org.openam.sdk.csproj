@@ -48,8 +48,10 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="NLog">
-      <HintPath>..\packages\NLog.4.4.13\lib\net45\NLog.dll</HintPath>
+      <HintPath>..\packages\NLog.4.5.2\lib\net45\NLog.dll</HintPath>
     </Reference>
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Transactions" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Auth.cs" />
@@ -115,7 +117,7 @@
     <GitVersion LocalPath="$(SolutionDir)" Short="true">
       <Output TaskParameter="CommitHash" PropertyName="Revision" />
     </GitVersion>
-    <GitDescribe LocalPath="$(SolutionDir)"  LightWeight="true">
+    <GitDescribe LocalPath="$(SolutionDir)" LightWeight="true">
       <Output TaskParameter="Tag" PropertyName="Tag" />
       <Output TaskParameter="CommitCount" PropertyName="CommitCount" />
       <Output TaskParameter="CommitHash" PropertyName="CommitHash" />
@@ -123,18 +125,6 @@
     <GitBranch LocalPath="$(SolutionDir)">
       <Output TaskParameter="Branch" PropertyName="GitBranch" />
     </GitBranch>
-    <AssemblyInfo 
-        CodeLanguage="CS" 
-        OutputFile="Properties\AssemblyInfo.cs" 
-        AssemblyTitle="org.openidentityplatform.openam.sdk" 
-        AssemblyDescription="OpenAM client SDK (.Net)" 
-        AssemblyCompany="Open Identity Platform Community" 
-        AssemblyProduct="OpenAM" 
-        AssemblyCopyright="3A Systems, LLC" 
-        ComVisible="false" 
-        CLSCompliant="true" 
-        AssemblyInformationalVersion="$(Tag)-$(CommitCount)/$(GitBranch)-$(Revision)" 
-        AssemblyVersion="$(Tag)" 
-        AssemblyFileVersion="$(Tag)" />
+    <AssemblyInfo CodeLanguage="CS" OutputFile="Properties\AssemblyInfo.cs" AssemblyTitle="org.openidentityplatform.openam.sdk" AssemblyDescription="OpenAM client SDK (.Net)" AssemblyCompany="Open Identity Platform Community" AssemblyProduct="OpenAM" AssemblyCopyright="3A Systems, LLC" ComVisible="false" CLSCompliant="true" AssemblyInformationalVersion="$(Tag)-$(CommitCount)/$(GitBranch)-$(Revision)" AssemblyVersion="$(Tag)" AssemblyFileVersion="$(Tag)" />
   </Target>
 </Project>

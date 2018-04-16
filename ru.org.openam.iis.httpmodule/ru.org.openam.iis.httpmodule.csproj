@@ -40,8 +40,16 @@
     <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Web" />
     <Reference Include="NLog">
-      <HintPath>..\packages\NLog.4.4.13\lib\net45\NLog.dll</HintPath>
+      <HintPath>..\packages\NLog.4.5.2\lib\net45\NLog.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseHttpModule.cs" />
@@ -86,18 +94,6 @@
     <GitBranch LocalPath="$(SolutionDir)">
       <Output TaskParameter="Branch" PropertyName="GitBranch" />
     </GitBranch>
-    <AssemblyInfo 
-        CodeLanguage="CS" 
-        OutputFile="Properties\AssemblyInfo.cs" 
-        AssemblyTitle="org.openidentityplatform.openam.iis.httpmodule" 
-        AssemblyDescription="OpenAM Web Agent for IIS (.Net)"
-        AssemblyCompany="Open Identity Platform Community" 
-        AssemblyProduct="OpenAM" 
-        AssemblyCopyright="3A Systems, LLC" 
-        ComVisible="false" 
-        CLSCompliant="true" 
-        AssemblyInformationalVersion="$(Tag)-$(CommitCount)/$(GitBranch)-$(Revision)" 
-        AssemblyVersion="$(Tag)" 
-        AssemblyFileVersion="$(Tag)" />
+    <AssemblyInfo CodeLanguage="CS" OutputFile="Properties\AssemblyInfo.cs" AssemblyTitle="org.openidentityplatform.openam.iis.httpmodule" AssemblyDescription="OpenAM Web Agent for IIS (.Net)" AssemblyCompany="Open Identity Platform Community" AssemblyProduct="OpenAM" AssemblyCopyright="3A Systems, LLC" ComVisible="false" CLSCompliant="true" AssemblyInformationalVersion="$(Tag)-$(CommitCount)/$(GitBranch)-$(Revision)" AssemblyVersion="$(Tag)" AssemblyFileVersion="$(Tag)" />
   </Target>
 </Project>
