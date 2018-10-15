@@ -23,13 +23,15 @@ Identify ${site} folder, where your application files are by finding ${site}/web
 
 ### Application Setup:
 Policy agent settings are in ${site}/web.config file. add following settings to \<appSettings\> section:
-*  \<add key="com.sun.identity.agents.config.naming.url" value="" /\>
-*  \<add key="com.sun.identity.agents.config.organization.name" value="/" /\>
-*  \<add key="com.sun.identity.agents.app.username" value="" /\>
-*  \<add key="com.iplanet.am.service.password" value="" /\>
-*  \<add key="com.sun.identity.agents.config.key" value="" /\> (skip this setting, if password is not encrypted)
-*  \<add key="com.sun.identity.agents.config.local.log.path" value="${basedir}/App_Data/Logs"/\> (override log files path)
 
+```xml
+<add key="com.sun.identity.agents.config.naming.url" value="" />
+<add key="com.sun.identity.agents.config.organization.name" value="/" />
+<add key="com.sun.identity.agents.app.username" value="" />
+<add key="com.iplanet.am.service.password" value="" />
+<add key="com.sun.identity.agents.config.key" value="" /> <!--skip this setting, if password is not encrypted)-->
+<add key="com.sun.identity.agents.config.local.log.path" value="${basedir}/App_Data/Logs"/> <!--override log files path-->
+```
 Settings values provided by OpenAM server administrator or could be found in c:\iis7_agent\Identifier_${site_id}\config\OpenSSOAgentBootstrap.properties file from previous installation.
 
 ### Enable Policy Agent
@@ -42,8 +44,12 @@ IMPORTANT: new section must be first entry after \<httpModules\> tag or after \<
 
 ### Disable Policy Agent
 Policy Agent could be disabled in \<httpModules\> section of  ${site}/web.config file:
-* Remove entry:  \<add name="OpenAM" type="ru.org.openam.iis.OpenAMHttpModule"\>
 
+Remove entry:  
+```xml
+<add name="OpenAM" type="ru.org.openam.iis.OpenAMHttpModule"/>
+```
+  
 ### Example Settings
 Example settings ${site}/web.config: https://github.com/OpenIdentityPlatform/OpenAM-.Net-Agent/blob/master/ru.org.openam.iis.site.sample/web.config
 
@@ -52,9 +58,13 @@ Example settings ${site}/web.config: https://github.com/OpenIdentityPlatform/Ope
 #### System.Net.WebException: The underlying connection was closed: Could not establish trust relationship for the SSL/TLS secure channel
 The server uses non-trusted certificate. Add server certificate to trusted list or disable strict certificate check (not recommended in production):
 
-\<add key="com.sun.identity.agents.config.trust.server.certs" value="true"/\>
+```xml
+<add key="com.sun.identity.agents.config.trust.server.certs" value="true"/>
+```
 
 #### System.Net.WebException: The underlying connection was closed: A connection that was expected to be kept alive was closed by the server. at System.Net.HttpWebRequest.GetResponse()
 Networking equipment does not properly handle maintaining keepalive network connections, try to prohibit keepalive connections:
 
-\<add key="org.openidentityplatform.agents.config.keepalive.disable" value="true"/\>
+```xml
+<add key="org.openidentityplatform.agents.config.keepalive.disable" value="true"/>
+```
