@@ -11,18 +11,18 @@
 
 
 ## Setup and Installation
-Identify ${site} folder, where your application files are by finding ${site}/web.config file
+Identify **${site}** folder, where your application files are by finding **${site}/web.config** file
 
 ### Install binary distribution:
 *  Download [binary distribution file](https://github.com/OpenIdentityPlatform/OpenAM-.Net-Agent/releases)
-*  Extract archive contents to ${site}/bin
+*  Extract archive contents to **${site}/bin**
 
 ### Setup Policy Agent Logging:
-* Create folder ${site}/App_Data/Logs
-* Grant write access rights to ${site}/App_Data/Logs folder for account IUSER_XXX
+* Create folder **${site}/App_Data/Logs**
+* Grant write access rights to **${site}/App_Data/Logs** folder for account **IUSER_XXX**
 
 ### Application Setup:
-Policy agent settings are in ${site}/web.config file. add following settings to \<appSettings\> section:
+Policy agent settings are in **${site}/web.config** file. add following settings to **\<appSettings\>** section:
 
 ```xml
 <add key="com.sun.identity.agents.config.naming.url" value="" />
@@ -32,18 +32,24 @@ Policy agent settings are in ${site}/web.config file. add following settings to 
 <add key="com.sun.identity.agents.config.key" value="" /> <!--skip this setting, if password is not encrypted)-->
 <add key="com.sun.identity.agents.config.local.log.path" value="${basedir}/App_Data/Logs"/> <!--override log files path-->
 ```
-Settings values provided by OpenAM server administrator or could be found in c:\iis7_agent\Identifier_${site_id}\config\OpenSSOAgentBootstrap.properties file from previous installation.
+Settings values provided by OpenAM server administrator or could be found in **c:\iis7_agent\Identifier_${site_id}\config\OpenSSOAgentBootstrap.properties** file from previous installation.
 
 ### Enable Policy Agent
-Policy Agent could be enabled in section \<httpModules\> in ${site}/web.config file:
-* Remove previous policy agent version:  \<add name="iis7agent" /\>
-* Add new policy agent version, by adding entry: \<add name="OpenAM" type="ru.org.openam.iis.OpenAMHttpModule"\>
-* Check application functionality and log files in ${site}/App_Data/Logs
+Policy Agent could be enabled in section **\<httpModules\>** in **${site}/web.config** file:
+* Remove previous policy agent version:  
+```xml
+<add name="iis7agent" />
+```
+* Add new policy agent version, by adding entry: 
+```xml
+<add name="OpenAM" type="ru.org.openam.iis.OpenAMHttpModule"/>
+```
+* Check application functionality and log files in **${site}/App_Data/Logs**
 
-IMPORTANT: new section must be first entry after \<httpModules\> tag or after \<clear/\> tag inside \<httpModules\>, if it exists
+IMPORTANT: new section must be first entry after **\<httpModules\>** tag or after **\<clear/\>** tag inside **\<httpModules\>**, if it exists
 
 ### Disable Policy Agent
-Policy Agent could be disabled in \<httpModules\> section of  ${site}/web.config file:
+Policy Agent could be disabled in **\<httpModules\>** section of  **${site}/web.config** file:
 
 Remove entry:  
 ```xml
@@ -51,7 +57,7 @@ Remove entry:
 ```
   
 ### Example Settings
-Example settings ${site}/web.config: https://github.com/OpenIdentityPlatform/OpenAM-.Net-Agent/blob/master/ru.org.openam.iis.site.sample/web.config
+Example settings **${site}/web.config**: https://github.com/OpenIdentityPlatform/OpenAM-.Net-Agent/blob/master/ru.org.openam.iis.site.sample/web.config
 
 ## Possible Issues
 
